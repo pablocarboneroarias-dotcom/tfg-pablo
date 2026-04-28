@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benchmarking CRM — Comercializadora Energética B2C</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sf:      #00A1E0;   /* Salesforce blue */
+    --sf-dark: #0070D2;
+    --sf-glow: rgba(0,161,224,0.15);
+    --ms:      #00BCF2;
+    --sap:     #008FD3;
+    --ora:     #C74634;
+    --dev:     #6B7280;
+
+    --bg:      #0B0F1A;
+    --bg2:     #111827;
+    --bg3:     #1C2333;
+    --border:  rgba(255,255,255,0.07);
+    --text:    #E5E7EB;
+    --muted:   #6B7280;
+    --gold:    #F59E0B;
+    --green:   #10B981;
+    --red:     #EF4444;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 40px 36px 52px;
+    min-width: 1100px;
+  }
+
+  /* ── HEADER ─────────────────────────────────────── */
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-left h1 {
+    font-size: 24px; font-weight: 800;
+    background: linear-gradient(135deg, #E0F2FE 0%, #38BDF8 50%, #0EA5E9 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+  .header-left p {
+    font-size: 12.5px; color: var(--muted); margin-top: 6px; max-width: 560px; line-height: 1.55;
+  }
+  .header-right {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+  }
+  .winner-badge {
+    background: linear-gradient(135deg, var(--gold), #FBBF24);
+    color: #000; font-size: 10px; font-weight: 800;
+    letter-spacing: 0.8px; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 20px;
+  }
+  .source-note { font-size: 9.5px; color: var(--muted); text-align: right; }
+
+  /* ── PLATFORMS HEADER ROW ────────────────────────── */
+  .platforms-header {
+    display: grid;
+    grid-template-columns: 220px repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .platform-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px 10px 0 0;
+    padding: 14px 10px 12px;
+    text-align: center;
+    position: relative;
+    transition: all 0.2s;
+  }
+  .platform-card.winner {
+    background: linear-gradient(160deg, #0D2545 0%, #0A3D62 100%);
+    border-color: var(--sf);
+    border-bottom: none;
+    box-shadow: 0 0 24px rgba(0,161,224,0.2);
+  }
+  .platform-card.winner::before {
+    content: '★ SELECCIONADO';
+    position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+    background: var(--sf); color: #fff;
+    font-size: 8px; font-weight: 800; letter-spacing: 0.8px;
+    padding: 2px 10px; border-radius: 10px; white-space: nowrap;
+  }
+  .platform-logo {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.3px;
+    margin-bottom: 4px;
+  }
+  .platform-logo.sf  { color: var(--sf); }
+  .platform-logo.ms  { color: #00BCF2; }
+  .platform-logo.sap { color: #2ECC71; }
+  .platform-logo.ora { color: #F97316; }
+  .platform-logo.dev { color: #A78BFA; }
+  .platform-sub {
+    font-size: 8.5px; color: var(--muted); line-height: 1.4;
+  }
+  .platform-score {
+    margin-top: 8px;
+    font-size: 22px; font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .platform-score.sf  { color: var(--sf); }
+  .platform-score.ms  { color: #60D4F5; }
+  .platform-score.sap { color: #6EE7B7; }
+  .platform-score.ora { color: #FCA5A5; }
+  .platform-score.dev { color: #C4B5FD; }
+  .score-max { font-size: 11px; color: var(--muted); font-weight: 400; }
+  .label-col { /* empty spacer */ }
+
+  /* ── CRITERIA ROWS ───────────────────────────────── */
+  .criteria-group {
+    margin-bottom: 8px;
+  }
+  .group-label {
+    font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted);
+    padding: 10px 0 6px;
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
+  }
+  .criteria-row {
+    display: grid;
+    grid-template-columns: 220px repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 5px;
+  }
+  .criteria-label {
+    display: flex; align-items: center;
+    font-size: 11px; color: var(--text);
+    padding: 0 4px;
+    line-height: 1.35;
+  }
+  .criteria-label .icon { font-size: 13px; margin-right: 7px; flex-shrink: 0; }
+
+  .score-cell {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 8px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 5px;
+  }
+  .score-cell.winner-col {
+    background: rgba(0,112,210,0.08);
+    border-color: rgba(0,161,224,0.3);
+  }
+
+  /* Bar */
+  .bar-wrap {
+    width: 100%; height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px; overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%; border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+  .bar-sf  { background: linear-gradient(90deg, var(--sf-dark), var(--sf)); }
+  .bar-ms  { background: linear-gradient(90deg, #0088B3, #00BCF2); }
+  .bar-sap { background: linear-gradient(90deg, #10B981, #6EE7B7); }
+  .bar-ora { background: linear-gradient(90deg, #B91C1C, #F97316); }
+  .bar-dev { background: linear-gradient(90deg, #4C1D95, #A78BFA); }
+
+  /* Dot score */
+  .dot-row { display: flex; gap: 3px; }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .dot.filled-sf  { background: var(--sf); }
+  .dot.filled-ms  { background: #00BCF2; }
+  .dot.filled-sap { background: #6EE7B7; }
+  .dot.filled-ora { background: #F97316; }
+  .dot.filled-dev { background: #A78BFA; }
+  .dot.empty { background: rgba(255,255,255,0.1); }
+
+  .num-score {
+    font-size: 11px; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .num-5.sf  { color: var(--sf); }
+  .num-4.ms  { color: #60D4F5; }
+  .num-3.sap { color: #6EE7B7; }
+  .num-2.ora { color: #FCA5A5; }
+  .num-1.dev { color: #C4B5FD; }
+
+  /* generic score coloring */
+  .s5 { color: #10B981; }
+  .s4 { color: #60D4F5; }
+  .s3 { color: #F59E0B; }
+  .s2 { color: #F97316; }
+  .s1 { color: #EF4444; }
+
+  /* ── TOTAL ROW ───────────────────────────────────── */
+  .total-row {
+    display: grid;
+    grid-template-columns: 220px repeat(5, 1fr);
+    gap: 6px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+  }
+  .total-label {
+    display: flex; align-items: center;
+    font-size: 12px; font-weight: 700; color: #fff;
+    padding: 0 4px;
+  }
+  .total-cell {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+  .total-cell.winner-col {
+    background: linear-gradient(160deg, #0D2545, #0A3D62);
+    border-color: var(--sf);
+    box-shadow: 0 0 20px rgba(0,161,224,0.15);
+  }
+  .total-num {
+    font-size: 28px; font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .total-cell.winner-col .total-num { color: var(--sf); }
+  .total-cell:not(.winner-col) .total-num { color: var(--muted); }
+  .total-pct {
+    font-size: 10px; margin-top: 3px;
+  }
+  .total-cell.winner-col .total-pct { color: var(--sf); }
+  .total-cell:not(.winner-col) .total-pct { color: var(--muted); }
+  .total-rank {
+    font-size: 9px; letter-spacing: 0.5px; margin-top: 5px;
+    font-weight: 600;
+  }
+  .rank-1 { color: var(--gold); }
+  .rank-2 { color: #94A3B8; }
+  .rank-3 { color: #CD7F32; }
+  .rank-low { color: var(--muted); }
+
+  /* ── RADAR / MINI CHART SECTION ──────────────────── */
+  .insight-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .insight-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .insight-card h3 {
+    font-size: 11px; font-weight: 700;
+    color: var(--muted); letter-spacing: 0.8px;
+    text-transform: uppercase; margin-bottom: 12px;
+  }
+  .insight-card.highlight {
+    border-color: rgba(0,161,224,0.4);
+    background: linear-gradient(160deg, #0D1F3C, #0B1426);
+  }
+
+  /* Horizontal bar chart */
+  .hbar-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 7px;
+  }
+  .hbar-label {
+    font-size: 9.5px; width: 80px; flex-shrink: 0; color: var(--text);
+    font-weight: 500;
+  }
+  .hbar-track {
+    flex: 1; height: 14px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 7px; overflow: hidden;
+  }
+  .hbar-fill {
+    height: 100%; border-radius: 7px;
+    display: flex; align-items: center; padding-left: 6px;
+    font-size: 8px; font-weight: 700; color: rgba(0,0,0,0.7);
+    transition: width 0.8s ease;
+  }
+  .hbar-val {
+    font-size: 10px; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    width: 28px; text-align: right; flex-shrink: 0;
+  }
+
+  /* Pros / Cons */
+  .pro-con { display: flex; flex-direction: column; gap: 6px; }
+  .pro-con-item {
+    display: flex; align-items: flex-start; gap: 7px;
+    font-size: 10px; line-height: 1.4;
+  }
+  .pro-con-item .tag {
+    font-size: 9px; font-weight: 700; padding: 1px 6px;
+    border-radius: 3px; flex-shrink: 0; margin-top: 1px;
+  }
+  .pro .tag  { background: rgba(16,185,129,0.2); color: #6EE7B7; }
+  .con .tag  { background: rgba(239,68,68,0.15);  color: #FCA5A5; }
+
+  /* ── FOOTER ──────────────────────────────────────── */
+  .footer {
+    margin-top: 28px; padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-note { font-size: 9px; color: var(--muted); }
+  .footer-brand { font-size: 9px; color: var(--muted); font-weight: 600; }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Benchmarking de Plataformas CRM</h1>
+    <p>Análisis comparativo de alternativas para la implantación en una comercializadora energética B2C del mercado residencial español (~500k clientes). Evaluación multicritero sobre 8 dimensiones funcionales, técnicas y operativas.</p>
+  </div>
+  <div class="header-right">
+    <div class="winner-badge">★ Salesforce — Plataforma seleccionada</div>
+    <div class="source-note">Fuentes: Gartner MQ Sales Force Automation 2024 · Gartner MQ CRM CEC 2024 · IDC CRM Market Share 2024</div>
+    <div class="source-note">Elaboración propia · TFG UOC 2026</div>
+  </div>
+</div>
+
+<!-- PLATFORM HEADER ROW -->
+<div class="platforms-header">
+  <div class="label-col"></div>
+
+  <div class="platform-card winner">
+    <div class="platform-logo sf">Salesforce</div>
+    <div class="platform-sub">Sales Cloud · Service Cloud<br>Marketing Cloud</div>
+    <div class="platform-score sf">38<span class="score-max">/40</span></div>
+  </div>
+
+  <div class="platform-card">
+    <div class="platform-logo ms">MS Dynamics 365</div>
+    <div class="platform-sub">Sales · Customer Service<br>Customer Insights</div>
+    <div class="platform-score ms">30<span class="score-max">/40</span></div>
+  </div>
+
+  <div class="platform-card">
+    <div class="platform-logo sap">SAP CX</div>
+    <div class="platform-sub">Sales Cloud · Service Cloud<br>(ex C/4HANA)</div>
+    <div class="platform-score sap">21<span class="score-max">/40</span></div>
+  </div>
+
+  <div class="platform-card">
+    <div class="platform-logo ora">Oracle CX</div>
+    <div class="platform-sub">Fusion CX · Siebel CRM<br>Utilities module</div>
+    <div class="platform-score ora">20<span class="score-max">/40</span></div>
+  </div>
+
+  <div class="platform-card">
+    <div class="platform-logo dev">Desarrollo a medida</div>
+    <div class="platform-sub">Arquitectura propia<br>Cloud-native / microservicios</div>
+    <div class="platform-score dev">22<span class="score-max">/40</span></div>
+  </div>
+</div>
+
+<!-- CRITERIA ROWS -->
+
+<!-- GROUP 1: FUNCIONAL -->
+<div class="criteria-group">
+  <div class="group-label">Dimensión funcional</div>
+
+  <!-- Adecuación B2C energía -->
+  <div class="criteria-row">
+    <div class="criteria-label"><span class="icon">⚡</span>Adecuación funcional B2C sector energético</div>
+    <!-- SF -->
+    <div class="score-cell winner-col">
+      <div class="dot-row">
+        <div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill bar-sf" style="width:100%"></div></div>
+      <div class="num-score s5">5</div>
+    </div>
+    <!-- MS -->
+    <div class="score-cell">
+      <div class="dot-row">
+        <div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot empty"></div><div class="dot empty"></div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill bar-ms" style="width:60%"></div></div>
+      <div class="num-score s3">3</div>
+    </div>
+    <!-- SAP -->
+    <div class="score-cell">
+      <div class="dot-row">
+        <div class="dot filled-sap"></div><div class="dot filled-sap"></div><div class="dot filled-sap"></div><div class="dot empty"></div><div class="dot empty"></div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill bar-sap" style="width:60%"></div></div>
+      <div class="num-score s3">3</div>
+    </div>
+    <!-- ORA -->
+    <div class="score-cell">
+      <div class="dot-row">
+        <div class="dot filled-ora"></div><div class="dot filled-ora"></div><div class="dot filled-ora"></div><div class="dot empty"></div><div class="dot empty"></div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill bar-ora" style="width:60%"></div></div>
+      <div class="num-score s3">3</div>
+    </div>
+    <!-- DEV -->
+    <div class="score-cell">
+      <div class="dot-row">
+        <div class="dot filled-dev"></div><div class="dot filled-dev"></div><div class="dot filled-dev"></div><div class="dot filled-dev"></div><div class="dot empty"></div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill bar-dev" style="width:80%"></div></div>
+      <div class="num-score s4">4*</div>
+    </div>
+  </div>
+
+  <!-- Omnicanal -->
+  <div class="criteria-row">
+    <div class="criteria-label"><span class="icon">📡</span>Capacidades omnicanal y gestión de casos</div>
+    <div class="score-cell winner-col">
+      <div class="dot-row"><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-sf" style="width:100%"></div></div>
+      <div class="num-score s5">5</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-ms" style="width:80%"></div></div>
+      <div class="num-score s4">4</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-sap"></div><div class="dot filled-sap"></div><div class="dot filled-sap"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-sap" style="width:60%"></div></div>
+      <div class="num-score s3">3</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-ora"></div><div class="dot filled-ora"></div><div class="dot filled-ora"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-ora" style="width:60%"></div></div>
+      <div class="num-score s3">3</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-dev"></div><div class="dot filled-dev"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-dev" style="width:40%"></div></div>
+      <div class="num-score s2">2</div>
+    </div>
+  </div>
+
+  <!-- Marketing -->
+  <div class="criteria-row">
+    <div class="criteria-label"><span class="icon">🎯</span>Marketing automation y Customer Journeys</div>
+    <div class="score-cell winner-col">
+      <div class="dot-row"><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-sf" style="width:100%"></div></div>
+      <div class="num-score s5">5</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-ms" style="width:60%"></div></div>
+      <div class="num-score s3">3</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-sap"></div><div class="dot filled-sap"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-sap" style="width:40%"></div></div>
+      <div class="num-score s2">2</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-ora"></div><div class="dot filled-ora"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-ora" style="width:40%"></div></div>
+      <div class="num-score s2">2</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-dev"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-dev" style="width:20%"></div></div>
+      <div class="num-score s1">1</div>
+    </div>
+  </div>
+</div>
+
+<!-- GROUP 2: TÉCNICO -->
+<div class="criteria-group">
+  <div class="group-label">Dimensión técnica e integradora</div>
+
+  <!-- Integración SAP -->
+  <div class="criteria-row">
+    <div class="criteria-label"><span class="icon">🔗</span>Integración con SAP IS-U y sistemas externos</div>
+    <div class="score-cell winner-col">
+      <div class="dot-row"><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-sf" style="width:100%"></div></div>
+      <div class="num-score s5">5</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-ms" style="width:80%"></div></div>
+      <div class="num-score s4">4</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-sap"></div><div class="dot filled-sap"></div><div class="dot filled-sap"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-sap" style="width:60%"></div></div>
+      <div class="num-score s3">3</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-ora"></div><div class="dot filled-ora"></div><div class="dot filled-ora"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-ora" style="width:60%"></div></div>
+      <div class="num-score s3">3</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-dev"></div><div class="dot filled-dev"></div><div class="dot filled-dev"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-dev" style="width:60%"></div></div>
+      <div class="num-score s3">3</div>
+    </div>
+  </div>
+
+  <!-- Modelo de datos -->
+  <div class="criteria-row">
+    <div class="criteria-label"><span class="icon">🗄️</span>Flexibilidad del modelo de datos</div>
+    <div class="score-cell winner-col">
+      <div class="dot-row"><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-sf" style="width:100%"></div></div>
+      <div class="num-score s5">5</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-ms" style="width:80%"></div></div>
+      <div class="num-score s4">4</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-sap"></div><div class="dot filled-sap"></div><div class="dot filled-sap"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-sap" style="width:60%"></div></div>
+      <div class="num-score s3">3</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-ora"></div><div class="dot filled-ora"></div><div class="dot filled-ora"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-ora" style="width:60%"></div></div>
+      <div class="num-score s3">3</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-dev"></div><div class="dot filled-dev"></div><div class="dot filled-dev"></div><div class="dot filled-dev"></div><div class="dot filled-dev"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-dev" style="width:100%"></div></div>
+      <div class="num-score s5">5</div>
+    </div>
+  </div>
+
+  <!-- IA -->
+  <div class="criteria-row">
+    <div class="criteria-label"><span class="icon">🤖</span>Inteligencia artificial embebida</div>
+    <div class="score-cell winner-col">
+      <div class="dot-row"><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-sf" style="width:100%"></div></div>
+      <div class="num-score s5">5</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-ms" style="width:80%"></div></div>
+      <div class="num-score s4">4</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-sap"></div><div class="dot filled-sap"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-sap" style="width:40%"></div></div>
+      <div class="num-score s2">2</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-ora"></div><div class="dot filled-ora"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-ora" style="width:40%"></div></div>
+      <div class="num-score s2">2</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-dev"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-dev" style="width:20%"></div></div>
+      <div class="num-score s1">1</div>
+    </div>
+  </div>
+</div>
+
+<!-- GROUP 3: OPERATIVO -->
+<div class="criteria-group">
+  <div class="group-label">Dimensión operativa y estratégica</div>
+
+  <!-- TCO -->
+  <div class="criteria-row">
+    <div class="criteria-label"><span class="icon">💶</span>Coste total de propiedad (TCO 5 años)</div>
+    <div class="score-cell winner-col">
+      <div class="dot-row"><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-sf" style="width:60%"></div></div>
+      <div class="num-score s3">3</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-ms" style="width:80%"></div></div>
+      <div class="num-score s4">4</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-sap"></div><div class="dot filled-sap"></div><div class="dot filled-sap"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-sap" style="width:60%"></div></div>
+      <div class="num-score s3">3</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-ora"></div><div class="dot filled-ora"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-ora" style="width:40%"></div></div>
+      <div class="num-score s2">2</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-dev"></div><div class="dot filled-dev"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-dev" style="width:40%"></div></div>
+      <div class="num-score s2">2</div>
+    </div>
+  </div>
+
+  <!-- Talento -->
+  <div class="criteria-row">
+    <div class="criteria-label"><span class="icon">👥</span>Disponibilidad de talento certificado en España</div>
+    <div class="score-cell winner-col">
+      <div class="dot-row"><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div><div class="dot filled-sf"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-sf" style="width:100%"></div></div>
+      <div class="num-score s5">5</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot filled-ms"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-ms" style="width:80%"></div></div>
+      <div class="num-score s4">4</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-sap"></div><div class="dot filled-sap"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-sap" style="width:40%"></div></div>
+      <div class="num-score s2">2</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-ora"></div><div class="dot filled-ora"></div><div class="dot empty"></div><div class="dot empty"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-ora" style="width:40%"></div></div>
+      <div class="num-score s2">2</div>
+    </div>
+    <div class="score-cell">
+      <div class="dot-row"><div class="dot filled-dev"></div><div class="dot filled-dev"></div><div class="dot filled-dev"></div><div class="dot filled-dev"></div><div class="dot empty"></div></div>
+      <div class="bar-wrap"><div class="bar-fill bar-dev" style="width:80%"></div></div>
+      <div class="num-score s4">4</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOTAL ROW -->
+<div class="total-row">
+  <div class="total-label">Puntuación global</div>
+  <div class="total-cell winner-col">
+    <div class="total-num">38</div>
+    <div class="total-pct">95%</div>
+    <div class="total-rank rank-1">★ 1º SELECCIONADO</div>
+  </div>
+  <div class="total-cell">
+    <div class="total-num">30</div>
+    <div class="total-pct">75%</div>
+    <div class="total-rank rank-2">2º</div>
+  </div>
+  <div class="total-cell">
+    <div class="total-num">21</div>
+    <div class="total-pct">53%</div>
+    <div class="total-rank rank-low">4º</div>
+  </div>
+  <div class="total-cell">
+    <div class="total-num">20</div>
+    <div class="total-pct">50%</div>
+    <div class="total-rank rank-low">5º</div>
+  </div>
+  <div class="total-cell">
+    <div class="total-num">22</div>
+    <div class="total-pct">55%</div>
+    <div class="total-rank rank-3">3º</div>
+  </div>
+</div>
+
+<!-- INSIGHT CARDS -->
+<div class="insight-row">
+
+  <!-- Horizontal bar summary -->
+  <div class="insight-card highlight">
+    <h3>Puntuación total por plataforma</h3>
+    <div class="hbar-row">
+      <div class="hbar-label" style="color:var(--sf);font-weight:700">Salesforce</div>
+      <div class="hbar-track"><div class="hbar-fill bar-sf" style="width:95%">38</div></div>
+      <div class="hbar-val" style="color:var(--sf)">38</div>
+    </div>
+    <div class="hbar-row">
+      <div class="hbar-label" style="color:#60D4F5">MS Dynamics</div>
+      <div class="hbar-track"><div class="hbar-fill bar-ms" style="width:75%">30</div></div>
+      <div class="hbar-val" style="color:#60D4F5">30</div>
+    </div>
+    <div class="hbar-row">
+      <div class="hbar-label" style="color:#A78BFA">A medida</div>
+      <div class="hbar-track"><div class="hbar-fill bar-dev" style="width:55%">22</div></div>
+      <div class="hbar-val" style="color:#A78BFA">22</div>
+    </div>
+    <div class="hbar-row">
+      <div class="hbar-label" style="color:#6EE7B7">SAP CX</div>
+      <div class="hbar-track"><div class="hbar-fill bar-sap" style="width:53%">21</div></div>
+      <div class="hbar-val" style="color:#6EE7B7">21</div>
+    </div>
+    <div class="hbar-row">
+      <div class="hbar-label" style="color:#FCA5A5">Oracle CX</div>
+      <div class="hbar-track"><div class="hbar-fill bar-ora" style="width:50%">20</div></div>
+      <div class="hbar-val" style="color:#FCA5A5">20</div>
+    </div>
+    <div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--border)">
+      <div style="font-size:9px;color:var(--muted);line-height:1.5">
+        Escala 1–5 por criterio · 8 criterios · máximo 40 puntos<br>
+        * Desarrollo a medida: puntuación teórica; coste y riesgo reales son significativamente mayores
+      </div>
+    </div>
+  </div>
+
+  <!-- Salesforce pros -->
+  <div class="insight-card">
+    <h3>Salesforce · Factores decisivos</h3>
+    <div class="pro-con">
+      <div class="pro-con-item pro"><span class="tag">✓</span><span>Líder Gartner MQ en SFA y CRM CEC desde 2010 — posición de mercado consolidada</span></div>
+      <div class="pro-con-item pro"><span class="tag">✓</span><span>MuleSoft como iPaaS nativo — integración madura con SAP IS-U, SIPS y ATR</span></div>
+      <div class="pro-con-item pro"><span class="tag">✓</span><span>Einstein AI embebido — churn prediction, lead scoring y NBA sin desarrollo adicional</span></div>
+      <div class="pro-con-item pro"><span class="tag">✓</span><span>Marketing Cloud — AMPscript, journeys multicanal y segmentación dinámica de máxima profundidad</span></div>
+      <div class="pro-con-item pro"><span class="tag">✓</span><span>+15.000 profesionales certificados en España — pool de talento más amplio del mercado</span></div>
+      <div class="pro-con-item con"><span class="tag">✗</span><span>Coste de licenciamiento más elevado del mercado — requiere justificación de ROI sólida</span></div>
+      <div class="pro-con-item con"><span class="tag">✗</span><span>Gobernanza de plataforma exigente — necesita arquitecto Salesforce dedicado en el proyecto</span></div>
+    </div>
+  </div>
+
+  <!-- Dev a medida risks -->
+  <div class="insight-card">
+    <h3>Desarrollo a medida · Por qué se descarta</h3>
+    <div class="pro-con">
+      <div class="pro-con-item pro"><span class="tag">✓</span><span>Máxima flexibilidad teórica del modelo de datos</span></div>
+      <div class="pro-con-item pro"><span class="tag">✓</span><span>Sin dependencia de licenciamiento externo</span></div>
+      <div class="pro-con-item con"><span class="tag">✗</span><span>Replicar omnicanalidad, journeys y IA nativa de Salesforce requiere años y millones en desarrollo</span></div>
+      <div class="pro-con-item con"><span class="tag">✗</span><span>Coste de infraestructura, seguridad y RGPD asumido íntegramente por la organización</span></div>
+      <div class="pro-con-item con"><span class="tag">✗</span><span>Alta dependencia del equipo interno — riesgo de fuga de conocimiento crítico</span></div>
+      <div class="pro-con-item con"><span class="tag">✗</span><span>Adaptación a cambios regulatorios ATR / CNMC requiere desarrollo ad hoc permanente</span></div>
+      <div class="pro-con-item con"><span class="tag">✗</span><span>Sin casos de éxito documentados en comercializadoras energéticas europeas de escala comparable</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="footer-note">Fuentes: Gartner Magic Quadrant for Sales Force Automation (2024) · Gartner Magic Quadrant for CRM Customer Engagement Center (2024) · IDC CRM Market Share Report (2024) · Elaboración propia</span>
+  <span class="footer-brand">TFG · Propuesta implantación CRM comercializadora energética B2C · UOC 2026</span>
+</div>
+
+</body>
+</html>

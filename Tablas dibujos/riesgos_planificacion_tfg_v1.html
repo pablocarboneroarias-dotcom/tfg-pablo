@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tabla 2 — Riesgos de Planificación del TFG</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sf:      #00A1E0;
+    --sf-dark: #0070D2;
+
+    --low:     #10B981;
+    --low-bg:  rgba(16,185,129,0.12);
+    --low-bd:  rgba(16,185,129,0.3);
+
+    --med:     #F59E0B;
+    --med-bg:  rgba(245,158,11,0.12);
+    --med-bd:  rgba(245,158,11,0.3);
+
+    --high:    #EF4444;
+    --high-bg: rgba(239,68,68,0.13);
+    --high-bd: rgba(239,68,68,0.35);
+
+    --bg:      #0B0F1A;
+    --bg3:     #1C2333;
+    --bg4:     #141B28;
+    --border:  rgba(255,255,255,0.07);
+    --text:    #E5E7EB;
+    --muted:   #6B7280;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 40px 40px 52px;
+    min-width: 960px;
+  }
+
+  /* ── HEADER ─────────────────────────────── */
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 28px; padding-bottom: 22px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-left h1 {
+    font-size: 20px; font-weight: 800;
+    background: linear-gradient(135deg, #E0F2FE 0%, #38BDF8 50%, #0EA5E9 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: -0.4px; margin-bottom: 7px;
+  }
+  .header-left p { font-size: 11.5px; color: var(--muted); max-width: 560px; line-height: 1.6; }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .badge {
+    font-size: 9px; font-weight: 800; letter-spacing: 0.8px;
+    text-transform: uppercase; padding: 4px 12px; border-radius: 20px;
+  }
+  .badge-tfg { background: linear-gradient(135deg, var(--sf-dark), var(--sf)); color: #fff; }
+  .source-note { font-size: 9px; color: var(--muted); text-align: right; }
+
+  /* ── SUMMARY PILLS ──────────────────────── */
+  .summary-row { display: flex; gap: 10px; margin-bottom: 26px; }
+  .summary-pill {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1;
+  }
+  .pill-value { font-size: 22px; font-weight: 900; font-family: 'JetBrains Mono', monospace; }
+  .pill-label {
+    font-size: 9px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.7px; text-align: center; line-height: 1.4;
+  }
+
+  /* ── TABLE WRAPPER ──────────────────────── */
+  .table-title {
+    font-size: 13px; font-weight: 700; color: #fff;
+    text-align: center; margin-bottom: 14px; letter-spacing: 0.1px;
+  }
+  .table-wrap { border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  /* Column widths */
+  col.c-id   { width: 56px; }
+  col.c-risk { width: 130px; }
+  col.c-desc { }
+  col.c-prob { width: 88px; }
+  col.c-imp  { width: 88px; }
+  col.c-mit  { width: 280px; }
+
+  /* Header */
+  thead tr { background: var(--bg3); border-bottom: 1px solid rgba(255,255,255,0.1); }
+  thead th {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.1px; color: var(--muted);
+    padding: 12px 14px; text-align: left;
+  }
+  thead th.center { text-align: center; }
+
+  /* Rows */
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.022); }
+
+  td { padding: 16px 14px; vertical-align: middle; font-size: 11px; line-height: 1.55; }
+  td.center { text-align: center; vertical-align: middle; }
+
+  /* ID chip */
+  .id-chip {
+    display: inline-block;
+    font-size: 11px; font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--sf);
+    background: rgba(0,161,224,0.1);
+    border: 1px solid rgba(0,161,224,0.2);
+    padding: 4px 9px; border-radius: 6px;
+  }
+
+  /* Risk name */
+  .risk-name {
+    font-size: 11px; font-weight: 600; color: var(--text);
+    line-height: 1.4; text-align: center;
+  }
+
+  /* Description */
+  .desc-text { font-size: 11px; color: #CBD5E1; line-height: 1.6; }
+
+  /* Prob / Impact badges */
+  .level-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800;
+    padding: 5px 14px; border-radius: 6px;
+    letter-spacing: 0.3px; white-space: nowrap;
+    font-family: 'Inter', sans-serif;
+  }
+  .level-low  { background: var(--low-bg);  color: var(--low);  border: 1px solid var(--low-bd); }
+  .level-med  { background: var(--med-bg);  color: var(--med);  border: 1px solid var(--med-bd); }
+  .level-high { background: var(--high-bg); color: var(--high); border: 1px solid var(--high-bd); }
+
+  /* Mitigation */
+  .mit-text { font-size: 10.5px; color: #94A3B8; line-height: 1.6; }
+
+  /* Row left-border accent by combined risk level */
+  .row-critical { border-left: 3px solid var(--high); }
+  .row-medium   { border-left: 3px solid var(--med); }
+  .row-low      { border-left: 3px solid var(--low); }
+
+  /* ── LEGEND ─────────────────────────────── */
+  .legend {
+    display: flex; justify-content: center; align-items: center;
+    gap: 32px; margin-top: 16px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 9px; }
+  .legend-dot {
+    width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0;
+  }
+  .legend-label { font-size: 10.5px; color: var(--text); font-weight: 500; }
+  .legend-sep { color: var(--muted); font-size: 18px; font-weight: 300; }
+
+  /* ── FOOTER ─────────────────────────────── */
+  .footer {
+    margin-top: 20px; padding-top: 14px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-note { font-size: 9px; color: var(--muted); }
+  .footer-brand { font-size: 9px; color: var(--muted); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Riesgos de Planificación del TFG</h1>
+    <p>Identificación, valoración y estrategia de mitigación de los principales riesgos 
+       que pueden afectar al desarrollo y entrega del Trabajo de Fin de Grado.</p>
+  </div>
+  <div class="header-right">
+    <span class="badge badge-tfg">PEC1 · Planificación</span>
+    <span class="source-note">UOC 2025–2026 · Elaboración propia</span>
+  </div>
+</div>
+
+<!-- PILLS -->
+<div class="summary-row">
+  <div class="summary-pill">
+    <span class="pill-value" style="color:var(--sf)">8</span>
+    <span class="pill-label">Riesgos identificados</span>
+  </div>
+  <div class="summary-pill">
+    <span class="pill-value" style="color:var(--high)">2</span>
+    <span class="pill-label">Impacto alto</span>
+  </div>
+  <div class="summary-pill">
+    <span class="pill-value" style="color:var(--med)">5</span>
+    <span class="pill-label">Impacto medio</span>
+  </div>
+  <div class="summary-pill">
+    <span class="pill-value" style="color:var(--high)">2</span>
+    <span class="pill-label">Prob. alta</span>
+  </div>
+  <div class="summary-pill">
+    <span class="pill-value" style="color:var(--low)">2</span>
+    <span class="pill-label">Prob. baja</span>
+  </div>
+</div>
+
+<!-- TABLE -->
+<div class="table-title">Tabla 2. Riesgos de planificación del Trabajo de Fin de Grado</div>
+<div class="table-wrap">
+  <table>
+    <colgroup>
+      <col class="c-id"><col class="c-risk"><col class="c-desc">
+      <col class="c-prob"><col class="c-imp"><col class="c-mit">
+    </colgroup>
+    <thead>
+      <tr>
+        <th class="center">ID</th>
+        <th class="center">Riesgo</th>
+        <th>Descripción</th>
+        <th class="center">Prob.</th>
+        <th class="center">Impacto</th>
+        <th>Estrategia de mitigación</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <tr class="row-critical">
+        <td class="center"><span class="id-chip">RT01</span></td>
+        <td><div class="risk-name">Disponibilidad personal</div></td>
+        <td><span class="desc-text">Posibilidad de no poder dedicar el tiempo previsto al TFG por motivos académicos, laborales o personales.</span></td>
+        <td class="center"><span class="level-badge level-med">Media</span></td>
+        <td class="center"><span class="level-badge level-high">Alto</span></td>
+        <td><span class="mit-text">Planificar con márgenes temporales holgados; priorizar tareas críticas y distribuir el trabajo en bloques semanales.</span></td>
+      </tr>
+
+      <tr class="row-medium">
+        <td class="center"><span class="id-chip">RT02</span></td>
+        <td><div class="risk-name">Herramientas o recursos técnicos</div></td>
+        <td><span class="desc-text">Imposibilidad temporal de acceder a software, plataformas digitales o recursos técnicos necesarios para el desarrollo del TFG.</span></td>
+        <td class="center"><span class="level-badge level-med">Media</span></td>
+        <td class="center"><span class="level-badge level-med">Medio</span></td>
+        <td><span class="mit-text">Identificar herramientas alternativas antes de comenzar; mantener copias locales; usar servicios en la nube como respaldo.</span></td>
+      </tr>
+
+      <tr class="row-critical">
+        <td class="center"><span class="id-chip">RT03</span></td>
+        <td><div class="risk-name">Complejidad metodológica</div></td>
+        <td><span class="desc-text">Fases metodológicas que resulten más complejas de lo previsto, requiriendo más tiempo y dificultando el ritmo de avance.</span></td>
+        <td class="center"><span class="level-badge level-high">Alta</span></td>
+        <td class="center"><span class="level-badge level-high">Alto</span></td>
+        <td><span class="mit-text">Dedicar tiempo de estudio a aspectos complejos; replantear profundidad o alcance si se detectan retrasos significativos.</span></td>
+      </tr>
+
+      <tr class="row-medium">
+        <td class="center"><span class="id-chip">RT04</span></td>
+        <td><div class="risk-name">Carga derivada de revisiones</div></td>
+        <td><span class="desc-text">Las revisiones del tutor pueden requerir más tiempo del estimado para ser incorporadas.</span></td>
+        <td class="center"><span class="level-badge level-med">Media</span></td>
+        <td class="center"><span class="level-badge level-med">Medio</span></td>
+        <td><span class="mit-text">Reservar tiempo adicional en cada hito; consultar con el tutor ante dudas; documentar versiones para facilitar ajustes.</span></td>
+      </tr>
+
+      <tr class="row-low">
+        <td class="center"><span class="id-chip">RT05</span></td>
+        <td><div class="risk-name">Desviación del enfoque</div></td>
+        <td><span class="desc-text">Desviarse del objetivo principal añadiendo tareas o contenidos no previstos que aumenten la carga total del TFG.</span></td>
+        <td class="center"><span class="level-badge level-low">Baja</span></td>
+        <td class="center"><span class="level-badge level-med">Medio</span></td>
+        <td><span class="mit-text">Revisar periódicamente los objetivos y el índice; validar con el tutor cualquier cambio significativo de alcance.</span></td>
+      </tr>
+
+      <tr class="row-medium">
+        <td class="center"><span class="id-chip">RT06</span></td>
+        <td><div class="risk-name">Retraso en la recopilación de información</div></td>
+        <td><span class="desc-text">Dificultad para acceder a fuentes fiables, actualizadas o suficientes para fundamentar el trabajo.</span></td>
+        <td class="center"><span class="level-badge level-med">Media</span></td>
+        <td class="center"><span class="level-badge level-med">Medio</span></td>
+        <td><span class="mit-text">Ampliar la búsqueda a bases de datos académicas secundarias; iniciar la recopilación cuanto antes para disponer de margen.</span></td>
+      </tr>
+
+      <tr class="row-critical">
+        <td class="center"><span class="id-chip">RT07</span></td>
+        <td><div class="risk-name">Pérdida de información o versiones</div></td>
+        <td><span class="desc-text">Pérdida accidental de archivos o versiones del trabajo por fallos técnicos, errores humanos o problemas con dispositivos.</span></td>
+        <td class="center"><span class="level-badge level-low">Baja</span></td>
+        <td class="center"><span class="level-badge level-high">Alto</span></td>
+        <td><span class="mit-text">Realizar copias de seguridad en la nube; usar un sistema de versionado (Git, OneDrive o Google Drive).</span></td>
+      </tr>
+
+      <tr class="row-medium">
+        <td class="center"><span class="id-chip">RT08</span></td>
+        <td><div class="risk-name">Exceso de extensión</div></td>
+        <td><span class="desc-text">Dado lo ambicioso del proyecto, exceder los límites de extensión establecidos por la UOC al desarrollar los capítulos.</span></td>
+        <td class="center"><span class="level-badge level-high">Alta</span></td>
+        <td class="center"><span class="level-badge level-med">Medio</span></td>
+        <td><span class="mit-text">Aplicar disciplina de alcance en cada capítulo; revisar extensión tras cada PEC; volcar el detalle técnico en anexos cuando proceda.</span></td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <span style="font-size:10.5px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.8px;">Leyenda:</span>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--low-bg); border:1px solid var(--low-bd);"></div>
+    <span class="legend-label" style="color:var(--low)">Bajo / Baja</span>
+  </div>
+  <span class="legend-sep">·</span>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--med-bg); border:1px solid var(--med-bd);"></div>
+    <span class="legend-label" style="color:var(--med)">Medio / Media</span>
+  </div>
+  <span class="legend-sep">·</span>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--high-bg); border:1px solid var(--high-bd);"></div>
+    <span class="legend-label" style="color:var(--high)">Alto / Alta</span>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="footer-note">TFG · CRM Comercializadora Energética B2C · UOC 2025–2026 · Tutor: Santiago A. Bruno Pérez</span>
+  <span class="footer-brand">Pablo · Elaboración propia</span>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tabla 5.2a — Integraciones Criticidad Alta</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:#07090F;--bg-base:#0C1018;--bg-hover:#161D2C;
+  --border-xs:rgba(255,255,255,0.05);--border-sm:rgba(255,255,255,0.09);
+  --p-rest:#3B8BEB;--p-event:#A78BFA;--p-cdc:#E879F9;--p-batch:#10B981;
+  --p-async:#F59E0B;--p-direct:#06B6D4;--p-mixed:#FB7185;
+  --crit:#FB7185;--text:#EEF2FF;--muted:#8896AC;--dim:#3D4A5C;
+  --ff-d:'Syne',sans-serif;--ff-b:'DM Sans',sans-serif;--ff-m:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg-deep);color:var(--text);font-family:var(--ff-b);min-height:100vh;}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(255,255,255,0.016) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.016) 1px,transparent 1px);
+  background-size:36px 36px;}
+.glow-orb{position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(140px);opacity:0.05;}
+.page{position:relative;z-index:1;padding:28px 32px 44px;max-width:1320px;margin:0 auto;}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;}
+.hdr-left h1{font-family:var(--ff-d);font-size:22px;font-weight:800;letter-spacing:-.3px;margin-bottom:7px;}
+.hdr-left h1 em{font-style:normal;background:linear-gradient(120deg,#FB7185 10%,#F59E0B 90%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hdr-left p{font-size:11.5px;color:var(--muted);max-width:660px;line-height:1.65;}
+.badges{display:flex;flex-direction:column;gap:5px;align-items:flex-end;}
+.badge{font-family:var(--ff-m);font-size:9px;letter-spacing:.5px;text-transform:uppercase;padding:3px 10px;border-radius:4px;}
+.b-crit{background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.3);color:var(--crit);}
+.b-meta{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:8px;}
+.card{background:var(--bg-base);border:1px solid var(--border-xs);border-radius:18px;padding:22px 22px 20px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(251,113,133,.6),transparent);}
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border-xs);}
+table{width:100%;border-collapse:collapse;min-width:1100px;}
+thead tr{background:rgba(255,255,255,.03);border-bottom:1px solid var(--border-sm);}
+th{font-family:var(--ff-m);font-size:8px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--dim);padding:10px 12px;text-align:left;white-space:nowrap;}
+tbody tr{border-bottom:1px solid var(--border-xs);transition:background .15s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--bg-hover);}
+td{padding:9px 12px;font-size:9px;vertical-align:middle;}
+.td-id{font-family:var(--ff-m);font-size:8.5px;font-weight:600;color:var(--dim);white-space:nowrap;}
+.sys-pill{display:inline-flex;align-items:center;gap:5px;font-family:var(--ff-m);font-size:8px;padding:3px 8px;border-radius:4px;white-space:nowrap;}
+.sys-sf{background:rgba(59,139,235,.1);border:1px solid rgba(59,139,235,.25);color:#3B8BEB;}
+.sys-sap{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#10B981;}
+.sys-reg{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.25);color:#F97316;}
+.sys-chan{background:rgba(107,124,246,.1);border:1px solid rgba(107,124,246,.25);color:#6B7CF6;}
+.sys-ext{background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.25);color:#FB7185;}
+.dir-pill{font-family:var(--ff-m);font-size:8px;font-weight:600;padding:3px 8px;border-radius:4px;white-space:nowrap;}
+.dir-in{background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.25);color:#06B6D4;}
+.dir-out{background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);color:#A78BFA;}
+.dir-bi{background:rgba(232,121,249,.08);border:1px solid rgba(232,121,249,.22);color:#E879F9;}
+.pat-pill{display:inline-block;font-family:var(--ff-m);font-size:7.5px;font-weight:600;padding:2px 7px;border-radius:3px;white-space:nowrap;}
+.pat-rest{background:rgba(59,139,235,.1);border:1px solid rgba(59,139,235,.28);color:var(--p-rest);}
+.pat-event{background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.28);color:var(--p-event);}
+.pat-cdc{background:rgba(232,121,249,.1);border:1px solid rgba(232,121,249,.28);color:var(--p-cdc);}
+.pat-async{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.28);color:var(--p-async);}
+.pat-direct{background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.28);color:var(--p-direct);}
+.td-freq{font-family:var(--ff-m);font-size:8px;color:var(--muted);white-space:nowrap;}
+.freq-rt{color:#E879F9;}.freq-ev{color:#A78BFA;}.freq-od{color:#3B8BEB;}.freq-as{color:#F59E0B;}
+.crit-pill{font-family:var(--ff-m);font-size:8px;font-weight:600;padding:3px 9px;border-radius:4px;}
+.crit-hi{background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.28);color:var(--crit);}
+.td-desc{color:var(--muted);line-height:1.55;max-width:340px;font-size:9px;}
+.legend{border-top:1px solid var(--border-xs);padding-top:14px;margin-top:16px;}
+.leg-title{font-family:var(--ff-m);font-size:8px;letter-spacing:1.2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px;}
+.leg-row{display:flex;flex-wrap:wrap;gap:8px 18px;}
+.leg-item{display:flex;align-items:center;gap:6px;font-family:var(--ff-m);font-size:8.5px;color:var(--muted);}
+.leg-swatch{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:500px;height:500px;top:-150px;left:-80px;background:#FB7185;"></div>
+<div class="glow-orb" style="width:400px;height:400px;bottom:-100px;right:-60px;background:#F59E0B;"></div>
+<div class="page">
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1>Tabla 5.2a — <em>Integraciones · Criticidad Alta</em></h1>
+      <p>Integraciones críticas para la operativa del negocio. Un fallo en cualquiera de ellas bloquea procesos clave: contratación, firma digital, switching ATR, atención al cliente o consulta de facturación. Requieren monitorización en tiempo real y plan de contingencia documentado.</p>
+    </div>
+    <div class="badges">
+      <span class="badge b-crit">🔴 11 integraciones · Criticidad Alta</span>
+      <span class="badge b-meta">Elaboración propia · TFG 2025 · Cap. 5.2</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Sistema origen</th><th>Sistema destino</th>
+            <th>Dirección</th><th>Patrón</th><th>Frecuencia / Latencia</th>
+            <th>Criticidad</th><th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-id">INT-001</td>
+            <td><span class="sys-pill sys-sf">Salesforce CRM</span></td>
+            <td><span class="sys-pill sys-sap">SAP S/4HANA</span></td>
+            <td><span class="dir-pill dir-out">Outbound</span></td>
+            <td><span class="pat-pill pat-event">Platform Event</span></td>
+            <td class="td-freq freq-ev">Event-driven · ~seg</td>
+            <td><span class="crit-pill crit-hi">Alta</span></td>
+            <td class="td-desc">Alta de contrato. Salesforce publica Platform Event al activar un contrato. MuleSoft orquesta la creación del contrato IS-U en SAP con los datos maestros del cliente y del punto de suministro.</td>
+          </tr>
+          <tr>
+            <td class="td-id">INT-002</td>
+            <td><span class="sys-pill sys-sap">SAP S/4HANA</span></td>
+            <td><span class="sys-pill sys-sf">Salesforce CRM</span></td>
+            <td><span class="dir-pill dir-in">Inbound</span></td>
+            <td><span class="pat-pill pat-rest">REST</span></td>
+            <td class="td-freq freq-od">On-demand · &lt;2s</td>
+            <td><span class="crit-pill crit-hi">Alta</span></td>
+            <td class="td-desc">Consulta de facturas y consumos desde el CRM. El agente de ATC solicita el detalle de facturación del cliente. MuleSoft expone una Experience API que consulta SAP IS-U en tiempo real.</td>
+          </tr>
+          <tr>
+            <td class="td-id">INT-003</td>
+            <td><span class="sys-pill sys-sf">Salesforce CRM</span></td>
+            <td><span class="sys-pill sys-sap">SAP S/4HANA</span></td>
+            <td><span class="dir-pill dir-bi">Bidireccional</span></td>
+            <td><span class="pat-pill pat-cdc">CDC</span></td>
+            <td class="td-freq freq-rt">Tiempo real · ~seg</td>
+            <td><span class="crit-pill crit-hi">Alta</span></td>
+            <td class="td-desc">Sincronización de cambios en Account, Contract y ServicePoint hacia SAP. Change Data Capture publica el evento; MuleSoft actualiza los datos maestros en SAP IS-U sin intervención del usuario.</td>
+          </tr>
+          <tr>
+            <td class="td-id">INT-006</td>
+            <td><span class="sys-pill sys-sf">Salesforce CRM</span></td>
+            <td><span class="sys-pill sys-reg">Distribuidoras ATR</span></td>
+            <td><span class="dir-pill dir-out">Outbound</span></td>
+            <td><span class="pat-pill pat-async">Request-Reply</span></td>
+            <td class="td-freq freq-as">Async · días</td>
+            <td><span class="crit-pill crit-hi">Alta</span></td>
+            <td class="td-desc">Solicitud de cambio de suministrador (switching). Salesforce lanza el proceso ATR vía MuleSoft en formato EDIEL/CONTAX. La distribuidora confirma o rechaza en días.</td>
+          </tr>
+          <tr>
+            <td class="td-id">INT-007</td>
+            <td><span class="sys-pill sys-reg">Distribuidoras ATR</span></td>
+            <td><span class="sys-pill sys-sf">Salesforce CRM</span></td>
+            <td><span class="dir-pill dir-in">Inbound</span></td>
+            <td><span class="pat-pill pat-async">Request-Reply</span></td>
+            <td class="td-freq freq-as">Async · días</td>
+            <td><span class="crit-pill crit-hi">Alta</span></td>
+            <td class="td-desc">Recepción de confirmación ATR (F2, A1, B1). MuleSoft recibe la respuesta, actualiza el estado del contrato en Salesforce y dispara la notificación al cliente vía Marketing Cloud.</td>
+          </tr>
+          <tr>
+            <td class="td-id">INT-009</td>
+            <td><span class="sys-pill sys-sf">Salesforce CRM</span></td>
+            <td><span class="sys-pill sys-reg">SIPS / REE</span></td>
+            <td><span class="dir-pill dir-out">Outbound</span></td>
+            <td><span class="pat-pill pat-rest">REST</span></td>
+            <td class="td-freq freq-od">On-demand · &lt;2s</td>
+            <td><span class="crit-pill crit-hi">Alta</span></td>
+            <td class="td-desc">Validación obligatoria del CUPS durante la contratación B2C. Integración síncrona bloqueante: sin respuesta no avanza el proceso de alta del cliente.</td>
+          </tr>
+          <tr>
+            <td class="td-id">INT-012</td>
+            <td><span class="sys-pill sys-sf">Salesforce CRM</span></td>
+            <td><span class="sys-pill sys-ext">Serviinform</span></td>
+            <td><span class="dir-pill dir-out">Outbound</span></td>
+            <td><span class="pat-pill pat-rest">REST</span></td>
+            <td class="td-freq freq-od">On-demand · &lt;2s</td>
+            <td><span class="crit-pill crit-hi">Alta</span></td>
+            <td class="td-desc">Lanzamiento del proceso de firma electrónica avanzada (eIDAS) desde Salesforce. MuleSoft invoca la API de Serviinform con el paquete documental del contrato para firma remota del cliente.</td>
+          </tr>
+          <tr>
+            <td class="td-id">INT-013</td>
+            <td><span class="sys-pill sys-ext">Serviinform</span></td>
+            <td><span class="sys-pill sys-sf">Salesforce CRM</span></td>
+            <td><span class="dir-pill dir-in">Inbound</span></td>
+            <td><span class="pat-pill pat-async">Request-Reply</span></td>
+            <td class="td-freq freq-as">Async · min/horas</td>
+            <td><span class="crit-pill crit-hi">Alta</span></td>
+            <td class="td-desc">Notificación del resultado de la firma digital vía webhook. Actualiza el estado del contrato (firmado/rechazado/caducado) y dispara el siguiente paso del proceso de alta.</td>
+          </tr>
+          <tr>
+            <td class="td-id">INT-014</td>
+            <td><span class="sys-pill sys-chan">Amazon Connect</span></td>
+            <td><span class="sys-pill sys-sf">Salesforce CRM</span></td>
+            <td><span class="dir-pill dir-bi">Bidireccional</span></td>
+            <td><span class="pat-pill pat-direct">CTI Adapter</span></td>
+            <td class="td-freq freq-rt">Tiempo real</td>
+            <td><span class="crit-pill crit-hi">Alta</span></td>
+            <td class="td-desc">Integración CTI directa con Service Cloud. Identificación automática del cliente por CLI, apertura de ficha en pantalla, grabaciones y transferencias entre agentes sin salir del CRM.</td>
+          </tr>
+          <tr>
+            <td class="td-id">INT-015</td>
+            <td><span class="sys-pill sys-chan">WhatsApp Business</span></td>
+            <td><span class="sys-pill sys-sf">Salesforce CRM</span></td>
+            <td><span class="dir-pill dir-bi">Bidireccional</span></td>
+            <td><span class="pat-pill pat-event">Platform Event</span></td>
+            <td class="td-freq freq-rt">Tiempo real</td>
+            <td><span class="crit-pill crit-hi">Alta</span></td>
+            <td class="td-desc">Canal conversacional bidireccional sobre Salesforce Messaging. Los mensajes entrantes generan Casos en Service Cloud. Respuestas del agente publicadas como Platform Events al canal de WhatsApp.</td>
+          </tr>
+          <tr>
+            <td class="td-id">INT-019</td>
+            <td><span class="sys-pill sys-sf">Salesforce CRM</span></td>
+            <td><span class="sys-pill sys-reg">Entidades Bancarias</span></td>
+            <td><span class="dir-pill dir-out">Outbound</span></td>
+            <td><span class="pat-pill pat-rest">REST</span></td>
+            <td class="td-freq freq-od">On-demand · &lt;3s</td>
+            <td><span class="crit-pill crit-hi">Alta</span></td>
+            <td class="td-desc">Validación del IBAN del cliente durante la contratación (ISO 13616). El resultado se vincula al objeto PaymentMethod en Energy &amp; Utilities Cloud para la domiciliación bancaria SEPA.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <div class="leg-title">Patrones de integración</div>
+      <div class="leg-row">
+        <div class="leg-item"><div class="leg-swatch" style="background:#3B8BEB"></div>REST síncrona</div>
+        <div class="leg-item"><div class="leg-swatch" style="background:#A78BFA"></div>Platform Events</div>
+        <div class="leg-item"><div class="leg-swatch" style="background:#E879F9"></div>Change Data Capture</div>
+        <div class="leg-item"><div class="leg-swatch" style="background:#F59E0B"></div>Request-Reply asíncrono</div>
+        <div class="leg-item"><div class="leg-swatch" style="background:#06B6D4"></div>CTI Adapter directo</div>
+        <div class="leg-item" style="margin-left:12px;font-family:var(--ff-m);font-size:8.5px;color:var(--muted);">⇄ bidireccional &nbsp; → outbound &nbsp; ← inbound</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

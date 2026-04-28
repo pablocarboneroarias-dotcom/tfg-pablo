@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nubes Salesforce Seleccionadas — Comercializadora Energética B2C</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #060D1A;
+    --bg2:       #0D1B2E;
+    --bg3:       #122240;
+    --border:    rgba(255,255,255,0.07);
+    --text:      #E2EAF4;
+    --muted:     #5B7A9D;
+
+    /* Cloud colors */
+    --sales-c:   #00A1E0;
+    --sales-d:   #0070D2;
+    --sales-bg:  rgba(0,161,224,0.07);
+    --sales-glow:rgba(0,161,224,0.18);
+
+    --service-c: #07B78B;
+    --service-d: #047857;
+    --service-bg:rgba(7,183,139,0.07);
+    --service-glow:rgba(7,183,139,0.18);
+
+    --mkt-c:     #F97316;
+    --mkt-d:     #C2410C;
+    --mkt-bg:    rgba(249,115,22,0.07);
+    --mkt-glow:  rgba(249,115,22,0.18);
+
+    --einstein-c:#9333EA;
+    --einstein-d:#6B21A8;
+    --einstein-bg:rgba(147,51,234,0.09);
+    --einstein-glow:rgba(147,51,234,0.25);
+
+    --agent-c:   #E11D48;
+    --agent-d:   #9F1239;
+    --agent-bg:  rgba(225,29,72,0.07);
+    --agent-glow:rgba(225,29,72,0.22);
+  }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 40px 36px 52px;
+    min-width: 1080px;
+  }
+
+  /* ── HEADER ─────────────────────────────────────── */
+  .header {
+    text-align: center;
+    margin-bottom: 44px;
+  }
+  .header .eyebrow {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--sales-c); margin-bottom: 10px;
+  }
+  .header h1 {
+    font-size: 26px; font-weight: 800;
+    color: #fff; letter-spacing: -0.5px; line-height: 1.2;
+  }
+  .header h1 span {
+    background: linear-gradient(120deg, var(--sales-c), #38BDF8);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .header p {
+    font-size: 12.5px; color: var(--muted); margin-top: 10px;
+    max-width: 620px; margin-left: auto; margin-right: auto; line-height: 1.6;
+  }
+
+  /* ── CLOUDS GRID ─────────────────────────────────── */
+  .clouds-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .cloud-card {
+    background: var(--bg2);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 28px 24px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .cloud-card:hover {
+    transform: translateY(-3px);
+  }
+
+  /* Glow blob */
+  .cloud-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .card-sales::before   { background: var(--sales-glow); }
+  .card-service::before { background: var(--service-glow); }
+  .card-mkt::before     { background: var(--mkt-glow); }
+
+  /* Top border accent */
+  .cloud-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 16px 16px 0 0;
+  }
+  .card-sales::after   { background: linear-gradient(90deg, var(--sales-d), var(--sales-c)); }
+  .card-service::after { background: linear-gradient(90deg, var(--service-d), var(--service-c)); }
+  .card-mkt::after     { background: linear-gradient(90deg, var(--mkt-d), var(--mkt-c)); }
+
+  /* Cloud icon block */
+  .cloud-icon-block {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 18px;
+    position: relative; z-index: 1;
+  }
+  .cloud-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; flex-shrink: 0;
+  }
+  .icon-sales   { background: var(--sales-bg);   box-shadow: 0 0 0 1px rgba(0,161,224,0.25); }
+  .icon-service { background: var(--service-bg);  box-shadow: 0 0 0 1px rgba(7,183,139,0.25); }
+  .icon-mkt     { background: var(--mkt-bg);      box-shadow: 0 0 0 1px rgba(249,115,22,0.25); }
+
+  .cloud-title-block {}
+  .cloud-name {
+    font-size: 16px; font-weight: 800; line-height: 1.1;
+  }
+  .name-sales   { color: var(--sales-c); }
+  .name-service { color: var(--service-c); }
+  .name-mkt     { color: var(--mkt-c); }
+
+  .cloud-subtitle {
+    font-size: 10px; color: var(--muted); margin-top: 3px;
+    font-weight: 500; letter-spacing: 0.3px;
+  }
+
+  /* SF logo pill */
+  .sf-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    border-radius: 20px; padding: 2px 8px;
+    font-size: 8.5px; font-weight: 600; color: var(--muted);
+    letter-spacing: 0.5px; text-transform: uppercase;
+    margin-bottom: 14px;
+    position: relative; z-index: 1;
+  }
+  .sf-pill .dot-pill {
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+  .dot-sales   { background: var(--sales-c); }
+  .dot-service { background: var(--service-c); }
+  .dot-mkt     { background: var(--mkt-c); }
+
+  /* Bullet list */
+  .feature-list {
+    list-style: none;
+    position: relative; z-index: 1;
+  }
+  .feature-list li {
+    display: flex; align-items: flex-start; gap: 9px;
+    font-size: 11px; color: #94A3B8;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.45;
+  }
+  .feature-list li:last-child { border-bottom: none; }
+  .feat-icon {
+    width: 18px; height: 18px; border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; flex-shrink: 0; margin-top: 1px;
+  }
+  .fi-sales   { background: rgba(0,161,224,0.12); }
+  .fi-service { background: rgba(7,183,139,0.12); }
+  .fi-mkt     { background: rgba(249,115,22,0.12); }
+
+  /* Badges on card */
+  .card-badges {
+    display: flex; flex-wrap: wrap; gap: 5px;
+    margin-top: 16px; position: relative; z-index: 1;
+  }
+  .cbadge {
+    font-size: 9px; font-weight: 600; padding: 2px 8px;
+    border-radius: 10px; letter-spacing: 0.3px;
+  }
+  .cb-sales   { background: rgba(0,161,224,0.12); color: var(--sales-c);   border: 1px solid rgba(0,161,224,0.2); }
+  .cb-service { background: rgba(7,183,139,0.12);  color: var(--service-c); border: 1px solid rgba(7,183,139,0.2); }
+  .cb-mkt     { background: rgba(249,115,22,0.12); color: var(--mkt-c);    border: 1px solid rgba(249,115,22,0.2); }
+
+  /* ── AI STRIP ────────────────────────────────────── */
+  .ai-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .ai-card {
+    border-radius: 16px;
+    padding: 24px 24px 20px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .ai-card::before {
+    content: '';
+    position: absolute;
+    bottom: -50px; left: -50px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    filter: blur(70px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .card-einstein { background: var(--bg2); }
+  .card-einstein::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--einstein-d), var(--einstein-c), #C084FC);
+    border-radius: 16px 16px 0 0;
+  }
+  .card-einstein::before { background: var(--einstein-glow); }
+
+  .card-agent { background: var(--bg2); }
+  .card-agent::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--agent-d), var(--agent-c), #FB7185);
+    border-radius: 16px 16px 0 0;
+  }
+  .card-agent::before { background: var(--agent-glow); }
+
+  .ai-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 16px; position: relative; z-index: 1;
+  }
+  .ai-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; flex-shrink: 0;
+  }
+  .icon-einstein { background: var(--einstein-bg); box-shadow: 0 0 0 1px rgba(147,51,234,0.3); }
+  .icon-agent    { background: var(--agent-bg);    box-shadow: 0 0 0 1px rgba(225,29,72,0.3); }
+
+  .ai-title { font-size: 17px; font-weight: 800; }
+  .title-einstein { color: #C084FC; }
+  .title-agent    { color: #FB7185; }
+  .ai-sub   { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+  .ai-tag {
+    display: inline-block; font-size: 8.5px; font-weight: 700;
+    padding: 1px 8px; border-radius: 10px; letter-spacing: 0.5px;
+    text-transform: uppercase; margin-bottom: 12px;
+    position: relative; z-index: 1;
+  }
+  .tag-einstein { background: rgba(147,51,234,0.15); color: #C084FC; border: 1px solid rgba(147,51,234,0.3); }
+  .tag-agent    { background: rgba(225,29,72,0.12);  color: #FB7185; border: 1px solid rgba(225,29,72,0.25); }
+
+  .ai-list {
+    list-style: none;
+    position: relative; z-index: 1;
+  }
+  .ai-list li {
+    display: flex; align-items: flex-start; gap: 9px;
+    font-size: 11px; color: #94A3B8;
+    padding: 5px 0; border-bottom: 1px solid var(--border);
+    line-height: 1.45;
+  }
+  .ai-list li:last-child { border-bottom: none; }
+  .ai-feat-icon {
+    width: 18px; height: 18px; border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; flex-shrink: 0; margin-top: 1px;
+  }
+  .fi-einstein { background: rgba(147,51,234,0.15); }
+  .fi-agent    { background: rgba(225,29,72,0.12); }
+
+  .ai-card-badges {
+    display: flex; flex-wrap: wrap; gap: 5px;
+    margin-top: 14px; position: relative; z-index: 1;
+  }
+  .cb-einstein { background: rgba(147,51,234,0.12); color: #C084FC; border: 1px solid rgba(147,51,234,0.25); font-size:9px; font-weight:600; padding:2px 8px; border-radius:10px; }
+  .cb-agent    { background: rgba(225,29,72,0.1);   color: #FB7185; border: 1px solid rgba(225,29,72,0.2);  font-size:9px; font-weight:600; padding:2px 8px; border-radius:10px; }
+
+  /* ── INTEGRATION BAR ─────────────────────────────── */
+  .integration-bar {
+    background: linear-gradient(135deg, #0D1B2E 0%, #122240 100%);
+    border: 1px solid rgba(0,161,224,0.15);
+    border-radius: 14px;
+    padding: 18px 24px;
+    display: flex; align-items: center; gap: 16px;
+    flex-wrap: wrap;
+  }
+  .int-label {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+    color: var(--muted); white-space: nowrap;
+  }
+  .int-items {
+    display: flex; gap: 8px; flex-wrap: wrap; flex: 1;
+  }
+  .int-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 8px; padding: 5px 12px;
+    font-size: 10px; font-weight: 600; color: #64748B;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .int-item .idot {
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+  .id-sap   { background: #6EE7B7; }
+  .id-sips  { background: #60D4F5; }
+  .id-atr   { background: #FCD34D; }
+  .id-firma { background: #F9A8D4; }
+  .id-iga   { background: #A78BFA; }
+  .id-cti   { background: #FB923C; }
+
+  /* ── FOOTER ──────────────────────────────────────── */
+  .footer {
+    margin-top: 24px; padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-note  { font-size: 9px; color: var(--muted); }
+  .footer-brand { font-size: 9px; color: var(--muted); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="eyebrow">Apartado 3.3.2 · Plataforma tecnológica seleccionada</div>
+  <h1>Nubes Salesforce seleccionadas para la <span>comercializadora energética B2C</span></h1>
+  <p>La propuesta se sustenta sobre tres nubes de Salesforce como núcleo funcional, complementadas con la capa transversal de Inteligencia Artificial Einstein y las capacidades de automatización agéntica de Agentforce.</p>
+</div>
+
+<!-- ── TRES NUBES PRINCIPALES ── -->
+<div class="clouds-grid">
+
+  <!-- SALES CLOUD -->
+  <div class="cloud-card card-sales">
+    <div class="cloud-icon-block">
+      <div class="cloud-icon icon-sales">
+        <!-- SVG briefcase / opportunity icon -->
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect x="3" y="10" width="22" height="14" rx="3" fill="none" stroke="#00A1E0" stroke-width="1.8"/>
+          <path d="M10 10V8a2 2 0 012-2h4a2 2 0 012 2v2" stroke="#00A1E0" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M3 16h22" stroke="#00A1E0" stroke-width="1.5" stroke-dasharray="2 2"/>
+          <circle cx="14" cy="16" r="2" fill="#00A1E0"/>
+        </svg>
+      </div>
+      <div class="cloud-title-block">
+        <div class="cloud-name name-sales">Sales Cloud</div>
+        <div class="cloud-subtitle">Captación · Oferta · Contratación</div>
+      </div>
+    </div>
+    <div class="sf-pill"><div class="dot-pill dot-sales"></div>Salesforce Sales Cloud</div>
+    <ul class="feature-list">
+      <li><div class="feat-icon fi-sales">🎯</div>Gestión del pipeline de captación: leads por canal (web, comparadores, FFVV, bot, teléfono) con asignación automática y scoring Einstein</li>
+      <li><div class="feat-icon fi-sales">⚡</div>Motor CPQ de oferta energética: cálculo de tarifa óptima (2.0TD/3.0TD), ahorro estimado vs. tarifa actual y generación de PDF de oferta</li>
+      <li><div class="feat-icon fi-sales">📋</div>Gestión de oportunidades con etapas específicas del sector, versiones de oferta, aprobación de descuentos y forecast de ventas</li>
+      <li><div class="feat-icon fi-sales">✍️</div>Proceso de contratación guiado: validación DNI/IBAN, generación de contrato y orquestación de firma digital (Signaturit/DocuSign)</li>
+      <li><div class="feat-icon fi-sales">🔄</div>Proceso ATR desde Salesforce: generación de mensajes C1/C2/A3, envío a distribuidora y gestión de respuestas y rechazos</li>
+      <li><div class="feat-icon fi-sales">📊</div>Collaborative Forecasting y dashboards de ventas: conversión por canal y agente, motivos de pérdida, KPIs de activación</li>
+    </ul>
+    <div class="card-badges">
+      <span class="cbadge cb-sales">Lead Management</span>
+      <span class="cbadge cb-sales">CPQ</span>
+      <span class="cbadge cb-sales">Contratación</span>
+      <span class="cbadge cb-sales">ATR</span>
+      <span class="cbadge cb-sales">Forecasting</span>
+    </div>
+  </div>
+
+  <!-- SERVICE CLOUD -->
+  <div class="cloud-card card-service">
+    <div class="cloud-icon-block">
+      <div class="cloud-icon icon-service">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="9" stroke="#07B78B" stroke-width="1.8" fill="none"/>
+          <path d="M10 14c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="#07B78B" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="14" cy="17" r="1.5" fill="#07B78B"/>
+          <path d="M9 22c1.3-1.2 3-2 5-2s3.7.8 5 2" stroke="#07B78B" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="cloud-title-block">
+        <div class="cloud-name name-service">Service Cloud</div>
+        <div class="cloud-subtitle">Atención al cliente · Casos · Omnicanal</div>
+      </div>
+    </div>
+    <div class="sf-pill"><div class="dot-pill dot-service"></div>Salesforce Service Cloud</div>
+    <ul class="feature-list">
+      <li><div class="feat-icon fi-service">🎧</div>Omni-Channel real: gestión unificada de teléfono (CTI), email, chat, WhatsApp Business, app móvil y portal de autoservicio desde una única interfaz</li>
+      <li><div class="feat-icon fi-service">📁</div>Gestión de casos tipificados para el sector: consulta factura, incidencia suministro, reclamación económica, modificación contractual, ATR y fraude</li>
+      <li><div class="feat-icon fi-service">⏱️</div>Entitlements y SLAs regulatorios: P1 sin suministro (4h), P2 reclamación económica (24h), reclamaciones formales CNMC (15 días hábiles)</li>
+      <li><div class="feat-icon fi-service">🔍</div>Screen pop 360° al inicio de cada interacción: contratos, facturas, ATR en curso, NPS histórico y casos abiertos sin consultar otros sistemas</li>
+      <li><div class="feat-icon fi-service">📈</div>Gestión de modificaciones contractuales desde el caso: cambio titular, potencia, tarifa, domiciliación, con inicio de ATR automático si aplica</li>
+      <li><div class="feat-icon fi-service">⭐</div>Encuestas NPS/CSAT post-caso, detección de riesgo churn y activación automática del journey de retención si puntuación inferior a 6</li>
+    </ul>
+    <div class="card-badges">
+      <span class="cbadge cb-service">Omni-Channel</span>
+      <span class="cbadge cb-service">Case Mgmt</span>
+      <span class="cbadge cb-service">SLA / Entitlements</span>
+      <span class="cbadge cb-service">CTI</span>
+      <span class="cbadge cb-service">NPS</span>
+    </div>
+  </div>
+
+  <!-- MARKETING CLOUD -->
+  <div class="cloud-card card-mkt">
+    <div class="cloud-icon-block">
+      <div class="cloud-icon icon-mkt">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M5 14c0-5 4-9 9-9s9 4 9 9" stroke="#F97316" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          <path d="M8 18l3-3 2 2 4-5 3 3" stroke="#F97316" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="14" cy="5" r="1.5" fill="#F97316"/>
+          <circle cx="5"  cy="14" r="1.5" fill="#F97316"/>
+          <circle cx="23" cy="14" r="1.5" fill="#F97316"/>
+        </svg>
+      </div>
+      <div class="cloud-title-block">
+        <div class="cloud-name name-mkt">Marketing Cloud</div>
+        <div class="cloud-subtitle">Customer Journeys · Segmentación · Comunicaciones</div>
+      </div>
+    </div>
+    <div class="sf-pill"><div class="dot-pill dot-mkt"></div>Salesforce Marketing Cloud</div>
+    <ul class="feature-list">
+      <li><div class="feat-icon fi-mkt">🗺️</div>7 Customer Journeys end-to-end: nurturing leads, recuperación oportunidades, onboarding, facturación transaccional, retención anti-churn, recuperación bajas y upsell dual</li>
+      <li><div class="feat-icon fi-mkt">🎯</div>Segmentación dinámica sobre Data Extensions: consumo kWh, tarifa, antigüedad, NPS, score de churn, producto activo y canal de preferencia</li>
+      <li><div class="feat-icon fi-mkt">💬</div>Comunicaciones personalizadas con AMPscript: consumo real, importe de factura y ahorro estimado calculado en tiempo de envío</li>
+      <li><div class="feat-icon fi-mkt">🛡️</div>Motor de supresión inteligente: bloqueo automático de comunicaciones comerciales durante impagos, casos P1/P2 activos y sin consentimiento RGPD</li>
+      <li><div class="feat-icon fi-mkt">📱</div>Gestión multicanal: email, SMS, push notifications y WhatsApp Business con frecuencia máxima configurable (1 comunicación comercial / 7 días)</li>
+      <li><div class="feat-icon fi-mkt">📊</div>Analytics Builder: tasa de apertura, conversión por journey, opt-out rate, NPS onboarding y ARPU por segmento con comparativa entre campañas</li>
+    </ul>
+    <div class="card-badges">
+      <span class="cbadge cb-mkt">Journey Builder</span>
+      <span class="cbadge cb-mkt">Segmentación</span>
+      <span class="cbadge cb-mkt">AMPscript</span>
+      <span class="cbadge cb-mkt">Supresión RGPD</span>
+      <span class="cbadge cb-mkt">Analytics Builder</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── EINSTEIN + AGENTFORCE ── -->
+<div class="ai-strip">
+
+  <!-- EINSTEIN AI -->
+  <div class="ai-card card-einstein">
+    <div class="ai-header">
+      <div class="ai-icon icon-einstein">
+        <!-- Einstein head SVG -->
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+          <ellipse cx="15" cy="16" rx="9" ry="10" stroke="#C084FC" stroke-width="1.8" fill="none"/>
+          <path d="M10 9c0-3.5 10-3.5 10 0" stroke="#C084FC" stroke-width="1.6" stroke-linecap="round"/>
+          <circle cx="11.5" cy="15" r="1.5" fill="#C084FC"/>
+          <circle cx="18.5" cy="15" r="1.5" fill="#C084FC"/>
+          <path d="M12 19.5c1 1 5 1 6 0" stroke="#C084FC" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M6 12l3 1M24 12l-3 1" stroke="#C084FC" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="15" cy="6" r="1" fill="#9333EA"/>
+          <path d="M15 7v3" stroke="#9333EA" stroke-width="1.2"/>
+        </svg>
+      </div>
+      <div>
+        <div class="ai-title title-einstein">Einstein AI</div>
+        <div class="ai-sub">Inteligencia artificial embebida · Capa transversal</div>
+      </div>
+    </div>
+    <div class="ai-tag tag-einstein">Capa transversal — aplica en Sales, Service y Marketing Cloud</div>
+    <ul class="ai-list">
+      <li><div class="ai-feat-icon fi-einstein">📉</div><strong style="color:#C084FC">Einstein Prediction Builder — Churn Score:</strong>&nbsp;modelo predictivo de abandono entrenado sobre variables CRM (NPS, reclamaciones, ATR entrante, consumo, antigüedad); score individual actualizado semanalmente y visible en ficha de cliente</li>
+      <li><div class="ai-feat-icon fi-einstein">⭐</div><strong style="color:#C084FC">Einstein Lead Scoring:</strong>&nbsp;puntuación automática de propensión a contratar sobre perfil de consumo y comportamiento histórico del segmento; umbral de cualificación configurable por canal</li>
+      <li><div class="ai-feat-icon fi-einstein">🎯</div><strong style="color:#C084FC">Einstein Next Best Action (NBA):</strong>&nbsp;recomendación de la siguiente mejor acción al agente en tiempo real: retener, hacer upsell, escalar o derivar a autoservicio, según contexto de la interacción</li>
+      <li><div class="ai-feat-icon fi-einstein">📊</div><strong style="color:#C084FC">Einstein Analytics — CRM Analytics:</strong>&nbsp;dashboards predictivos sobre cartera activa, anomalías de facturación, distribución de carga ATR y tendencia de churn por distribuidora y tarifa</li>
+    </ul>
+    <div class="ai-card-badges">
+      <span class="cb-einstein">Churn Prediction</span>
+      <span class="cb-einstein">Lead Scoring</span>
+      <span class="cb-einstein">Next Best Action</span>
+      <span class="cb-einstein">CRM Analytics</span>
+    </div>
+  </div>
+
+  <!-- AGENTFORCE -->
+  <div class="ai-card card-agent">
+    <div class="ai-header">
+      <div class="ai-icon icon-agent">
+        <!-- Agentforce robot/agent SVG -->
+        <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+          <rect x="7" y="11" width="16" height="12" rx="3" stroke="#FB7185" stroke-width="1.8" fill="none"/>
+          <circle cx="11" cy="16.5" r="2" fill="#FB7185"/>
+          <circle cx="19" cy="16.5" r="2" fill="#FB7185"/>
+          <path d="M12 21c1 1 5 1 6 0" stroke="#FB7185" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M15 11V8" stroke="#FB7185" stroke-width="1.6" stroke-linecap="round"/>
+          <circle cx="15" cy="6.5" r="2" stroke="#FB7185" stroke-width="1.6" fill="none"/>
+          <path d="M7 17H5M23 17h2" stroke="#FB7185" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Signal waves -->
+          <path d="M20 6c1.5 1.5 1.5 4 0 5.5" stroke="#E11D48" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+          <path d="M22 4c2.5 2.5 2.5 7 0 9.5" stroke="#E11D48" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="ai-title title-agent">Agentforce</div>
+        <div class="ai-sub">Agentes autónomos con IA generativa · Salesforce 2024</div>
+      </div>
+    </div>
+    <div class="ai-tag tag-agent">Aplica en Service Cloud y Marketing Cloud — automatización agéntica</div>
+    <ul class="ai-list">
+      <li><div class="ai-feat-icon fi-agent">🤖</div><strong style="color:#FB7185">Agente de atención autónomo (ATC):</strong>&nbsp;resolución de consultas frecuentes de baja complejidad sin intervención humana (estado de factura, fecha de próximo vencimiento, estado del expediente ATR, datos del contrato), con escalado al agente humano si la confianza es insuficiente</li>
+      <li><div class="ai-feat-icon fi-agent">📝</div><strong style="color:#FB7185">Resumen automático de caso (Case Summary):</strong>&nbsp;generación de resumen contextual del caso al inicio de cada interacción mediante IA generativa, eliminando el tiempo de lectura del historial por parte del agente</li>
+      <li><div class="ai-feat-icon fi-agent">✉️</div><strong style="color:#FB7185">Redacción asistida de respuestas (Reply Recommendations):</strong>&nbsp;sugerencia de respuesta personalizada para el agente basada en el historial del cliente, el tipo de caso y la base de conocimiento, con revisión y aprobación humana obligatoria</li>
+      <li><div class="ai-feat-icon fi-agent">⚠️</div><strong style="color:#FB7185">Supervisión humana obligatoria (Human in the Loop):</strong>&nbsp;conforme al AI Act, todas las acciones de Agentforce sobre contratos, ATR o datos sensibles requieren confirmación explícita del agente; el sistema registra la supervisión en el campo <code style="font-size:9px;color:#FDA4AF">decision_supervisada__c</code></li>
+    </ul>
+    <div class="ai-card-badges">
+      <span class="cb-agent">Atención Autónoma</span>
+      <span class="cb-agent">Case Summary</span>
+      <span class="cb-agent">Reply Assist</span>
+      <span class="cb-agent">AI Act Compliant</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── INTEGRATION BAR ── -->
+<div class="integration-bar">
+  <div class="int-label">Integraciones clave</div>
+  <div class="int-items">
+    <div class="int-item"><div class="idot id-sap"></div>SAP IS-U · MuleSoft</div>
+    <div class="int-item"><div class="idot id-sips"></div>SIPS · REE</div>
+    <div class="int-item"><div class="idot id-atr"></div>Mensajería ATR · Distribuidoras</div>
+    <div class="int-item"><div class="idot id-firma"></div>Firma Digital · Signaturit / DocuSign</div>
+    <div class="int-item"><div class="idot id-iga"></div>IGA · Azure AD / Okta</div>
+    <div class="int-item"><div class="idot id-cti"></div>CTI · Genesys / Amazon Connect</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="footer-note">Fuente: Elaboración propia · Salesforce Product Documentation (2025) · TFG — Propuesta de implantación de sistemas comerciales en una comercializadora energética B2C · UOC 2026</span>
+  <span class="footer-brand">Salesforce CRM · Mercado Residencial Español</span>
+</div>
+
+</body>
+</html>

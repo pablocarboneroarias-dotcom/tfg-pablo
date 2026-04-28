@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figura 7.1 — Estructura de gobierno: comités y órganos de decisión</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-deep:#07090F;--bg-base:#0C1018;--border-xs:rgba(255,255,255,0.05);--border-sm:rgba(255,255,255,0.09);
+  --c-dir:#FB7185;   /* Dirección - rojo */
+  --c-seg:#F59E0B;   /* Seguimiento - ámbar */
+  --c-tec:#3B8BEB;   /* Técnico - azul */
+  --c-imp:#10B981;   /* Implantador */
+  --c-cli:#A78BFA;   /* Cliente */
+  --text:#EEF2FF;--muted:#8896AC;--dim:#4B5563;
+  --ff-d:'Syne',sans-serif;--ff-b:'DM Sans',sans-serif;--ff-m:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg-deep);color:var(--text);font-family:var(--ff-b);min-height:100vh;}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(255,255,255,0.016) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,0.016) 1px,transparent 1px);
+  background-size:36px 36px;}
+.glow-orb{position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(140px);opacity:0.05;}
+.page{position:relative;z-index:1;padding:28px 36px 40px;max-width:1180px;margin:0 auto;}
+
+/* HEADER */
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;}
+.hdr h1{font-family:var(--ff-d);font-size:22px;font-weight:800;letter-spacing:-.3px;margin-bottom:7px;}
+.hdr h1 em{font-style:normal;background:linear-gradient(120deg,#FB7185 10%,#3B8BEB 90%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hdr p{font-size:11.5px;color:var(--muted);max-width:640px;line-height:1.65;}
+.badges{display:flex;flex-direction:column;gap:5px;align-items:flex-end;}
+.badge{font-family:var(--ff-m);font-size:9px;letter-spacing:.5px;text-transform:uppercase;padding:3px 10px;border-radius:4px;}
+.b1{background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.25);color:var(--c-dir);}
+.b2{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:8px;}
+
+/* CARD */
+.card{background:var(--bg-base);border:1px solid var(--border-xs);border-radius:18px;padding:26px 24px 22px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(251,113,133,.5),rgba(59,139,235,.5),transparent);}
+
+/* ── LEVEL LABELS ── */
+.level-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:8px;}
+.lvl-lbl{text-align:center;font-family:var(--ff-m);font-size:7.5px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:4px 0;}
+.lvl-dir{color:var(--c-dir);}
+.lvl-seg{color:var(--c-seg);}
+.lvl-tec{color:var(--c-tec);}
+
+/* ── CONNECTOR ── */
+.connector-row{display:flex;justify-content:space-around;align-items:center;height:24px;position:relative;margin-bottom:0;}
+.connector-row::before{content:'';position:absolute;top:50%;left:16.5%;right:16.5%;height:1px;background:var(--border-sm);}
+.conn-dot{width:8px;height:8px;border-radius:50%;position:relative;z-index:1;}
+
+/* ── COMMITTEE CARDS ── */
+.committees{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:24px;}
+
+.com-card{border-radius:14px;padding:18px 16px;position:relative;overflow:hidden;cursor:default;transition:all .2s;}
+.com-card:hover{transform:translateY(-3px);}
+.com-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:14px 14px 0 0;}
+
+.cc-dir{background:rgba(251,113,133,.07);border:1px solid rgba(251,113,133,.22);}
+.cc-dir::before{background:linear-gradient(90deg,transparent,rgba(251,113,133,.9),transparent);}
+.cc-seg{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.22);}
+.cc-seg::before{background:linear-gradient(90deg,transparent,rgba(245,158,11,.9),transparent);}
+.cc-tec{background:rgba(59,139,235,.07);border:1px solid rgba(59,139,235,.22);}
+.cc-tec::before{background:linear-gradient(90deg,transparent,rgba(59,139,235,.9),transparent);}
+
+/* Level badge */
+.com-level{font-family:var(--ff-m);font-size:7px;font-weight:600;padding:2px 9px;border-radius:3px;display:inline-block;margin-bottom:10px;}
+.cl-dir{background:rgba(251,113,133,.15);border:1px solid rgba(251,113,133,.3);color:var(--c-dir);}
+.cl-seg{background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);color:var(--c-seg);}
+.cl-tec{background:rgba(59,139,235,.15);border:1px solid rgba(59,139,235,.3);color:var(--c-tec);}
+
+.com-icon{font-size:26px;display:block;margin-bottom:8px;}
+.com-name{font-family:var(--ff-d);font-size:14px;font-weight:800;line-height:1.2;margin-bottom:4px;}
+.cc-dir .com-name{color:var(--c-dir);}
+.cc-seg .com-name{color:var(--c-seg);}
+.cc-tec .com-name{color:var(--c-tec);}
+
+.com-freq{font-family:var(--ff-m);font-size:8px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.freq-dot{width:6px;height:6px;border-radius:50%;}
+
+/* Participants */
+.com-section-lbl{font-family:var(--ff-m);font-size:7px;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);margin-bottom:6px;margin-top:10px;}
+
+.participants{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.part-row{display:flex;align-items:center;gap:6px;font-size:8.5px;color:#C4CDD8;}
+.part-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.part-role{font-size:7.5px;color:var(--muted);font-family:var(--ff-m);}
+
+/* Responsibilities */
+.resp-list{display:flex;flex-direction:column;gap:4px;}
+.resp-item{font-size:8.5px;color:var(--muted);display:flex;align-items:flex-start;gap:6px;line-height:1.4;}
+.resp-item::before{content:'→';font-family:var(--ff-m);font-size:8px;flex-shrink:0;margin-top:1px;}
+.cc-dir .resp-item::before{color:rgba(251,113,133,.6);}
+.cc-seg .resp-item::before{color:rgba(245,158,11,.6);}
+.cc-tec .resp-item::before{color:rgba(59,139,235,.6);}
+
+/* Output badge */
+.com-output{margin-top:12px;padding:8px 10px;border-radius:6px;font-size:8px;line-height:1.45;}
+.cc-dir .com-output{background:rgba(251,113,133,.07);border:1px solid rgba(251,113,133,.18);color:rgba(251,113,133,.85);}
+.cc-seg .com-output{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18);color:rgba(245,158,11,.85);}
+.cc-tec .com-output{background:rgba(59,139,235,.07);border:1px solid rgba(59,139,235,.18);color:rgba(59,139,235,.85);}
+.out-lbl{font-family:var(--ff-m);font-size:6.5px;letter-spacing:.6px;text-transform:uppercase;display:block;margin-bottom:3px;opacity:.7;}
+
+/* ── ESCALATION FLOW ── */
+.escalation{background:rgba(255,255,255,.02);border:1px solid var(--border-xs);border-radius:12px;padding:16px 18px;margin-bottom:20px;}
+.esc-title{font-family:var(--ff-m);font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.esc-title::after{content:'';flex:1;height:1px;background:var(--border-xs);}
+
+.esc-flow{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;}
+.esc-node{border-radius:8px;padding:10px 14px;text-align:center;min-width:130px;}
+.en-daily{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);}
+.en-tec{background:rgba(59,139,235,.08);border:1px solid rgba(59,139,235,.2);}
+.en-seg{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);}
+.en-dir{background:rgba(251,113,133,.08);border:1px solid rgba(251,113,133,.2);}
+.en-name{font-family:var(--ff-d);font-size:9.5px;font-weight:800;display:block;}
+.en-daily .en-name{color:#10B981;}
+.en-tec .en-name{color:var(--c-tec);}
+.en-seg .en-name{color:var(--c-seg);}
+.en-dir .en-name{color:var(--c-dir);}
+.en-sub{font-family:var(--ff-m);font-size:7px;color:var(--muted);margin-top:2px;display:block;}
+.esc-arrow{font-family:var(--ff-m);font-size:9px;color:var(--dim);padding:0 6px;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.esc-lbl{font-family:var(--ff-m);font-size:6.5px;color:var(--dim);white-space:nowrap;}
+
+/* ── CADENCE TABLE ── */
+.cadence-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:6px;}
+.cad-card{border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;}
+.cad-dir{background:rgba(251,113,133,.06);border:1px solid rgba(251,113,133,.18);}
+.cad-seg{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.18);}
+.cad-tec{background:rgba(59,139,235,.06);border:1px solid rgba(59,139,235,.18);}
+.cad-icon{font-size:20px;flex-shrink:0;}
+.cad-name{font-family:var(--ff-d);font-size:10px;font-weight:800;display:block;}
+.cad-dir .cad-name{color:var(--c-dir);}
+.cad-seg .cad-name{color:var(--c-seg);}
+.cad-tec .cad-name{color:var(--c-tec);}
+.cad-freq{font-family:var(--ff-m);font-size:8px;color:var(--muted);display:block;margin-top:2px;}
+.cad-dur{font-family:var(--ff-m);font-size:8px;font-weight:700;margin-left:auto;flex-shrink:0;}
+.cad-dir .cad-dur{color:var(--c-dir);}
+.cad-seg .cad-dur{color:var(--c-seg);}
+.cad-tec .cad-dur{color:var(--c-tec);}
+
+/* LEGEND */
+.legend{border-top:1px solid var(--border-xs);padding-top:12px;margin-top:4px;}
+.leg-row{display:flex;flex-wrap:wrap;gap:7px 18px;}
+.leg-item{display:flex;align-items:center;gap:6px;font-family:var(--ff-m);font-size:8px;color:var(--muted);}
+.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:550px;height:550px;top:-180px;left:-80px;background:#FB7185;"></div>
+<div class="glow-orb" style="width:480px;height:480px;bottom:-120px;right:-60px;background:#3B8BEB;"></div>
+
+<div class="page">
+  <div class="hdr">
+    <div>
+      <h1>Figura 7.1 — <em>Estructura de gobierno: comités y órganos de decisión</em></h1>
+      <p>Tres niveles de gobierno del proyecto: Comité de Dirección (estratégico · mensual), Comité de Seguimiento (táctico · semanal) y Comité Técnico (operativo · bajo demanda). Cada nivel tiene autoridad, cadencia y participantes definidos, con un flujo de escalado claro entre ellos.</p>
+    </div>
+    <div class="badges">
+      <span class="badge b1">3 comités · Estratégico · Táctico · Operativo</span>
+      <span class="badge b2">Elaboración propia · TFG 2025 · Cap. 7.1</span>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <!-- LEVEL LABELS -->
+    <div class="level-bar">
+      <div class="lvl-lbl lvl-dir">Nivel estratégico</div>
+      <div class="lvl-lbl lvl-seg">Nivel táctico</div>
+      <div class="lvl-lbl lvl-tec">Nivel operativo</div>
+    </div>
+
+    <!-- THREE COMMITTEES -->
+    <div class="committees">
+
+      <!-- COMITÉ DE DIRECCIÓN -->
+      <div class="com-card cc-dir">
+        <span class="com-level cl-dir">Estratégico · Mensual</span>
+        <span class="com-icon">🏛️</span>
+        <div class="com-name">Comité de<br>Dirección</div>
+        <div class="com-freq">
+          <span class="freq-dot" style="background:var(--c-dir);box-shadow:0 0 5px var(--c-dir);"></span>
+          Reunión mensual · 2 horas · Presencial o videoconferencia
+        </div>
+
+        <div class="com-section-lbl">Participantes</div>
+        <div class="participants">
+          <div class="part-row">
+            <div class="part-dot" style="background:var(--c-cli);"></div>
+            <span>Sponsor / Director TI o CDO</span>
+            <span class="part-role">(cliente · preside)</span>
+          </div>
+          <div class="part-row">
+            <div class="part-dot" style="background:var(--c-imp);"></div>
+            <span>Project Manager</span>
+            <span class="part-role">(implantador)</span>
+          </div>
+          <div class="part-row">
+            <div class="part-dot" style="background:var(--c-imp);"></div>
+            <span>Arquitecto de Solución</span>
+            <span class="part-role">(implantador)</span>
+          </div>
+          <div class="part-row">
+            <div class="part-dot" style="background:var(--c-cli);"></div>
+            <span>Product Owner</span>
+            <span class="part-role">(cliente)</span>
+          </div>
+        </div>
+
+        <div class="com-section-lbl">Responsabilidades</div>
+        <div class="resp-list">
+          <div class="resp-item">Revisión de avance a nivel de fase</div>
+          <div class="resp-item">Aprobación formal de go-lives</div>
+          <div class="resp-item">Cambios de alcance con impacto presupuestario o de calendario</div>
+          <div class="resp-item">Resolución de escalados no resueltos en niveles inferiores</div>
+          <div class="resp-item">Única autoridad para modificar el Plan de Proyecto</div>
+        </div>
+
+        <div class="com-output">
+          <span class="out-lbl">Output</span>
+          Acta de reunión firmada · Decisiones de alcance · Aprobación de go-live
+        </div>
+      </div>
+
+      <!-- COMITÉ DE SEGUIMIENTO -->
+      <div class="com-card cc-seg">
+        <span class="com-level cl-seg">Táctico · Semanal</span>
+        <span class="com-icon">📊</span>
+        <div class="com-name">Comité de<br>Seguimiento</div>
+        <div class="com-freq">
+          <span class="freq-dot" style="background:var(--c-seg);box-shadow:0 0 5px var(--c-seg);"></span>
+          Reunión semanal · 1 hora · Lunes a las 9:00h
+        </div>
+
+        <div class="com-section-lbl">Participantes</div>
+        <div class="participants">
+          <div class="part-row">
+            <div class="part-dot" style="background:var(--c-imp);"></div>
+            <span>Project Manager</span>
+            <span class="part-role">(implantador · preside)</span>
+          </div>
+          <div class="part-row">
+            <div class="part-dot" style="background:var(--c-cli);"></div>
+            <span>Product Owner</span>
+            <span class="part-role">(cliente)</span>
+          </div>
+          <div class="part-row">
+            <div class="part-dot" style="background:var(--c-imp);"></div>
+            <span>FC líderes por área</span>
+            <span class="part-role">(implantador)</span>
+          </div>
+          <div class="part-row">
+            <div class="part-dot" style="background:var(--c-imp);"></div>
+            <span>Arq. Técnico (cuando aplica)</span>
+            <span class="part-role">(implantador)</span>
+          </div>
+        </div>
+
+        <div class="com-section-lbl">Responsabilidades</div>
+        <div class="resp-list">
+          <div class="resp-item">Revisión de avance del sprint en curso</div>
+          <div class="resp-item">Validación del backlog de la semana siguiente</div>
+          <div class="resp-item">Resolución de impedimentos operativos</div>
+          <div class="resp-item">Monitorización KPIs: velocidad, aceptación, integraciones, deuda técnica</div>
+          <div class="resp-item">Escalado al Comité de Dirección si procede</div>
+        </div>
+
+        <div class="com-output">
+          <span class="out-lbl">Output</span>
+          Informe semanal de estado · Sprint backlog validado · Impedimentos registrados
+        </div>
+      </div>
+
+      <!-- COMITÉ TÉCNICO -->
+      <div class="com-card cc-tec">
+        <span class="com-level cl-tec">Operativo · Bajo demanda</span>
+        <span class="com-icon">⚙️</span>
+        <div class="com-name">Comité<br>Técnico</div>
+        <div class="com-freq">
+          <span class="freq-dot" style="background:var(--c-tec);box-shadow:0 0 5px var(--c-tec);"></span>
+          Convocatoria ad-hoc · Max. 1 hora · Cuando surge decisión técnica bloqueante
+        </div>
+
+        <div class="com-section-lbl">Participantes</div>
+        <div class="participants">
+          <div class="part-row">
+            <div class="part-dot" style="background:var(--c-imp);"></div>
+            <span>Arquitecto de Solución</span>
+            <span class="part-role">(implantador · convoca y preside)</span>
+          </div>
+          <div class="part-row">
+            <div class="part-dot" style="background:var(--c-imp);"></div>
+            <span>Arquitecto Técnico</span>
+            <span class="part-role">(implantador)</span>
+          </div>
+          <div class="part-row">
+            <div class="part-dot" style="background:var(--c-imp);"></div>
+            <span>Dev Senior + Integraciones</span>
+            <span class="part-role">(implantador)</span>
+          </div>
+          <div class="part-row">
+            <div class="part-dot" style="background:var(--c-cli);"></div>
+            <span>Dir. TI cliente (si afecta sistemas)</span>
+            <span class="part-role">(cliente · opcional)</span>
+          </div>
+        </div>
+
+        <div class="com-section-lbl">Responsabilidades</div>
+        <div class="resp-list">
+          <div class="resp-item">Decisiones técnicas que afectan a arquitectura o seguridad</div>
+          <div class="resp-item">Resolución de conflictos entre patrones de integración</div>
+          <div class="resp-item">Evaluación de deuda técnica crítica</div>
+          <div class="resp-item">Análisis de impacto de cambios técnicos en el plan</div>
+          <div class="resp-item">Documentación en Architecture Decision Record (ADR)</div>
+        </div>
+
+        <div class="com-output">
+          <span class="out-lbl">Output</span>
+          Architecture Decision Record (ADR) · Decisión técnica documentada y firmada
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ESCALATION FLOW -->
+    <div class="escalation">
+      <div class="esc-title">Flujo de escalado</div>
+      <div class="esc-flow">
+        <div class="esc-node en-daily">
+          <span class="en-name">Daily Standup</span>
+          <span class="en-sub">Impedimento detectado · 15 min</span>
+        </div>
+        <div class="esc-arrow">
+          <span>→</span>
+          <span class="esc-lbl">no resuelto en 2h</span>
+        </div>
+        <div class="esc-node en-tec">
+          <span class="en-name">Comité Técnico</span>
+          <span class="en-sub">Decisión técnica · ad-hoc</span>
+        </div>
+        <div class="esc-arrow">
+          <span>→</span>
+          <span class="esc-lbl">afecta a alcance/plan</span>
+        </div>
+        <div class="esc-node en-seg">
+          <span class="en-name">Comité Seguimiento</span>
+          <span class="en-sub">Impacto operativo · semanal</span>
+        </div>
+        <div class="esc-arrow">
+          <span>→</span>
+          <span class="esc-lbl">afecta a presupuesto/calendario</span>
+        </div>
+        <div class="esc-node en-dir">
+          <span class="en-name">Comité Dirección</span>
+          <span class="en-sub">Decisión estratégica · mensual</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CADENCE SUMMARY -->
+    <div class="cadence-grid">
+      <div class="cad-card cad-dir">
+        <span class="cad-icon">🏛️</span>
+        <div>
+          <span class="cad-name">Comité de Dirección</span>
+          <span class="cad-freq">Mensual · último jueves del mes</span>
+        </div>
+        <span class="cad-dur">2h</span>
+      </div>
+      <div class="cad-card cad-seg">
+        <span class="cad-icon">📊</span>
+        <div>
+          <span class="cad-name">Comité de Seguimiento</span>
+          <span class="cad-freq">Semanal · lunes 9:00h</span>
+        </div>
+        <span class="cad-dur">1h</span>
+      </div>
+      <div class="cad-card cad-tec">
+        <span class="cad-icon">⚙️</span>
+        <div>
+          <span class="cad-name">Comité Técnico</span>
+          <span class="cad-freq">Ad-hoc · convocatoria &lt;24h</span>
+        </div>
+        <span class="cad-dur">≤1h</span>
+      </div>
+    </div>
+
+    <!-- LEGEND -->
+    <div class="legend">
+      <div class="leg-row">
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-dir);"></div>Comité de Dirección · nivel estratégico</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-seg);"></div>Comité de Seguimiento · nivel táctico</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-tec);"></div>Comité Técnico · nivel operativo</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-imp);"></div>Perfil implantador</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-cli);"></div>Perfil cliente</div>
+        <div class="leg-item" style="margin-left:auto;font-family:var(--ff-m);font-size:7.5px;color:var(--dim);">ADR = Architecture Decision Record · documento de decisión técnica</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

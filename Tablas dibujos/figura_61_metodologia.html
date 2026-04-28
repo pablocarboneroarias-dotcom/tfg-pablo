@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figura 6.1 — Fases del proyecto · SAFe / Scrum</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-deep:#07090F;--bg-base:#0C1018;--border-xs:rgba(255,255,255,0.05);--border-sm:rgba(255,255,255,0.09);
+  --c-dis:#6B7CF6;--c-con:#3B8BEB;--c-tst:#10B981;--c-tr:#94A3B8;--c-sprint:#F59E0B;
+  --text:#EEF2FF;--muted:#8896AC;--dim:#4B5563;
+  --ff-d:'Syne',sans-serif;--ff-b:'DM Sans',sans-serif;--ff-m:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg-deep);color:var(--text);font-family:var(--ff-b);min-height:100vh;}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(255,255,255,0.016) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.016) 1px,transparent 1px);
+  background-size:36px 36px;}
+.glow-orb{position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(140px);opacity:0.05;}
+.page{position:relative;z-index:1;padding:28px 36px 40px;max-width:1180px;margin:0 auto;}
+
+/* HEADER */
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;}
+.hdr h1{font-family:var(--ff-d);font-size:22px;font-weight:800;letter-spacing:-.3px;margin-bottom:7px;}
+.hdr h1 em{font-style:normal;background:linear-gradient(120deg,#6B7CF6 10%,#10B981 90%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hdr p{font-size:11.5px;color:var(--muted);max-width:640px;line-height:1.65;}
+.badges{display:flex;flex-direction:column;gap:5px;align-items:flex-end;}
+.badge{font-family:var(--ff-m);font-size:9px;letter-spacing:.5px;text-transform:uppercase;padding:3px 10px;border-radius:4px;}
+.b1{background:rgba(107,124,246,.1);border:1px solid rgba(107,124,246,.25);color:var(--c-dis);}
+.b2{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:8px;}
+
+/* CARD */
+.card{background:var(--bg-base);border:1px solid var(--border-xs);border-radius:18px;padding:26px 24px 22px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(107,124,246,.5),rgba(16,185,129,.5),transparent);}
+
+/* ══ TIMELINE BAR ══ */
+.timeline-wrap{margin-bottom:28px;}
+.tl-label{font-family:var(--ff-m);font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.tl-label::after{content:'';flex:1;height:1px;background:var(--border-xs);}
+
+.timeline{display:flex;gap:3px;height:44px;border-radius:10px;overflow:hidden;margin-bottom:6px;}
+.tl-seg{display:flex;align-items:center;justify-content:center;border-radius:6px;transition:filter .2s;cursor:default;position:relative;}
+.tl-seg:hover{filter:brightness(1.15);}
+.tl-dis{background:rgba(107,124,246,.35);border:1px solid rgba(107,124,246,.5);flex:1;}
+.tl-con{background:rgba(59,139,235,.35);border:1px solid rgba(59,139,235,.5);flex:8;}
+.tl-tst{background:rgba(16,185,129,.2);border:1px dashed rgba(16,185,129,.5);}
+.tl-tr{background:rgba(148,163,184,.2);border:1px solid rgba(148,163,184,.35);flex:1;}
+.tl-seg-label{font-family:var(--ff-m);font-size:8px;font-weight:700;white-space:nowrap;padding:0 8px;}
+.tl-dis .tl-seg-label{color:#6B7CF6;}
+.tl-con .tl-seg-label{color:#3B8BEB;}
+.tl-tr  .tl-seg-label{color:#94A3B8;}
+
+/* month markers */
+.month-markers{display:flex;padding:0 2px;}
+.mm{flex:1;font-family:var(--ff-m);font-size:6.5px;color:var(--dim);text-align:center;}
+.mm.hi{color:var(--c-sprint);font-weight:600;}
+
+/* ══ PHASE CARDS ══ */
+.phases-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+
+.phase-card{border-radius:12px;padding:16px 14px;position:relative;overflow:hidden;cursor:default;transition:all .2s;}
+.phase-card:hover{transform:translateY(-3px);}
+.phase-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:12px 12px 0 0;}
+
+.pc-dis{background:rgba(107,124,246,.07);border:1px solid rgba(107,124,246,.22);}
+.pc-dis::before{background:linear-gradient(90deg,transparent,rgba(107,124,246,.9),transparent);}
+.pc-con{background:rgba(59,139,235,.07);border:1px solid rgba(59,139,235,.22);}
+.pc-con::before{background:linear-gradient(90deg,transparent,rgba(59,139,235,.9),transparent);}
+.pc-tst{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.22);}
+.pc-tst::before{background:linear-gradient(90deg,transparent,rgba(16,185,129,.9),transparent);}
+.pc-tr{background:rgba(148,163,184,.07);border:1px solid rgba(148,163,184,.22);}
+.pc-tr::before{background:linear-gradient(90deg,transparent,rgba(148,163,184,.9),transparent);}
+
+.ph-icon{font-size:22px;margin-bottom:8px;display:block;}
+.ph-num{font-family:var(--ff-m);font-size:7.5px;font-weight:600;padding:2px 8px;border-radius:3px;display:inline-block;margin-bottom:6px;}
+.pc-dis .ph-num{background:rgba(107,124,246,.15);border:1px solid rgba(107,124,246,.3);color:#6B7CF6;}
+.pc-con .ph-num{background:rgba(59,139,235,.15);border:1px solid rgba(59,139,235,.3);color:#3B8BEB;}
+.pc-tst .ph-num{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#10B981;}
+.pc-tr  .ph-num{background:rgba(148,163,184,.15);border:1px solid rgba(148,163,184,.3);color:#94A3B8;}
+
+.ph-title{font-family:var(--ff-d);font-size:13px;font-weight:800;margin-bottom:4px;}
+.pc-dis .ph-title{color:#6B7CF6;}
+.pc-con .ph-title{color:#3B8BEB;}
+.pc-tst .ph-title{color:#10B981;}
+.pc-tr  .ph-title{color:#94A3B8;}
+
+.ph-period{font-family:var(--ff-m);font-size:8px;color:var(--muted);margin-bottom:10px;}
+.ph-desc{font-size:9px;color:var(--muted);line-height:1.55;margin-bottom:10px;}
+.ph-items{display:flex;flex-direction:column;gap:4px;}
+.ph-item{font-size:8.5px;color:#C4CDD8;display:flex;align-items:flex-start;gap:6px;line-height:1.4;}
+.ph-item::before{content:'';width:4px;height:4px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.pc-dis .ph-item::before{background:rgba(107,124,246,.7);}
+.pc-con .ph-item::before{background:rgba(59,139,235,.7);}
+.pc-tst .ph-item::before{background:rgba(16,185,129,.7);}
+.pc-tr  .ph-item::before{background:rgba(148,163,184,.7);}
+
+/* ══ SPRINT ANATOMY ══ */
+.sprint-section{margin-bottom:20px;}
+.sprint-title{font-family:var(--ff-m);font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.sprint-title::after{content:'';flex:1;height:1px;background:var(--border-xs);}
+
+.sprint-wrap{background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.18);border-radius:10px;padding:14px 16px;}
+.sprint-row{display:flex;gap:4px;height:36px;margin-bottom:10px;}
+
+.sw-week{border-radius:6px;display:flex;align-items:center;justify-content:center;flex:3;}
+.sw-test{border-radius:6px;display:flex;align-items:center;justify-content:center;flex:1;}
+.sw-w1{background:rgba(245,158,11,.3);border:1px solid rgba(245,158,11,.5);}
+.sw-w2{background:rgba(245,158,11,.22);border:1px solid rgba(245,158,11,.4);}
+.sw-w3{background:rgba(245,158,11,.14);border:1px solid rgba(245,158,11,.3);}
+.sw-test-block{background:rgba(16,185,129,.2);border:1px dashed rgba(16,185,129,.5);}
+.sw-label{font-family:var(--ff-m);font-size:7.5px;font-weight:600;white-space:nowrap;}
+.sw-w1 .sw-label,.sw-w2 .sw-label,.sw-w3 .sw-label{color:#F59E0B;}
+.sw-test-block .sw-label{color:#10B981;}
+
+.sprint-events{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.se-item{border-radius:7px;padding:8px 10px;text-align:center;}
+.se-planning{background:rgba(107,124,246,.08);border:1px solid rgba(107,124,246,.2);}
+.se-daily{background:rgba(59,139,235,.08);border:1px solid rgba(59,139,235,.2);}
+.se-review{background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);}
+.se-retro{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);}
+.se-icon{font-size:14px;display:block;margin-bottom:4px;}
+.se-name{font-family:var(--ff-d);font-size:9px;font-weight:700;display:block;margin-bottom:2px;}
+.se-planning .se-name{color:#6B7CF6;}
+.se-daily    .se-name{color:#3B8BEB;}
+.se-review   .se-name{color:#10B981;}
+.se-retro    .se-name{color:#F59E0B;}
+.se-when{font-family:var(--ff-m);font-size:7px;color:var(--muted);}
+
+/* ══ SAFe LAYER ══ */
+.safe-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.safe-card{border-radius:9px;padding:12px 13px;}
+.sc-pi{background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.2);}
+.sc-art{background:rgba(232,121,249,.07);border:1px solid rgba(232,121,249,.2);}
+.sc-ip{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);}
+.sc-title{font-family:var(--ff-d);font-size:10px;font-weight:800;display:block;margin-bottom:4px;}
+.sc-pi .sc-title{color:#A78BFA;}
+.sc-art .sc-title{color:#E879F9;}
+.sc-ip .sc-title{color:#F59E0B;}
+.sc-desc{font-size:8.5px;color:var(--muted);line-height:1.5;}
+
+/* LEGEND */
+.legend{border-top:1px solid var(--border-xs);padding-top:14px;margin-top:4px;}
+.leg-row{display:flex;flex-wrap:wrap;gap:7px 18px;}
+.leg-item{display:flex;align-items:center;gap:6px;font-family:var(--ff-m);font-size:8.5px;color:var(--muted);}
+.leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:600px;height:600px;top:-200px;left:-100px;background:#6B7CF6;"></div>
+<div class="glow-orb" style="width:500px;height:500px;bottom:-150px;right:-80px;background:#10B981;"></div>
+
+<div class="page">
+  <div class="hdr">
+    <div>
+      <h1>Figura 6.1 — <em>Fases del proyecto · SAFe / Scrum</em></h1>
+      <p>Marco metodológico del proyecto de implantación: cuatro fases (Diseño, Construcción, Pruebas y Transición) organizadas bajo SAFe a nivel de programa y Scrum a nivel de equipo. Sprint de 4 semanas: 3 semanas de construcción + 1 semana de pruebas integradas.</p>
+    </div>
+    <div class="badges">
+      <span class="badge b1">SAFe · Scrum · Sprint 4 semanas (3+1) · ~20 meses</span>
+      <span class="badge b2">Elaboración propia · TFG 2025 · Cap. 6.1</span>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <!-- TIMELINE -->
+    <div class="timeline-wrap">
+      <div class="tl-label">Línea temporal del proyecto · 20 meses</div>
+      <div class="timeline">
+        <div class="tl-seg tl-dis" style="flex:1"><span class="tl-seg-label">Diseño</span></div>
+        <div class="tl-seg tl-con" style="flex:9"><span class="tl-seg-label">Construcción · 6 fases con go-live incremental</span></div>
+        <div class="tl-seg tl-tr" style="flex:1"><span class="tl-seg-label">Transición</span></div>
+      </div>
+      <div class="month-markers">
+        <div class="mm">M1</div><div class="mm">M2</div><div class="mm">M3</div><div class="mm">M4</div>
+        <div class="mm">M5</div><div class="mm">M6</div><div class="mm hi">M7★</div><div class="mm">M8</div>
+        <div class="mm">M9</div><div class="mm hi">M10★</div><div class="mm">M11</div><div class="mm">M12</div>
+        <div class="mm">M13</div><div class="mm hi">M14★</div><div class="mm">M15</div><div class="mm">M16</div>
+        <div class="mm hi">M17★</div><div class="mm hi">M18★</div><div class="mm">M19</div><div class="mm">M20</div>
+      </div>
+    </div>
+
+    <!-- 4 PHASE CARDS -->
+    <div class="phases-grid">
+
+      <div class="phase-card pc-dis">
+        <span class="ph-icon">🔍</span>
+        <span class="ph-num">Fase 1 · M1–M2</span>
+        <div class="ph-title">Diseño<br>/ Discovery</div>
+        <div class="ph-period">2 meses · Equipo completo</div>
+        <div class="ph-desc">Levantamiento de requisitos, validación del backlog y definición de la arquitectura objetivo. Al finalizar M1 el backlog está maduro para iniciar construcción en paralelo.</div>
+        <div class="ph-items">
+          <div class="ph-item">Workshops AS-IS por área funcional</div>
+          <div class="ph-item">Definición y priorización del backlog (197 US)</div>
+          <div class="ph-item">Arquitectura objetivo y modelo de datos</div>
+          <div class="ph-item">PI Planning del proyecto completo</div>
+          <div class="ph-item">Setup de entornos DEV/INT/UAT/PRE</div>
+          <div class="ph-item">Kick-off con sponsor y key users</div>
+        </div>
+      </div>
+
+      <div class="phase-card pc-con">
+        <span class="ph-icon">⚙️</span>
+        <span class="ph-num">Fase 2 · M2–M18</span>
+        <div class="ph-title">Construcción<br>/ Build</div>
+        <div class="ph-period">16 meses · 6 fases · 17 sprints</div>
+        <div class="ph-desc">Construcción iterativa organizada en sprints de 4 semanas. Cada fase termina con UAT y go-live incremental. F5 y F6 se ejecutan en paralelo por equipos independientes.</div>
+        <div class="ph-items">
+          <div class="ph-item">Sprint 4 semanas: 3 build + 1 test</div>
+          <div class="ph-item">Deploy continuo DEV → INT tras cada sprint</div>
+          <div class="ph-item">6 go-lives incrementales (M7→M18)</div>
+          <div class="ph-item">F7 Seguridad / RGPD transversal</div>
+          <div class="ph-item">Code review y CI/CD pipeline</div>
+          <div class="ph-item">Demo al cliente al final de cada sprint</div>
+        </div>
+      </div>
+
+      <div class="phase-card pc-tst">
+        <span class="ph-icon">✅</span>
+        <span class="ph-num">Continua · Semana 4 de cada sprint</span>
+        <div class="ph-title">Pruebas<br>/ Testing</div>
+        <div class="ph-period">Embebida en cada sprint + UAT por fase</div>
+        <div class="ph-desc">Las pruebas son continuas, no una fase final. La semana 4 de cada sprint se dedica a pruebas integradas. Antes de cada go-live se ejecuta UAT con negocio y prueba en PRE.</div>
+        <div class="ph-items">
+          <div class="ph-item">Pruebas unitarias Apex (semana 4 sprint)</div>
+          <div class="ph-item">Pruebas de integración en entorno INT</div>
+          <div class="ph-item">Regresión automatizada tras cada deploy</div>
+          <div class="ph-item">UAT con key users antes de cada go-live</div>
+          <div class="ph-item">Prueba de rendimiento en entorno PRE</div>
+          <div class="ph-item">Sign-off del Product Owner por fase</div>
+        </div>
+      </div>
+
+      <div class="phase-card pc-tr">
+        <span class="ph-icon">🚀</span>
+        <span class="ph-num">Fase 4 · M19–M20</span>
+        <div class="ph-title">Transición<br>/ Hypercare</div>
+        <div class="ph-period">2 meses · Handover a Operación</div>
+        <div class="ph-desc">Traspaso ordenado al equipo de operación del cliente: documentación técnica y funcional, formación de administradores Salesforce y definición del modelo de soporte.</div>
+        <div class="ph-items">
+          <div class="ph-item">Knowledge transfer al equipo interno</div>
+          <div class="ph-item">Documentación técnica y runbooks</div>
+          <div class="ph-item">Formación administradores Salesforce</div>
+          <div class="ph-item">Definición modelo soporte L1/L2/L3</div>
+          <div class="ph-item">Hypercare: soporte intensivo post go-live</div>
+          <div class="ph-item">Cierre del proyecto y lecciones aprendidas</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SPRINT ANATOMY -->
+    <div class="sprint-section">
+      <div class="sprint-title">Anatomía del sprint · 4 semanas (3 construcción + 1 pruebas)</div>
+      <div class="sprint-wrap">
+        <div class="sprint-row">
+          <div class="tl-seg sw-week sw-w1"><span class="sw-label">Semana 1 · Construcción</span></div>
+          <div class="tl-seg sw-week sw-w2"><span class="sw-label">Semana 2 · Construcción</span></div>
+          <div class="tl-seg sw-week sw-w3"><span class="sw-label">Semana 3 · Construcción</span></div>
+          <div class="tl-seg sw-test sw-test-block"><span class="sw-label">S4 · Pruebas</span></div>
+        </div>
+        <div class="sprint-events">
+          <div class="se-item se-planning">
+            <span class="se-icon">📋</span>
+            <span class="se-name">Sprint Planning</span>
+            <span class="se-when">Día 1 · 4-6 horas</span>
+          </div>
+          <div class="se-item se-daily">
+            <span class="se-icon">🔄</span>
+            <span class="se-name">Daily Standup</span>
+            <span class="se-when">Cada día · 15 min</span>
+          </div>
+          <div class="se-item se-review">
+            <span class="se-icon">🎯</span>
+            <span class="se-name">Sprint Review</span>
+            <span class="se-when">Día 20 · Demo cliente</span>
+          </div>
+          <div class="se-item se-retro">
+            <span class="se-icon">🔍</span>
+            <span class="se-name">Retrospectiva</span>
+            <span class="se-when">Día 20 · Mejora continua</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAFe LAYER -->
+    <div class="sprint-title">Capa SAFe · Coordinación inter-equipo a nivel de programa</div>
+    <div class="safe-row">
+      <div class="safe-card sc-pi">
+        <span class="sc-title">🗓 Program Increment (PI)</span>
+        <span class="sc-desc">Cada fase del proyecto equivale a un PI de SAFe. Al inicio de cada fase se celebra el PI Planning, donde todos los equipos (funcional, técnico, integraciones) sincronizan objetivos, identifican dependencias y definen el plan del incremento.</span>
+      </div>
+      <div class="safe-card sc-art">
+        <span class="sc-title">🚂 Agile Release Train (ART)</span>
+        <span class="sc-desc">Los equipos funcional, técnico e integraciones operan como un único ART coordinado por el Release Train Engineer (RTE), rol asumido por el Project Manager. Las dependencias críticas entre equipos se resuelven en el PI Planning y se monitorizan semanalmente.</span>
+      </div>
+      <div class="safe-card sc-ip">
+        <span class="sc-title">🔧 Innovation &amp; Planning Sprint</span>
+        <span class="sc-desc">Entre cada fase se reserva un sprint de estabilización e innovación (IP Sprint) para resolver deuda técnica, documentar, preparar el entorno PRE y planificar el siguiente PI antes del go-live. Garantiza que cada fase se cierra limpiamente antes de iniciar la siguiente.</span>
+      </div>
+    </div>
+
+    <!-- LEGEND -->
+    <div class="legend">
+      <div class="leg-row">
+        <div class="leg-item"><div class="leg-dot" style="background:#6B7CF6"></div>Diseño / Discovery</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#3B8BEB"></div>Construcción / Build (iterativa)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#10B981"></div>Pruebas (embebidas + UAT por fase)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#94A3B8"></div>Transición y Hypercare</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#F59E0B"></div>Sprint 4 semanas (3 build + 1 test)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#A78BFA"></div>SAFe · PI Planning y ART</div>
+        <div class="leg-item" style="margin-left:auto;font-family:var(--ff-m);font-size:7.5px;color:var(--dim)">★ = Hito go-live incremental por fase</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

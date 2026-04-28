@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salidas del proceso · CRM Comercializadora B2C</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:   #07090F;
+  --bg-base:   #0C1018;
+  --bg-card:   #101520;
+  --bg-hover:  #161D2C;
+  --border-xs: rgba(255,255,255,0.05);
+  --border-sm: rgba(255,255,255,0.09);
+
+  --blue:    #3B8BEB;
+  --amber:   #F59E0B;
+  --emerald: #10B981;
+  --violet:  #A78BFA;
+  --rose:    #FB7185;
+  --cyan:    #06B6D4;
+
+  --text:  #EEF2FF;
+  --muted: #8896AC;
+  --dim:   #3D4A5C;
+  --ff-d: 'Syne', sans-serif;
+  --ff-b: 'DM Sans', sans-serif;
+  --ff-m: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg-deep); color: var(--text); font-family: var(--ff-b); min-height: 100vh; }
+
+.grid-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+.glow-orb { position: fixed; pointer-events: none; z-index: 0; border-radius: 50%; filter: blur(140px); opacity: 0.06; }
+.page { position: relative; z-index: 1; padding: 28px 32px 44px; max-width: 980px; margin: 0 auto; }
+
+/* ── HEADER ── */
+.hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; animation: fadeUp .45s ease both; }
+.hdr-left h1 { font-family: var(--ff-d); font-size: 21px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 7px; }
+.hdr-left h1 em { font-style: normal; background: linear-gradient(120deg, #3B8BEB 10%, #10B981 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hdr-left p { font-size: 11.5px; color: var(--muted); max-width: 640px; line-height: 1.65; }
+.badges { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+.badge { font-family: var(--ff-m); font-size: 9px; letter-spacing: .5px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; }
+.b-sf  { background: rgba(59,139,235,.1);  border:1px solid rgba(59,139,235,.3);  color:#3B8BEB; }
+.b-crm { background: rgba(16,185,129,.1);  border:1px solid rgba(16,185,129,.3);  color:#10B981; }
+
+/* ── TABLE WRAPPER ── */
+.table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border-sm);
+  border-radius: 14px;
+  overflow: hidden;
+  animation: fadeUp .5s .1s ease both;
+  box-shadow: 0 0 0 1px var(--border-xs), 0 16px 48px rgba(0,0,0,.45);
+}
+
+table { width: 100%; border-collapse: collapse; }
+
+thead tr {
+  background: linear-gradient(90deg, rgba(59,139,235,.08) 0%, rgba(16,185,129,.06) 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+th {
+  font-family: var(--ff-m);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 13px 18px;
+  text-align: left;
+}
+
+tbody tr {
+  border-bottom: 1px solid var(--border-xs);
+  transition: background .15s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg-hover); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,0.012); }
+tbody tr:nth-child(even):hover { background: var(--bg-hover); }
+
+td {
+  padding: 14px 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  vertical-align: middle;
+}
+
+/* col: icono */
+td.icon-col { width: 48px; padding-left: 20px; padding-right: 8px; }
+.ico {
+  width: 32px; height: 32px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+}
+
+/* col: resultado */
+td.resultado {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  min-width: 220px;
+}
+
+/* col: estado CRM */
+td.estado { min-width: 220px; }
+.estado-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ff-m);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.pdot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink:0; }
+
+.pill-green  { background: rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.35); color:#10B981; }
+.pill-muted  { background: rgba(136,150,172,.10); border:1px solid rgba(136,150,172,.25); color:#8896AC; }
+.pill-rose   { background: rgba(251,113,133,.12); border:1px solid rgba(251,113,133,.35); color:#FB7185; }
+.pill-cyan   { background: rgba(6,182,212,.12);   border:1px solid rgba(6,182,212,.35);   color:#06B6D4; }
+
+/* col: acción siguiente */
+td.accion { color: var(--muted); font-size: 12.5px; }
+.accion strong { color: #C7D2FE; font-weight: 500; }
+
+/* ── FOOTER ── */
+.footer-note {
+  margin-top: 14px;
+  font-size: 11px;
+  color: var(--dim);
+  line-height: 1.7;
+  animation: fadeUp .5s .18s ease both;
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+.fn-item { display: flex; align-items: center; gap: 6px; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:600px;height:600px;top:-180px;left:-120px;background:#3B8BEB;"></div>
+<div class="glow-orb" style="width:400px;height:400px;bottom:-100px;right:-80px;background:#10B981;"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1><em>Salidas del proceso</em></h1>
+      <p>Posibles resultados tras la cualificación y presentación de oferta · 
+         Estado resultante en Salesforce CRM y acción siguiente asignada</p>
+    </div>
+    <div class="badges">
+      <span class="badge b-sf">Salesforce CRM</span>
+      <span class="badge b-crm">Lead · Opportunity</span>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:48px"></th>
+          <th>Resultado</th>
+          <th>Estado en CRM</th>
+          <th>Acción siguiente</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr>
+          <td class="icon-col">
+            <div class="ico" style="background:rgba(16,185,129,.13)">✅</div>
+          </td>
+          <td class="resultado">Lead cualificado y oferta aceptada</td>
+          <td class="estado">
+            <span class="estado-pill pill-green">
+              <span class="pdot"></span>Oportunidad "Pendiente de Contratación"
+            </span>
+          </td>
+          <td class="accion">Inicia flujo de <strong>Contratación</strong></td>
+        </tr>
+
+        <tr>
+          <td class="icon-col">
+            <div class="ico" style="background:rgba(136,150,172,.10)">🚫</div>
+          </td>
+          <td class="resultado">Lead no cualificado</td>
+          <td class="estado">
+            <span class="estado-pill pill-muted">
+              <span class="pdot"></span>Lead "No cualificado"
+            </span>
+          </td>
+          <td class="accion">Campaña de <strong>nurturing</strong> (30–90 días)</td>
+        </tr>
+
+        <tr>
+          <td class="icon-col">
+            <div class="ico" style="background:rgba(251,113,133,.12)">❌</div>
+          </td>
+          <td class="resultado">Oferta rechazada definitivamente</td>
+          <td class="estado">
+            <span class="estado-pill pill-rose">
+              <span class="pdot"></span>Oportunidad "Cerrada Perdida"
+            </span>
+          </td>
+          <td class="accion">Campaña de <strong>recuperación</strong> (30 días)</td>
+        </tr>
+
+        <tr>
+          <td class="icon-col">
+            <div class="ico" style="background:rgba(6,182,212,.12)">🔁</div>
+          </td>
+          <td class="resultado">Lead duplicado (cliente activo)</td>
+          <td class="estado">
+            <span class="estado-pill pill-cyan">
+              <span class="pdot"></span>Redirigido a flujo de retención/upsell
+            </span>
+          </td>
+          <td class="accion">Gestión en <strong>Service Cloud</strong></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-note">
+    <div class="fn-item">
+      <span style="color:var(--muted)">Fuente:</span>
+      <span>Elaboración propia · Salesforce Lead &amp; Opportunity lifecycle · Comercializadora B2C</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

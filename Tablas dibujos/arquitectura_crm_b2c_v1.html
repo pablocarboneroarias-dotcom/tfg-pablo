@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arquitectura CRM — Comercializadora Energética B2C</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --sf:#00A1E0; --sf-dark:#0070D2; --mkt:#A855F7; --sales:#3B82F6;
+    --service:#10B981; --mule:#00D2BE; --sap:#008FD3;
+    --bg:#0B0F1A; --bg2:#111827; --bg3:#1C2333;
+    --border:rgba(255,255,255,0.07); --text:#E5E7EB; --muted:#6B7280;
+  }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); padding:36px 36px 48px; min-width:1280px; }
+  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; padding-bottom:20px; border-bottom:1px solid var(--border); }
+  .header h1 { font-size:20px; font-weight:800; background:linear-gradient(135deg,#E0F2FE 0%,#38BDF8 50%,#0EA5E9 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:5px; }
+  .header p { font-size:11px; color:var(--muted); max-width:680px; line-height:1.65; }
+  .header-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
+  .badge { font-size:9px; font-weight:800; letter-spacing:0.8px; text-transform:uppercase; padding:4px 12px; border-radius:20px; }
+  .badge-sf { background:linear-gradient(135deg,var(--sf-dark),var(--sf)); color:#fff; }
+  .badge-b2c { background:rgba(239,68,68,0.12); color:#F87171; border:1px solid rgba(239,68,68,0.25); }
+  .source-note { font-size:9px; color:var(--muted); text-align:right; }
+  .diagram-card { background:var(--bg3); border:1px solid var(--border); border-radius:12px; padding:24px 24px 20px; }
+  .dc-title { font-size:13px; font-weight:700; color:#fff; text-align:center; margin-bottom:3px; }
+  .dc-sub { font-size:9.5px; color:var(--muted); text-align:center; margin-bottom:24px; font-style:italic; }
+  .dw { position:relative; width:1190px; height:848px; margin:0 auto; }
+  .dsvg { position:absolute; top:0; left:0; width:1190px; height:848px; pointer-events:none; overflow:visible; }
+  .col-hdr { position:absolute; top:6px; font-size:7.5px; font-weight:800; text-transform:uppercase; letter-spacing:1.2px; color:var(--muted); text-align:center; }
+  .pb { position:absolute; border-radius:8px; border:1.5px solid; cursor:default; transition:transform 0.15s,box-shadow 0.15s; }
+  .pb:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(0,0,0,0.5); z-index:30; }
+  .pb-t { font-size:10px; font-weight:800; line-height:1.3; margin-bottom:3px; }
+  .pb-s { font-size:7.5px; color:#94A3B8; line-height:1.55; }
+  .sf-outer { position:absolute; border:2px solid rgba(0,161,224,0.45); border-radius:12px; background:linear-gradient(165deg,rgba(0,112,210,0.06) 0%,rgba(0,161,224,0.02) 100%); }
+  .sf-lbl { position:absolute; top:-13px; left:14px; font-size:12px; font-weight:800; color:var(--sf); background:var(--bg3); padding:0 8px; display:flex; align-items:center; gap:6px; }
+  .sf-dot { width:13px; height:13px; border-radius:50%; background:var(--sf); display:inline-block; flex-shrink:0; }
+  .cb { position:absolute; border-radius:8px; border:1.5px solid; overflow:hidden; transition:box-shadow 0.15s; }
+  .cb:hover { box-shadow:0 4px 18px rgba(0,0,0,0.4); z-index:20; }
+  .cb-head { display:flex; align-items:center; gap:7px; padding:8px 11px 7px; border-bottom:1px solid rgba(255,255,255,0.05); }
+  .cb-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .cb-name { font-size:10.5px; font-weight:800; }
+  .cb-tag { margin-left:auto; font-size:7px; font-weight:700; padding:2px 9px; border-radius:8px; text-transform:uppercase; letter-spacing:0.5px; white-space:nowrap; }
+  .cb-grid { display:grid; grid-template-columns:1fr 1fr; gap:3px; padding:7px 10px 9px; }
+  .cp { font-size:7.5px; color:#CBD5E1; line-height:1.45; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:4px; padding:4px 7px; }
+  .mvb { position:absolute; border:1.5px dashed rgba(0,210,190,0.45); border-radius:8px; background:rgba(0,210,190,0.04); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .mvb-lbl { font-size:6.5px; font-weight:800; color:var(--mule); text-transform:uppercase; letter-spacing:1.1px; writing-mode:vertical-rl; transform:rotate(180deg); white-space:nowrap; }
+  .mhb { position:absolute; border:1.5px dashed rgba(0,210,190,0.55); border-radius:10px; background:rgba(0,210,190,0.04); }
+  .mhb-lbl { position:absolute; top:-11px; left:16px; font-size:10px; font-weight:800; color:var(--mule); background:var(--bg3); padding:0 8px; display:flex; align-items:center; gap:6px; }
+  .mhb-inner { display:flex; gap:8px; padding:16px 12px 10px; }
+  .mhb-box { flex:1; background:rgba(0,210,190,0.07); border:1px solid rgba(0,210,190,0.2); border-radius:6px; padding:7px 9px; text-align:center; }
+  .mhb-box-t { font-size:8.5px; font-weight:700; color:#5EEAD4; margin-bottom:2px; }
+  .mhb-box-s { font-size:7px; color:var(--muted); line-height:1.4; }
+  .sap-outer { position:absolute; border:1.5px solid rgba(0,143,211,0.45); border-radius:10px; background:linear-gradient(165deg,rgba(0,143,211,0.08) 0%,rgba(0,143,211,0.03) 100%); }
+  .sap-lbl { position:absolute; top:-11px; left:12px; font-size:10px; font-weight:800; color:#60A5FA; background:var(--bg3); padding:0 7px; }
+  .sap-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; padding:16px 11px 11px; }
+  .sap-mod { background:rgba(0,143,211,0.09); border:1px solid rgba(0,143,211,0.25); border-radius:6px; padding:8px 9px; text-align:center; }
+  .sap-mod-t { font-size:8.5px; font-weight:700; color:#93C5FD; margin-bottom:3px; }
+  .sap-mod-s { font-size:7px; color:var(--muted); line-height:1.45; }
+  .ext { position:absolute; border-radius:7px; border:1px solid rgba(255,255,255,0.1); background:var(--bg2); padding:8px 10px 9px; cursor:default; transition:transform 0.15s,box-shadow 0.15s; }
+  .ext:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(0,0,0,0.45); z-index:30; }
+  .ext-t { font-size:9.5px; font-weight:700; color:#E2E8F0; margin-bottom:2px; }
+  .ext-s { font-size:7.5px; color:var(--muted); line-height:1.5; }
+  .legend-wrap { margin-top:16px; background:var(--bg3); border:1px solid var(--border); border-radius:10px; padding:14px 20px; }
+  .legend-title { font-size:8.5px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:10px; }
+  .legend-items { display:flex; gap:22px; flex-wrap:wrap; align-items:center; }
+  .li { display:flex; align-items:center; gap:7px; font-size:9px; color:var(--text); }
+  .ld { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .lr { width:14px; height:9px; border-radius:2px; flex-shrink:0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Arquitectura CRM — Comercializadora Energética B2C</h1>
+    <p>Visión funcional end-to-end del sistema: canales de entrada, ciclo de vida del cliente sobre Salesforce (Marketing, Captación, Preventa/Venta, Contratación y Postventa), capa de integración MuleSoft iPaaS y ecosistema de sistemas externos. Mercado residencial español.</p>
+  </div>
+  <div class="header-right">
+    <span class="badge badge-sf">Salesforce CRM</span>
+    <span class="badge badge-b2c">Mercado B2C · Residencial</span>
+    <span class="source-note">Elaboración propia · TFG 2025 · Mercado energético español</span>
+  </div>
+</div>
+
+<div class="diagram-card">
+  <div class="dc-title">Arquitectura funcional del sistema CRM — Visión end-to-end</div>
+  <div class="dc-sub">Journey completo: Marketing &amp; Generación de Leads → Captación &amp; Preventa → Oferta &amp; Contratación → Postventa &amp; ATC</div>
+
+  <div class="dw">
+
+    <svg class="dsvg">
+      <defs>
+        <marker id="a"   markerWidth="7" markerHeight="6" refX="6" refY="3" orient="auto"><polygon points="0 0,7 3,0 6" fill="rgba(255,255,255,0.3)"/></marker>
+        <marker id="asf" markerWidth="7" markerHeight="6" refX="6" refY="3" orient="auto"><polygon points="0 0,7 3,0 6" fill="rgba(0,161,224,0.65)"/></marker>
+        <marker id="am"  markerWidth="7" markerHeight="6" refX="6" refY="3" orient="auto"><polygon points="0 0,7 3,0 6" fill="rgba(0,210,190,0.7)"/></marker>
+        <marker id="ar"  markerWidth="7" markerHeight="6" refX="1" refY="3" orient="auto"><polygon points="7 0,0 3,7 6" fill="rgba(255,255,255,0.22)"/></marker>
+      </defs>
+      <!-- Canales → SF -->
+      <line x1="192" y1="120" x2="222" y2="120" stroke="rgba(0,161,224,0.5)" stroke-width="1.5" marker-end="url(#asf)"/>
+      <line x1="192" y1="206" x2="222" y2="206" stroke="rgba(0,161,224,0.5)" stroke-width="1.5" marker-end="url(#asf)"/>
+      <line x1="192" y1="290" x2="222" y2="290" stroke="rgba(0,161,224,0.5)" stroke-width="1.5" marker-end="url(#asf)"/>
+      <line x1="192" y1="372" x2="222" y2="372" stroke="rgba(0,161,224,0.5)" stroke-width="1.5" marker-end="url(#asf)"/>
+      <!-- SF → Externos -->
+      <line x1="760" y1="92"  x2="784" y2="92"  stroke="rgba(255,255,255,0.28)" stroke-width="1.5" marker-end="url(#a)"/>
+      <line x1="784" y1="102" x2="760" y2="102" stroke="rgba(255,255,255,0.18)" stroke-width="1"   marker-end="url(#ar)"/>
+      <line x1="760" y1="170" x2="784" y2="170" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" marker-end="url(#a)"/>
+      <line x1="760" y1="248" x2="784" y2="248" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" marker-end="url(#a)"/>
+      <line x1="760" y1="328" x2="784" y2="328" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" marker-end="url(#a)"/>
+      <line x1="784" y1="338" x2="760" y2="338" stroke="rgba(255,255,255,0.18)" stroke-width="1"   marker-end="url(#ar)"/>
+      <line x1="760" y1="412" x2="784" y2="412" stroke="rgba(245,158,11,0.5)"   stroke-width="1.5" marker-end="url(#a)"/>
+      <line x1="784" y1="422" x2="760" y2="422" stroke="rgba(245,158,11,0.35)"  stroke-width="1"   marker-end="url(#ar)"/>
+      <line x1="760" y1="490" x2="784" y2="490" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" marker-end="url(#a)"/>
+      <!-- SF → MuleSoft iPaaS -->
+      <line x1="486" y1="598" x2="486" y2="614" stroke="rgba(0,210,190,0.55)" stroke-width="1.5" marker-end="url(#am)"/>
+      <!-- MuleSoft → SAP -->
+      <line x1="486" y1="682" x2="486" y2="696" stroke="rgba(0,143,211,0.55)" stroke-width="1.5" marker-end="url(#a)"/>
+    </svg>
+
+    <!-- Cabeceras columna -->
+    <div class="col-hdr" style="left:0;width:190px;">Canales de entrada</div>
+    <div class="col-hdr" style="left:226px;width:526px;">Salesforce CRM Platform</div>
+    <div class="col-hdr" style="left:786px;width:204px;">Sistemas externos</div>
+
+    <!-- ══ CANALES ══ -->
+    <div class="pb" style="left:0;top:82px;width:190px;height:74px;border-color:rgba(99,102,241,0.5);background:rgba(99,102,241,0.07);padding:9px 11px;">
+      <div class="pb-t" style="color:#A5B4FC;">🌐 WEB / APP</div>
+      <div class="pb-s">Portal autoservicio y app móvil<br>Contratación digital online</div>
+    </div>
+    <div class="pb" style="left:0;top:168px;width:190px;height:74px;border-color:rgba(251,191,36,0.4);background:rgba(251,191,36,0.05);padding:9px 11px;">
+      <div class="pb-t" style="color:#FCD34D;">📞 Amazon Connect CTI</div>
+      <div class="pb-s">Identificación automática cliente<br>Apertura ficha CRM</div>
+    </div>
+    <div class="pb" style="left:0;top:254px;width:190px;height:74px;border-color:rgba(34,197,94,0.4);background:rgba(34,197,94,0.05);padding:9px 11px;">
+      <div class="pb-t" style="color:#86EFAC;">💬 WhatsApp / Email</div>
+      <div class="pb-s">Chat y email integrados<br>en SF Service Cloud Cases</div>
+    </div>
+    <div class="pb" style="left:0;top:340px;width:190px;height:74px;border-color:rgba(249,115,22,0.4);background:rgba(249,115,22,0.05);padding:9px 11px;">
+      <div class="pb-t" style="color:#FDBA74;">🤝 Canal F2F / Partners</div>
+      <div class="pb-s">Fuerza de ventas directa<br>y red de distribuidores</div>
+    </div>
+
+    <!-- ══ BARRA MULESOFT IZQUIERDA ══ -->
+    <div class="mvb" style="left:194px;top:64px;width:24px;height:368px;">
+      <span class="mvb-lbl">MuleSoft · Integración</span>
+    </div>
+
+    <!-- ══ SALESFORCE ══ -->
+    <div class="sf-outer" style="left:222px;top:30px;width:530px;height:560px;">
+      <span class="sf-lbl"><span class="sf-dot"></span>Salesforce CRM</span>
+
+      <!-- Marketing Cloud -->
+      <div class="cb" style="left:10px;top:28px;width:510px;height:155px;border-color:rgba(168,85,247,0.42);background:rgba(168,85,247,0.05);">
+        <div class="cb-head">
+          <span class="cb-dot" style="background:#A855F7;"></span>
+          <span class="cb-name" style="color:#D8B4FE;">Marketing Cloud</span>
+          <span class="cb-tag" style="background:rgba(168,85,247,0.2);color:#C084FC;">Marketing &amp; Generación de Leads</span>
+        </div>
+        <div class="cb-grid">
+          <div class="cp">📊 Segmentación y audiencias B2C</div>
+          <div class="cp">📧 Campañas multicanal (email / SMS / push)</div>
+          <div class="cp">🎯 Lead nurturing &amp; lead scoring automático</div>
+          <div class="cp">🔄 Customer journeys del ciclo de vida</div>
+        </div>
+      </div>
+
+      <!-- Sales Cloud -->
+      <div class="cb" style="left:10px;top:195px;width:510px;height:165px;border-color:rgba(59,130,246,0.45);background:rgba(59,130,246,0.05);">
+        <div class="cb-head">
+          <span class="cb-dot" style="background:#3B82F6;"></span>
+          <span class="cb-name" style="color:#93C5FD;">Sales Cloud</span>
+          <span class="cb-tag" style="background:rgba(59,130,246,0.18);color:#60A5FA;">Captación · Preventa · Contratación</span>
+        </div>
+        <div class="cb-grid">
+          <div class="cp">🔍 Registro y cualificación de leads (BANT)</div>
+          <div class="cp">💶 Configuración y presentación de oferta (CPQ)</div>
+          <div class="cp">✍️ Contratación digital &amp; firma electrónica</div>
+          <div class="cp">⚡ Gestión del switching y proceso ATR</div>
+        </div>
+      </div>
+
+      <!-- Service Cloud -->
+      <div class="cb" style="left:10px;top:372px;width:510px;height:165px;border-color:rgba(16,185,129,0.45);background:rgba(16,185,129,0.05);">
+        <div class="cb-head">
+          <span class="cb-dot" style="background:#10B981;"></span>
+          <span class="cb-name" style="color:#6EE7B7;">Service Cloud</span>
+          <span class="cb-tag" style="background:rgba(16,185,129,0.15);color:#34D399;">Postventa · Atención al Cliente</span>
+        </div>
+        <div class="cb-grid">
+          <div class="cp">🎫 Gestión de casos e incidencias</div>
+          <div class="cp">📝 Modificaciones contractuales</div>
+          <div class="cp">🧾 Consulta de facturas y consumos</div>
+          <div class="cp">🚪 Retención y gestión de baja</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BARRA MULESOFT DERECHA ══ -->
+    <div class="mvb" style="left:756px;top:64px;width:24px;height:462px;">
+      <span class="mvb-lbl">MuleSoft · Integración</span>
+    </div>
+
+    <!-- ══ SISTEMAS EXTERNOS ══ -->
+    <div class="ext" style="left:784px;top:64px;width:204px;height:68px;">
+      <div class="ext-t">📡 SIPS</div>
+      <div class="ext-s">Datos PS · Validación de CUPS<br>Consulta punto de suministro</div>
+    </div>
+    <div class="ext" style="left:784px;top:142px;width:204px;height:68px;">
+      <div class="ext-t">🏦 Informa (Experian)</div>
+      <div class="ext-s">Scoring crediticio B2C<br>Calificación de riesgo del cliente</div>
+    </div>
+    <div class="ext" style="left:784px;top:220px;width:204px;height:68px;">
+      <div class="ext-t">🗺️ Google Maps API</div>
+      <div class="ext-s">Callejero y geocodificación<br>Validación dirección de contrato</div>
+    </div>
+    <div class="ext" style="left:784px;top:298px;width:204px;height:80px;">
+      <div class="ext-t">📄 SERVINFORM</div>
+      <div class="ext-s">Composición de contratos<br>Gestor documental<br>Firma digital (proveedor externo)</div>
+    </div>
+    <div class="ext" style="left:784px;top:388px;width:204px;height:68px;border-color:rgba(245,158,11,0.35);background:rgba(245,158,11,0.05);">
+      <div class="ext-t" style="color:#FCD34D;">⚡ Distribuidoras (ATR/REE)</div>
+      <div class="ext-s">Switching · Activación suministro<br>Procesos mercado eléctrico</div>
+    </div>
+    <div class="ext" style="left:784px;top:466px;width:204px;height:64px;">
+      <div class="ext-t">🧾 SERES</div>
+      <div class="ext-s">SII · Facturación electrónica<br>Obligaciones fiscales AEAT</div>
+    </div>
+
+    <!-- ══ MULESOFT iPaaS HORIZONTAL ══ -->
+    <div class="mhb" style="left:222px;top:608px;width:530px;height:78px;">
+      <div class="mhb-lbl">
+        <span style="color:var(--mule);font-size:13px;line-height:1;">⬡</span>
+        MuleSoft — Plataforma de Integración iPaaS
+      </div>
+      <div class="mhb-inner">
+        <div class="mhb-box">
+          <div class="mhb-box-t">API-led Connectivity</div>
+          <div class="mhb-box-s">APIs Sistema,<br>Proceso y Experiencia</div>
+        </div>
+        <div class="mhb-box">
+          <div class="mhb-box-t">Platform Events / CDC</div>
+          <div class="mhb-box-s">Eventos &amp; Change<br>Data Capture</div>
+        </div>
+        <div class="mhb-box">
+          <div class="mhb-box-t">REE / Switching</div>
+          <div class="mhb-box-s">Procesos ATR y<br>mercado eléctrico</div>
+        </div>
+        <div class="mhb-box">
+          <div class="mhb-box-t">Entidades Bancarias</div>
+          <div class="mhb-box-s">SEPA · Domiciliación<br>&amp; cobros</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SAP S/4HANA ══ -->
+    <div class="sap-outer" style="left:222px;top:698px;width:530px;height:132px;">
+      <span class="sap-lbl">SAP S/4HANA for Utilities — Sistema de registro</span>
+      <div class="sap-grid">
+        <div class="sap-mod">
+          <div class="sap-mod-t">Contratos &amp; PS</div>
+          <div class="sap-mod-s">Gestión contratos y puntos de suministro</div>
+        </div>
+        <div class="sap-mod">
+          <div class="sap-mod-t">Facturación &amp; Cobros</div>
+          <div class="sap-mod-s">Cálculo, emisión facturas y gestión cobros</div>
+        </div>
+        <div class="sap-mod">
+          <div class="sap-mod-t">Medida &amp; ATR</div>
+          <div class="sap-mod-s">Gestión medida, switching y procesos ATR</div>
+        </div>
+        <div class="sap-mod">
+          <div class="sap-mod-t">S4 Core (FI/CO)</div>
+          <div class="sap-mod-s">Finanzas, tesorería y reporting</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="legend-wrap">
+  <div class="legend-title">Leyenda</div>
+  <div class="legend-items">
+    <div class="li"><span class="ld" style="background:#A855F7;"></span> Marketing Cloud — Captación y nurturing</div>
+    <div class="li"><span class="ld" style="background:#3B82F6;"></span> Sales Cloud — Preventa, oferta y contratación</div>
+    <div class="li"><span class="ld" style="background:#10B981;"></span> Service Cloud — Postventa y atención al cliente</div>
+    <div class="li"><span class="lr" style="border:1.5px dashed rgba(0,210,190,0.55);background:transparent;"></span> MuleSoft — Capa de integración iPaaS</div>
+    <div class="li"><span class="lr" style="border:1.5px solid rgba(0,143,211,0.45);background:rgba(0,143,211,0.08);"></span> SAP S/4HANA for Utilities — Sistema de registro</div>
+    <div class="li"><span class="lr" style="border:1px solid rgba(255,255,255,0.1);background:#111827;"></span> Sistemas externos &amp; proveedores de datos</div>
+    <div class="li" style="color:var(--muted);">→ Flujo unidireccional &nbsp;|&nbsp; ⇄ Flujo bidireccional</div>
+  </div>
+</div>
+
+</body>
+</html>

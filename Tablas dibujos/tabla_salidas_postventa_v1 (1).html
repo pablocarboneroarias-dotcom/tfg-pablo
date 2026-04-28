@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Salidas del proceso · Postventa · CRM Comercializadora B2C</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:   #07090F;
+  --bg-base:   #0C1018;
+  --bg-card:   #101520;
+  --bg-hover:  #161D2C;
+  --border-xs: rgba(255,255,255,0.05);
+  --border-sm: rgba(255,255,255,0.09);
+
+  --text:  #EEF2FF;
+  --muted: #8896AC;
+  --dim:   #3D4A5C;
+  --ff-d: 'Syne', sans-serif;
+  --ff-b: 'DM Sans', sans-serif;
+  --ff-m: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg-deep); color: var(--text); font-family: var(--ff-b); min-height: 100vh; }
+
+.grid-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+.glow-orb { position: fixed; pointer-events: none; z-index: 0; border-radius: 50%; filter: blur(140px); opacity: 0.06; }
+.page { position: relative; z-index: 1; padding: 28px 32px 44px; max-width: 980px; margin: 0 auto; }
+
+/* ── HEADER ── */
+.hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; animation: fadeUp .45s ease both; }
+.hdr-left h1 { font-family: var(--ff-d); font-size: 21px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 7px; }
+.hdr-left h1 em { font-style: normal; background: linear-gradient(120deg, #10B981 10%, #3B8BEB 55%, #FB7185 95%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hdr-left p { font-size: 11.5px; color: var(--muted); max-width: 640px; line-height: 1.65; }
+.badges { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+.badge { font-family: var(--ff-m); font-size: 9px; letter-spacing: .5px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; }
+.b-sf  { background: rgba(59,139,235,.1);  border:1px solid rgba(59,139,235,.3);  color:#3B8BEB; }
+.b-pv  { background: rgba(16,185,129,.1);  border:1px solid rgba(16,185,129,.3);  color:#10B981; }
+
+/* ── LEGEND ── */
+.legend { display: flex; gap: 18px; margin-bottom: 18px; flex-wrap: wrap; animation: fadeUp .5s .06s ease both; }
+.leg-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--muted); }
+.leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── TABLE WRAPPER ── */
+.table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border-sm);
+  border-radius: 14px;
+  overflow: hidden;
+  animation: fadeUp .5s .1s ease both;
+  box-shadow: 0 0 0 1px var(--border-xs), 0 16px 48px rgba(0,0,0,.45);
+}
+table { width: 100%; border-collapse: collapse; }
+
+thead tr {
+  background: linear-gradient(90deg, rgba(16,185,129,.07) 0%, rgba(59,139,235,.06) 55%, rgba(251,113,133,.05) 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+th {
+  font-family: var(--ff-m); font-size: 9.5px; font-weight: 600;
+  letter-spacing: .8px; text-transform: uppercase; color: var(--muted);
+  padding: 13px 18px; text-align: left;
+}
+
+/* ── ROWS ── */
+tbody tr { border-bottom: 1px solid var(--border-xs); transition: background .15s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg-hover); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,0.012); }
+tbody tr:nth-child(even):hover { background: var(--bg-hover); }
+td { padding: 14px 18px; font-size: 13px; line-height: 1.55; vertical-align: middle; }
+
+/* ── ICONO ── */
+td.icon-col { width: 48px; padding-left: 20px; padding-right: 8px; }
+.ico { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+
+/* ── RESULTADO ── */
+td.resultado { font-size: 13px; font-weight: 500; color: var(--text); min-width: 220px; }
+
+/* ── ESTADO PILL ── */
+td.estado { min-width: 230px; }
+.estado-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--ff-m); font-size: 10.5px; font-weight: 600;
+  padding: 5px 12px; border-radius: 20px; white-space: nowrap;
+}
+.pdot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+.pill-green  { background: rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.35); color:#10B981; }
+.pill-blue   { background: rgba(59,139,235,.12);  border:1px solid rgba(59,139,235,.35); color:#3B8BEB; }
+.pill-rose   { background: rgba(251,113,133,.12); border:1px solid rgba(251,113,133,.35);color:#FB7185; }
+.pill-violet { background: rgba(167,139,250,.12); border:1px solid rgba(167,139,250,.35);color:#A78BFA; }
+.pill-amber  { background: rgba(245,158,11,.12);  border:1px solid rgba(245,158,11,.35); color:#F59E0B; }
+
+/* sub-estado */
+.sub-estado {
+  display: block;
+  font-family: var(--ff-m); font-size: 9px; color: var(--muted);
+  margin-top: 5px; padding-left: 2px;
+}
+
+/* ── ACCION ── */
+td.accion { color: var(--muted); font-size: 12.5px; }
+td.accion strong { color: #C7D2FE; font-weight: 500; }
+
+/* ── FOOTER ── */
+.footer-note {
+  margin-top: 14px; font-size: 11px; color: var(--dim); line-height: 1.7;
+  animation: fadeUp .5s .18s ease both; display: flex; gap: 22px; flex-wrap: wrap;
+}
+.fn-item { display: flex; align-items: center; gap: 6px; }
+.fn-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:600px;height:500px;top:-180px;left:-120px;background:#10B981;"></div>
+<div class="glow-orb" style="width:400px;height:400px;bottom:-100px;right:-80px;background:#FB7185;"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1><em>Salidas del proceso</em></h1>
+      <p>Posibles resultados tras la gestión de postventa, estado resultante en Salesforce CRM 
+         y acción siguiente asignada a cada escenario</p>
+    </div>
+    <div class="badges">
+      <span class="badge b-sf">Salesforce CRM</span>
+      <span class="badge b-pv">Postventa · Service Cloud</span>
+    </div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#10B981"></div><span>Resolución positiva</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#3B8BEB"></div><span>Modificación aplicada</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#FB7185"></div><span>Baja o riesgo</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#F59E0B"></div><span>Retención activa</span></div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:48px"></th>
+          <th>Resultado</th>
+          <th>Estado en CRM</th>
+          <th>Acción siguiente</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- 1 · Caso resuelto -->
+        <tr>
+          <td class="icon-col"><div class="ico" style="background:rgba(16,185,129,.13)">✅</div></td>
+          <td class="resultado">Caso resuelto en primer contacto</td>
+          <td class="estado">
+            <span class="estado-pill pill-green"><span class="pdot"></span>Caso "Cerrado"</span>
+          </td>
+          <td class="accion">Encuesta de satisfacción <strong>automática</strong> (NPS / CSAT)</td>
+        </tr>
+
+        <!-- 2 · Retenido -->
+        <tr>
+          <td class="icon-col"><div class="ico" style="background:rgba(245,158,11,.12)">🤝</div></td>
+          <td class="resultado">Cliente retenido</td>
+          <td class="estado">
+            <span class="estado-pill pill-amber"><span class="pdot"></span>Contrato "Activo"</span>
+            <span class="sub-estado">oferta de retención aplicada registrada</span>
+          </td>
+          <td class="accion">Seguimiento proactivo a <strong>30 días</strong></td>
+        </tr>
+
+        <!-- 3 · Baja -->
+        <tr>
+          <td class="icon-col"><div class="ico" style="background:rgba(251,113,133,.12)">🚪</div></td>
+          <td class="resultado">Cliente causa baja</td>
+          <td class="estado">
+            <span class="estado-pill pill-rose"><span class="pdot"></span>Contrato "Baja"</span>
+          </td>
+          <td class="accion">Campaña de <strong>recuperación</strong> a los 90 días (si motivo es precio o producto)</td>
+        </tr>
+
+        <!-- 4 · Modificación -->
+        <tr>
+          <td class="icon-col"><div class="ico" style="background:rgba(59,139,235,.12)">🔄</div></td>
+          <td class="resultado">Modificación contractual aplicada</td>
+          <td class="estado">
+            <span class="estado-pill pill-blue"><span class="pdot"></span>Contrato actualizado</span>
+            <span class="sub-estado">sincronizado en CRM y SAP vía middleware</span>
+          </td>
+          <td class="accion"><strong>Confirmación</strong> al cliente por canal preferido</td>
+        </tr>
+
+        <!-- 5 · NPS bajo -->
+        <tr>
+          <td class="icon-col"><div class="ico" style="background:rgba(167,139,250,.12)">⚠️</div></td>
+          <td class="resultado">NPS &lt; 6 tras cierre de caso</td>
+          <td class="estado">
+            <span class="estado-pill pill-violet"><span class="pdot"></span>Alerta de riesgo activa</span>
+          </td>
+          <td class="accion">Equipo de retención contacta en <strong>48 h</strong></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-note">
+    <div class="fn-item"><div class="fn-dot" style="background:#10B981"></div><span>Resolución positiva</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#3B8BEB"></div><span>Modificación aplicada</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#FB7185"></div><span>Baja o riesgo</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#F59E0B"></div><span>Retención activa</span></div>
+    <div class="fn-item" style="margin-left:auto;">
+      <span style="color:var(--muted)">Fuente:</span>
+      <span>Elaboración propia · Salesforce Service Cloud · Comercializadora B2C</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

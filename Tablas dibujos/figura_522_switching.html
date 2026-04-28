@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figura 5.2.2 — Proceso de Switching · Salesforce · MuleSoft · Distribuidora</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:   #07090F;
+  --bg-base:   #0C1018;
+  --bg-card:   #101520;
+  --border-xs: rgba(255,255,255,0.05);
+  --border-sm: rgba(255,255,255,0.09);
+
+  --c-sf:   #3B8BEB;
+  --c-mule: #F59E0B;
+  --c-dist: #F97316;
+  --c-ok:   #10B981;
+  --c-ko:   #FB7185;
+  --c-warn: #A78BFA;
+  --c-sips: #06B6D4;
+  --c-mkt:  #E879F9;
+
+  --text:  #EEF2FF;
+  --muted: #8896AC;
+  --dim:   #3D4A5C;
+  --ff-d: 'Syne', sans-serif;
+  --ff-b: 'DM Sans', sans-serif;
+  --ff-m: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg-deep); color: var(--text); font-family: var(--ff-b); min-height: 100vh; }
+.grid-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+.glow-orb { position: fixed; pointer-events: none; z-index: 0; border-radius: 50%; filter: blur(130px); opacity: 0.05; }
+.page { position: relative; z-index: 1; padding: 28px 36px 40px; max-width: 1180px; margin: 0 auto; }
+
+/* HEADER */
+.hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; animation: fadeUp .45s ease both; }
+.hdr-left h1 { font-family: var(--ff-d); font-size: 22px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 7px; }
+.hdr-left h1 em { font-style: normal; background: linear-gradient(120deg, #F97316 10%, #3B8BEB 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hdr-left p { font-size: 11.5px; color: var(--muted); max-width: 640px; line-height: 1.65; }
+.badges { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+.badge { font-family: var(--ff-m); font-size: 9px; letter-spacing: .5px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; }
+.b1 { background: rgba(249,115,22,.1); border: 1px solid rgba(249,115,22,.25); color: var(--c-dist); }
+.b2 { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); color: var(--muted); font-size: 8px; }
+
+/* CARD */
+.card { background: var(--bg-base); border: 1px solid var(--border-xs); border-radius: 18px; padding: 24px 22px 20px; position: relative; overflow: hidden; animation: fadeUp .5s .08s ease both; }
+.card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(249,115,22,.5), rgba(59,139,235,.5), transparent); }
+
+.card-title { text-align: center; margin-bottom: 20px; }
+.card-title h2 { font-family: var(--ff-d); font-size: 14px; font-weight: 700; }
+.card-title p  { font-family: var(--ff-m); font-size: 9px; color: var(--muted); margin-top: 4px; }
+
+/* ═══ LANE HEADERS ═══ */
+.lanes-hdr {
+  display: grid; grid-template-columns: 1fr 120px 1fr 1fr;
+  gap: 8px; margin-bottom: 8px;
+}
+.lane-hdr {
+  border-radius: 8px; padding: 8px 12px; text-align: center;
+}
+.lh-sf   { background: rgba(59,139,235,.08); border: 1px solid rgba(59,139,235,.22); }
+.lh-mule { background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.22); }
+.lh-dist { background: rgba(249,115,22,.08); border: 1px solid rgba(249,115,22,.22); }
+.lh-sips { background: rgba(6,182,212,.08);  border: 1px solid rgba(6,182,212,.22); }
+
+.lh-name { font-family: var(--ff-d); font-size: 10.5px; font-weight: 800; display: block; }
+.lh-sf   .lh-name { color: var(--c-sf); }
+.lh-mule .lh-name { color: var(--c-mule); }
+.lh-dist .lh-name { color: var(--c-dist); }
+.lh-sips .lh-name { color: var(--c-sips); }
+.lh-sub  { font-family: var(--ff-m); font-size: 7.5px; color: var(--muted); margin-top: 2px; display: block; }
+
+/* ═══ SWIM LANE DIAGRAM ═══ */
+.swimlane {
+  display: grid; grid-template-columns: 1fr 120px 1fr 1fr;
+  gap: 8px;
+  position: relative;
+}
+
+/* Lane column backgrounds */
+.lane-col {
+  display: flex; flex-direction: column; gap: 0;
+  border-left: 1px dashed; padding: 0 6px;
+  min-height: 100%;
+}
+.lc-sf   { border-color: rgba(59,139,235,.12); }
+.lc-mule { border-color: rgba(245,158,11,.12); }
+.lc-dist { border-color: rgba(249,115,22,.12); }
+.lc-sips { border-color: rgba(6,182,212,.12); }
+
+/* Step blocks */
+.step {
+  border-radius: 8px; padding: 9px 11px; margin: 4px 0;
+  position: relative; cursor: default; transition: all .2s;
+}
+.step:hover { transform: translateY(-1px); }
+
+/* Step colors by lane */
+.st-sf   { background: rgba(59,139,235,.08); border: 1px solid rgba(59,139,235,.2); }
+.st-mule { background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.2); }
+.st-dist { background: rgba(249,115,22,.08); border: 1px solid rgba(249,115,22,.2); }
+.st-sips { background: rgba(6,182,212,.08);  border: 1px solid rgba(6,182,212,.2); }
+.st-ok   { background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.2); }
+.st-ko   { background: rgba(251,113,133,.08); border: 1px solid rgba(251,113,133,.2); }
+.st-warn { background: rgba(167,139,250,.08); border: 1px solid rgba(167,139,250,.2); }
+.st-mkt  { background: rgba(232,121,249,.08); border: 1px solid rgba(232,121,249,.2); }
+
+.step:hover.st-sf   { background: rgba(59,139,235,.16); }
+.step:hover.st-mule { background: rgba(245,158,11,.16); }
+.step:hover.st-dist { background: rgba(249,115,22,.16); }
+.step:hover.st-sips { background: rgba(6,182,212,.16); }
+.step:hover.st-ok   { background: rgba(16,185,129,.16); }
+.step:hover.st-ko   { background: rgba(251,113,133,.16); }
+.step:hover.st-warn { background: rgba(167,139,250,.16); }
+
+.step-num {
+  font-family: var(--ff-m); font-size: 8px; font-weight: 600;
+  width: 16px; height: 16px; border-radius: 50%; display: inline-flex;
+  align-items: center; justify-content: center;
+  margin-bottom: 4px; flex-shrink: 0;
+}
+.sn-sf   { background: rgba(59,139,235,.2); color: var(--c-sf); }
+.sn-mule { background: rgba(245,158,11,.2); color: var(--c-mule); }
+.sn-dist { background: rgba(249,115,22,.2); color: var(--c-dist); }
+.sn-sips { background: rgba(6,182,212,.2);  color: var(--c-sips); }
+.sn-ok   { background: rgba(16,185,129,.2); color: var(--c-ok); }
+.sn-ko   { background: rgba(251,113,133,.2); color: var(--c-ko); }
+.sn-warn { background: rgba(167,139,250,.2); color: var(--c-warn); }
+.sn-mkt  { background: rgba(232,121,249,.2); color: var(--c-mkt); }
+
+.step-hdr { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.step-title { font-family: var(--ff-d); font-size: 10px; font-weight: 700; }
+.st-sf   .step-title { color: var(--c-sf); }
+.st-mule .step-title { color: var(--c-mule); }
+.st-dist .step-title { color: var(--c-dist); }
+.st-sips .step-title { color: var(--c-sips); }
+.st-ok   .step-title { color: var(--c-ok); }
+.st-ko   .step-title { color: var(--c-ko); }
+.st-warn .step-title { color: var(--c-warn); }
+.st-mkt  .step-title { color: var(--c-mkt); }
+
+.step-desc { font-size: 8.5px; color: var(--muted); line-height: 1.45; }
+
+/* Message pills */
+.msg-pill {
+  display: inline-block; font-family: var(--ff-m); font-size: 9px; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px; margin-top: 5px; margin-right: 3px;
+}
+.mp-p0  { background: rgba(6,182,212,.15);  border: 1px solid rgba(6,182,212,.35);  color: #06B6D4; }
+.mp-c1  { background: rgba(59,139,235,.15); border: 1px solid rgba(59,139,235,.35); color: #3B8BEB; }
+.mp-c2  { background: rgba(167,139,250,.15);border: 1px solid rgba(167,139,250,.35);color: #A78BFA; }
+.mp-a3  { background: rgba(245,158,11,.15); border: 1px solid rgba(245,158,11,.35); color: #F59E0B; }
+.mp-m1  { background: rgba(232,121,249,.15);border: 1px solid rgba(232,121,249,.35);color: #E879F9; }
+.mp-ok  { background: rgba(16,185,129,.15); border: 1px solid rgba(16,185,129,.35); color: #10B981; }
+.mp-ko  { background: rgba(251,113,133,.15);border: 1px solid rgba(251,113,133,.35);color: #FB7185; }
+.mp-d1  { background: rgba(249,115,22,.15); border: 1px solid rgba(249,115,22,.35); color: #F97316; }
+.mp-e1  { background: rgba(100,116,139,.15);border: 1px solid rgba(100,116,139,.35);color: #8896AC; }
+.mp-r1  { background: rgba(251,113,133,.1); border: 1px solid rgba(251,113,133,.25);color: #FB7185; }
+
+/* State transition pills */
+.state-tag {
+  font-family: var(--ff-m); font-size: 7px; padding: 2px 7px; border-radius: 3px;
+  margin-top: 5px; display: inline-block;
+}
+.s-draft   { background: rgba(100,116,139,.1); border:1px solid rgba(100,116,139,.2); color:var(--muted); }
+.s-signed  { background: rgba(167,139,250,.1); border:1px solid rgba(167,139,250,.2); color:#A78BFA; }
+.s-atr     { background: rgba(245,158,11,.1);  border:1px solid rgba(245,158,11,.2);  color:#F59E0B; }
+.s-pending { background: rgba(6,182,212,.1);   border:1px solid rgba(6,182,212,.2);   color:#06B6D4; }
+.s-active  { background: rgba(16,185,129,.1);  border:1px solid rgba(16,185,129,.2);  color:#10B981; }
+.s-rejected{ background: rgba(251,113,133,.1); border:1px solid rgba(251,113,133,.2); color:#FB7185; }
+.s-sub     { background: rgba(59,139,235,.1);  border:1px solid rgba(59,139,235,.2);  color:#3B8BEB; }
+
+/* Row separators / phase labels */
+.phase-label {
+  grid-column: 1 / -1;
+  font-family: var(--ff-m); font-size: 7.5px; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--dim);
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0 4px;
+}
+.phase-label::before, .phase-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border-xs);
+}
+
+/* Flow arrows between lanes (overlaid) */
+.arrow-row {
+  grid-column: 1 / -1; display: flex; align-items: center;
+  padding: 2px 0; gap: 0;
+}
+
+/* Spacer within lane col */
+.spacer { flex: 1; }
+
+/* ═══ MESSAGES REFERENCE ═══ */
+.msg-ref {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+  margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-xs);
+  margin-bottom: 16px;
+}
+.msg-card {
+  border-radius: 8px; padding: 9px 11px; cursor: default; transition: all .2s;
+}
+.msg-card:hover { transform: translateY(-2px); }
+.mc-p0 { background: rgba(6,182,212,.07); border:1px solid rgba(6,182,212,.2); }
+.mc-c1 { background: rgba(59,139,235,.07);border:1px solid rgba(59,139,235,.2); }
+.mc-c2 { background: rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.2); }
+.mc-a3 { background: rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2); }
+.mc-m1 { background: rgba(232,121,249,.07);border:1px solid rgba(232,121,249,.2); }
+.mc-d1 { background: rgba(249,115,22,.07); border:1px solid rgba(249,115,22,.2); }
+.mc-e1 { background: rgba(100,116,139,.07);border:1px solid rgba(100,116,139,.2); }
+.mc-r1 { background: rgba(251,113,133,.07);border:1px solid rgba(251,113,133,.2); }
+.mc-ok { background: rgba(16,185,129,.07); border:1px solid rgba(16,185,129,.2); }
+.mc-ko { background: rgba(251,113,133,.07);border:1px solid rgba(251,113,133,.2); }
+
+.mc-code { font-family: var(--ff-d); font-size: 14px; font-weight: 800; display: block; margin-bottom: 3px; }
+.mc-p0 .mc-code { color: #06B6D4; }
+.mc-c1 .mc-code { color: #3B8BEB; }
+.mc-c2 .mc-code { color: #A78BFA; }
+.mc-a3 .mc-code { color: #F59E0B; }
+.mc-m1 .mc-code { color: #E879F9; }
+.mc-d1 .mc-code { color: #F97316; }
+.mc-e1 .mc-code { color: var(--muted); }
+.mc-r1 .mc-code { color: #FB7185; }
+.mc-ok .mc-code { color: #10B981; }
+.mc-ko .mc-code { color: #FB7185; }
+
+.mc-name { font-family: var(--ff-d); font-size: 9px; font-weight: 700; display: block; margin-bottom: 3px; }
+.mc-p0 .mc-name { color: #06B6D4; }
+.mc-c1 .mc-name { color: #3B8BEB; }
+.mc-c2 .mc-name { color: #A78BFA; }
+.mc-a3 .mc-name { color: #F59E0B; }
+.mc-m1 .mc-name { color: #E879F9; }
+.mc-d1 .mc-name { color: #F97316; }
+.mc-e1 .mc-name { color: var(--muted); }
+.mc-r1 .mc-name { color: #FB7185; }
+.mc-ok .mc-name { color: #10B981; }
+.mc-ko .mc-name { color: #FB7185; }
+
+.mc-desc { font-size: 8px; color: var(--muted); line-height: 1.4; }
+.mc-dir  { font-family: var(--ff-m); font-size: 7px; color: var(--dim); margin-top: 4px; display: block; }
+
+/* LEGEND */
+.legend { border-top: 1px solid var(--border-xs); padding-top: 14px; }
+.leg-title { font-family: var(--ff-m); font-size: 8px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+.leg-row { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.leg-item { display: flex; align-items: center; gap: 6px; font-family: var(--ff-m); font-size: 8.5px; color: var(--muted); }
+.leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:600px;height:600px;top:-200px;left:-100px;background:#F97316;"></div>
+<div class="glow-orb" style="width:500px;height:500px;bottom:-150px;right:-80px;background:#3B8BEB;"></div>
+
+<div class="page">
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1>Figura 5.2.2 — <em>Proceso de Switching</em></h1>
+      <p>Flujo end-to-end del proceso de cambio de comercializador regulado por la CNMC. Mensajes normalizados (XSD/XML) intercambiados entre la comercializadora y la distribuidora a través de MuleSoft. Transiciones de estado del contrato en Salesforce en cada fase del proceso.</p>
+    </div>
+    <div class="badges">
+      <span class="badge b1">CNMC · RD 1435/2002 · Res. 2016/2019/2024</span>
+      <span class="badge b2">Elaboración propia · TFG 2025 · Cap. 5.2.2</span>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <div class="card-title">
+      <h2>Flujo de switching — Comercializadora · MuleSoft · Distribuidora · SIPS</h2>
+      <p>INT-006 (Outbound · Request-Reply asíncrono) · INT-007 (Inbound · respuesta distribuidora) · INT-009 (Outbound · consulta SIPS síncrona)</p>
+    </div>
+
+    <!-- LANE HEADERS -->
+    <div class="lanes-hdr">
+      <div class="lane-hdr lh-sf">
+        <span class="lh-name">Salesforce CRM</span>
+        <span class="lh-sub">Sistema de registro comercial</span>
+      </div>
+      <div class="lane-hdr lh-mule">
+        <span class="lh-name">MuleSoft</span>
+        <span class="lh-sub">Orquestación · XSD/XML</span>
+      </div>
+      <div class="lane-hdr lh-dist">
+        <span class="lh-name">Distribuidora</span>
+        <span class="lh-sub">Titular red · Contrato acceso</span>
+      </div>
+      <div class="lane-hdr lh-sips">
+        <span class="lh-name">SIPS / REE</span>
+        <span class="lh-sub">SoR dato técnico suministro</span>
+      </div>
+    </div>
+
+    <!-- SWIMLANE -->
+    <div class="swimlane">
+
+      <!-- ── FASE 1: CONSULTA PREVIA ── -->
+      <div class="phase-label">Fase 1 — Consulta previa al SIPS</div>
+
+      <div class="lc-sf lane-col">
+        <div class="step st-sf">
+          <div class="step-hdr"><span class="step-num sn-sf">1</span><span class="step-title">Agente inicia contratación</span></div>
+          <p class="step-desc">El agente introduce el CUPS en Salesforce. Flow dispara consulta bloqueante al SIPS antes de mostrar las condiciones del punto.</p>
+          <span class="state-tag s-draft">Estado: Borrador</span>
+        </div>
+      </div>
+      <div class="lc-mule lane-col">
+        <div class="step st-mule">
+          <div class="step-hdr"><span class="step-num sn-mule">2</span><span class="step-title">Invoca SIPS · P0</span></div>
+          <p class="step-desc">MuleSoft compone la consulta P0 síncrona y la envía al SIPS de REE. Respuesta en tiempo real.</p>
+          <span class="msg-pill mp-p0">P0</span>
+        </div>
+      </div>
+      <div class="lc-dist lane-col"></div>
+      <div class="lc-sips lane-col">
+        <div class="step st-sips">
+          <div class="step-hdr"><span class="step-num sn-sips">3</span><span class="step-title">Respuesta SIPS</span></div>
+          <p class="step-desc">Devuelve: CUPS, distribuidora, tarifa de acceso, potencias por período, tensión y último movimiento contractual.</p>
+        </div>
+      </div>
+
+      <!-- ── FASE 2: CONTRATACIÓN Y FIRMA ── -->
+      <div class="phase-label">Fase 2 — Contratación y firma digital</div>
+
+      <div class="lc-sf lane-col">
+        <div class="step st-sf">
+          <div class="step-hdr"><span class="step-num sn-sf">4</span><span class="step-title">Oferta y CPQ</span></div>
+          <p class="step-desc">Agente configura la oferta en CPQ (tarifa, potencia, descuentos). Cliente acepta y firma el contrato digitalmente (Serviinform / eIDAS).</p>
+          <span class="state-tag s-signed">Estado: Firmado</span>
+        </div>
+        <div class="step st-sf">
+          <div class="step-hdr"><span class="step-num sn-sf">5</span><span class="step-title">Back-office valida expediente</span></div>
+          <p class="step-desc">Checklist documental completo. Back-office activa el contrato. Record-Triggered Flow publica Platform Event a MuleSoft.</p>
+        </div>
+      </div>
+      <div class="lc-mule lane-col"></div>
+      <div class="lc-dist lane-col"></div>
+      <div class="lc-sips lane-col"></div>
+
+      <!-- ── FASE 3: ENVÍO ATR ── -->
+      <div class="phase-label">Fase 3 — Envío del mensaje de switching a la distribuidora</div>
+
+      <div class="lc-sf lane-col">
+        <div class="step st-warn">
+          <div class="step-hdr"><span class="step-num sn-warn">6</span><span class="step-title">Switching en curso</span></div>
+          <p class="step-desc">Contrato pasa a estado ATR en curso. Scheduled Flow inicia cómputo del plazo de 5 días hábiles regulados por la CNMC.</p>
+          <span class="state-tag s-atr">Estado: Switching en curso</span>
+        </div>
+      </div>
+      <div class="lc-mule lane-col">
+        <div class="step st-mule">
+          <div class="step-hdr"><span class="step-num sn-mule">7</span><span class="step-title">Determina tipo de proceso</span></div>
+          <p class="step-desc">MuleSoft evalúa los atributos del contrato y selecciona el mensaje normativo aplicable según el tipo de actuación solicitada.</p>
+          <span class="msg-pill mp-c1">C1</span>
+          <span class="msg-pill mp-c2">C2</span>
+          <span class="msg-pill mp-a3">A3</span>
+          <span class="msg-pill mp-m1">M1</span>
+        </div>
+        <div class="step st-mule">
+          <div class="step-hdr"><span class="step-num sn-mule">8</span><span class="step-title">Compone y valida XSD</span></div>
+          <p class="step-desc">Construye el mensaje XML, lo valida contra el esquema XSD oficial CNMC y lo transmite a la distribuidora.</p>
+        </div>
+      </div>
+      <div class="lc-dist lane-col">
+        <div class="step st-dist">
+          <div class="step-hdr"><span class="step-num sn-dist">9</span><span class="step-title">Distribuidora recibe y valida</span></div>
+          <p class="step-desc">Verifica CUPS, peaje aplicable, potencias, titularidad, estado del punto y si requiere actuación sobre instalaciones. Plazo máx: 5 días hábiles.</p>
+        </div>
+      </div>
+      <div class="lc-sips lane-col"></div>
+
+      <!-- ── FASE 4: RESPUESTA DISTRIBUIDORA ── -->
+      <div class="phase-label">Fase 4 — Respuesta de la distribuidora (bifurcación)</div>
+
+      <div class="lc-sf lane-col">
+        <div class="step st-ok">
+          <div class="step-hdr"><span class="step-num sn-ok">10a</span><span class="step-title">Solicitud aceptada</span></div>
+          <p class="step-desc">MuleSoft actualiza el contrato vía REST. Fecha de activación efectiva confirmada por la distribuidora.</p>
+          <span class="msg-pill mp-ok">Aceptación</span>
+          <span class="state-tag s-pending">Estado: Activación pendiente</span>
+        </div>
+        <div class="step st-ko">
+          <div class="step-hdr"><span class="step-num sn-ko">10b</span><span class="step-title">Solicitud rechazada</span></div>
+          <p class="step-desc">Se clasifica el rechazo según el código normalizado CNMC: subsanable (reabre gestión en Service Cloud) o no subsanable (cierra expediente).</p>
+          <span class="msg-pill mp-ko">Rechazo</span>
+          <span class="state-tag s-rejected">Estado: Rechazado</span>
+        </div>
+      </div>
+      <div class="lc-mule lane-col">
+        <div class="step st-mule">
+          <div class="step-hdr"><span class="step-num sn-mule">11</span><span class="step-title">Procesa respuesta</span></div>
+          <p class="step-desc">MuleSoft recibe la respuesta asíncrona de la distribuidora, la parsea y llama a la API REST de Salesforce para actualizar el estado del contrato.</p>
+        </div>
+      </div>
+      <div class="lc-dist lane-col">
+        <div class="step st-dist">
+          <div class="step-hdr"><span class="step-num sn-dist">12</span><span class="step-title">Emite respuesta normativa</span></div>
+          <p class="step-desc">Aceptación con fecha efectiva de activación, o rechazo con código de motivo según tablas maestras CNMC.</p>
+        </div>
+      </div>
+      <div class="lc-sips lane-col">
+        <div class="step st-sips">
+          <div class="step-hdr"><span class="step-num sn-sips">13</span><span class="step-title">Actualiza SIPS</span></div>
+          <p class="step-desc">La distribuidora actualiza el SIPS con el nuevo comercializador y la fecha de efectividad, cerrando el dato técnico del cambio.</p>
+        </div>
+      </div>
+
+      <!-- ── FASE 5: ACTIVACIÓN EFECTIVA ── -->
+      <div class="phase-label">Fase 5 — Activación efectiva y post-switching</div>
+
+      <div class="lc-sf lane-col">
+        <div class="step st-ok">
+          <div class="step-hdr"><span class="step-num sn-ok">14</span><span class="step-title">Contrato activado</span></div>
+          <p class="step-desc">Contrato pasa a Activo en Salesforce. Se dispara el journey de bienvenida en Marketing Cloud y se notifica al cliente la fecha de inicio del suministro.</p>
+          <span class="state-tag s-active">Estado: Activo</span>
+        </div>
+        <div class="step st-sf">
+          <div class="step-hdr"><span class="step-num sn-sf">15</span><span class="step-title">Dashboard ATR · monitorización</span></div>
+          <p class="step-desc">KPIs ATR en tiempo real: solicitudes en curso, aceptadas, rechazadas, en plazo y vencidas. Alertas automáticas ante vencimiento del plazo de 5 días hábiles.</p>
+          <span class="state-tag s-sub">US ATR-011</span>
+        </div>
+      </div>
+      <div class="lc-mule lane-col">
+        <div class="step st-mule">
+          <div class="step-hdr"><span class="step-num sn-mule">16</span><span class="step-title">Recibe D1 · notificaciones</span></div>
+          <p class="step-desc">MuleSoft escucha notificaciones D1 de la distribuidora (cambios posteriores en el punto: equipo medida, modificaciones técnicas) y las propaga a Salesforce.</p>
+          <span class="msg-pill mp-d1">D1</span>
+        </div>
+      </div>
+      <div class="lc-dist lane-col">
+        <div class="step st-dist">
+          <div class="step-hdr"><span class="step-num sn-dist">17</span><span class="step-title">Inicio ciclo de medida</span></div>
+          <p class="step-desc">Datos de medida y curvas de carga comienzan a fluir desde la distribuidora hacia SAP IS-U para iniciar el ciclo de facturación.</p>
+        </div>
+      </div>
+      <div class="lc-sips lane-col"></div>
+
+      <!-- ── FASE 6: PROCESOS AUXILIARES ── -->
+      <div class="phase-label">Fase 6 — Procesos auxiliares y control</div>
+
+      <div class="lc-sf lane-col">
+        <div class="step st-ko">
+          <div class="step-hdr"><span class="step-num sn-ko">18</span><span class="step-title">Desistimiento · Reclamación</span></div>
+          <p class="step-desc">Si el cliente desiste antes de la activación o surge una incidencia, Salesforce lanza el proceso E1 (desistimiento) o R1 (reclamación) vía MuleSoft.</p>
+          <span class="msg-pill mp-e1">E1</span>
+          <span class="msg-pill mp-r1">R1</span>
+        </div>
+      </div>
+      <div class="lc-mule lane-col">
+        <div class="step st-warn">
+          <div class="step-hdr"><span class="step-num sn-warn">19</span><span class="step-title">Alerta plazo vencido</span></div>
+          <p class="step-desc">Si transcurren 5 días hábiles sin respuesta, Scheduled Flow alerta al supervisor. La comercializadora puede considerar aceptación tácita e iniciar escalado ante REE.</p>
+        </div>
+      </div>
+      <div class="lc-dist lane-col"></div>
+      <div class="lc-sips lane-col"></div>
+
+    </div><!-- /swimlane -->
+
+    <!-- MESSAGES REFERENCE -->
+    <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--border-xs);">
+      <div style="font-family:var(--ff-m);font-size:8px;letter-spacing:1.2px;text-transform:uppercase;color:var(--dim);margin-bottom:10px;">Catálogo de mensajes CNMC — Resoluciones 2016 · 2019 · 2024</div>
+      <div class="msg-ref">
+        <div class="msg-card mc-p0">
+          <span class="mc-code">P0</span>
+          <span class="mc-name">Consulta previa</span>
+          <span class="mc-desc">Solicitud de información del punto de suministro antes de la contratación. Respuesta síncrona en tiempo real.</span>
+          <span class="mc-dir">Comercializadora → Distribuidora</span>
+        </div>
+        <div class="msg-card mc-c1">
+          <span class="mc-code">C1</span>
+          <span class="mc-name">Cambio comercializador</span>
+          <span class="mc-desc">Cambio de comercializador sin modificación del contrato de acceso. El más frecuente en B2C residencial.</span>
+          <span class="mc-dir">Comercializadora → Distribuidora</span>
+        </div>
+        <div class="msg-card mc-c2">
+          <span class="mc-code">C2</span>
+          <span class="mc-name">Cambio con modificación</span>
+          <span class="mc-desc">Cambio de comercializador con modificación simultánea del contrato de acceso (potencia, tarifa).</span>
+          <span class="mc-dir">Comercializadora → Distribuidora</span>
+        </div>
+        <div class="msg-card mc-a3">
+          <span class="mc-code">A3</span>
+          <span class="mc-name">Alta nuevo suministro</span>
+          <span class="mc-desc">Primera contratación o alta de suministro sin contrato previo activo en el punto.</span>
+          <span class="mc-dir">Comercializadora → Distribuidora</span>
+        </div>
+        <div class="msg-card mc-m1">
+          <span class="mc-code">M1</span>
+          <span class="mc-name">Modificación acceso</span>
+          <span class="mc-desc">Modificación del contrato de acceso sin cambio de comercializador (cambio de potencia, tarifa).</span>
+          <span class="mc-dir">Comercializadora → Distribuidora</span>
+        </div>
+        <div class="msg-card mc-ok">
+          <span class="mc-code">A1</span>
+          <span class="mc-name">Aceptación</span>
+          <span class="mc-desc">La distribuidora acepta la solicitud e indica la fecha efectiva de activación del cambio.</span>
+          <span class="mc-dir">Distribuidora → Comercializadora</span>
+        </div>
+        <div class="msg-card mc-ko">
+          <span class="mc-code">B1</span>
+          <span class="mc-name">Rechazo</span>
+          <span class="mc-desc">Rechazo con código de motivo normalizado (CUPS inválido, potencia fuera de rango, ATR activo, etc.).</span>
+          <span class="mc-dir">Distribuidora → Comercializadora</span>
+        </div>
+        <div class="msg-card mc-d1">
+          <span class="mc-code">D1</span>
+          <span class="mc-name">Notificación cambios</span>
+          <span class="mc-desc">La distribuidora notifica proactivamente cambios en el punto que afectan al contrato de acceso.</span>
+          <span class="mc-dir">Distribuidora → Comercializadora</span>
+        </div>
+        <div class="msg-card mc-e1">
+          <span class="mc-code">E1</span>
+          <span class="mc-name">Desistimiento</span>
+          <span class="mc-desc">Anulación de la solicitud de switching antes de su ejecución efectiva por la distribuidora.</span>
+          <span class="mc-dir">Comercializadora → Distribuidora</span>
+        </div>
+        <div class="msg-card mc-r1">
+          <span class="mc-code">R1</span>
+          <span class="mc-name">Reclamación</span>
+          <span class="mc-desc">Proceso de reclamación formal ante incidencias en el switching, cambios indebidos o errores de ejecución.</span>
+          <span class="mc-dir">Comercializadora → Distribuidora</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEGEND -->
+    <div class="legend">
+      <div class="leg-title">Leyenda · estados del contrato en Salesforce</div>
+      <div class="leg-row">
+        <div class="leg-item"><div class="leg-dot" style="background:var(--muted)"></div>Borrador</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#A78BFA"></div>Firmado</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#F59E0B"></div>Switching en curso</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#06B6D4"></div>Activación pendiente</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#10B981"></div>Activo</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#FB7185"></div>Rechazado</div>
+        <div class="leg-item" style="margin-left:10px;font-family:var(--ff-m);font-size:8px;color:var(--dim);">Plazo máx. respuesta distribuidora: 5 días hábiles · Activación máx.: 21 días naturales (Circular 3/2020 CNMC)</div>
+      </div>
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /page -->
+</body>
+</html>

@@ -1,0 +1,483 @@
+/*
+ * ════════════════════════════════════════════════════════════════════
+ *  TFG — SISTEMA DE DISEÑO VISUAL
+ *  Propuesta de implantación CRM en comercializadora energética B2C
+ *  Autor: Pablo · Tutor: Santiago A. Bruno Pérez · UOC 2025-2026
+ * ════════════════════════════════════════════════════════════════════
+ *
+ *  USO:
+ *    <link rel="stylesheet" href="tfg-style.css">
+ *    + <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+ *    + <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ── RESET ───────────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── TOKENS ──────────────────────────────────────── */
+:root {
+  /* Brand */
+  --sf:           #00A1E0;
+  --sf-dark:      #0070D2;
+  --sf-glow:      rgba(0,161,224,0.15);
+
+  /* Energía */
+  --elec:         #FBBF24;   /* amber  — electricidad */
+  --gas:          #34D399;   /* emerald — gas natural */
+
+  /* Grupos comercializadores (electricidad) */
+  --iberdrola:    #3B82F6;
+  --endesa:       #60A5FA;
+  --naturgy:      #818CF8;
+  --repsol:       #A78BFA;
+  --edp:          #C4B5FD;
+  --otros-elec:   #F97316;
+
+  /* Grupos comercializadores (gas) */
+  --iberdrola-g:  #059669;
+  --endesa-g:     #10B981;
+  --naturgy-g:    #34D399;
+  --repsol-g:     #6EE7B7;
+  --edp-g:        #A7F3D0;
+  --otros-gas:    #F59E0B;
+
+  /* Independientes */
+  --octopus:      #EF4444;
+  --masmovil:     #F97316;
+  --eri:          #FBBF24;
+  --otras-ind:    #6B7280;
+
+  /* Semánticos */
+  --risk-high:    #EF4444;
+  --risk-med:     #F59E0B;
+  --risk-low:     #10B981;
+  --crm-accent:   #818CF8;
+  --cnmc:         #A78BFA;
+  --foco-tfg:     #EF4444;
+
+  /* Fondos */
+  --bg:           #0B0F1A;
+  --bg2:          #111827;
+  --bg3:          #1C2333;
+  --bg4:          #141B28;
+
+  /* UI */
+  --border:       rgba(255,255,255,0.07);
+  --border-strong:rgba(255,255,255,0.14);
+  --text:         #E5E7EB;
+  --text-dim:     #CBD5E1;
+  --muted:        #6B7280;
+  --white:        #FFFFFF;
+
+  /* Typography */
+  --font-sans:    'Inter', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+
+  /* Spacing */
+  --page-pad:     40px;
+  --card-pad:     20px 24px;
+  --pill-pad:     12px 16px;
+  --radius-lg:    12px;
+  --radius-md:    8px;
+  --radius-sm:    6px;
+  --radius-pill:  20px;
+}
+
+/* ── BASE ────────────────────────────────────────── */
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  padding: var(--page-pad);
+  min-width: 900px;
+  line-height: 1.5;
+}
+
+/* ── HEADER ──────────────────────────────────────── */
+.tfg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+}
+.tfg-header h1 {
+  font-size: 20px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #E0F2FE 0%, #38BDF8 50%, #0EA5E9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.4px;
+  margin-bottom: 7px;
+  line-height: 1.35;
+}
+.tfg-header p {
+  font-size: 11.5px;
+  color: var(--muted);
+  max-width: 580px;
+  line-height: 1.6;
+}
+.tfg-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* ── BADGES ──────────────────────────────────────── */
+.tfg-badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+}
+.tfg-badge-blue   { background: linear-gradient(135deg, var(--sf-dark), var(--sf)); color: #fff; }
+.tfg-badge-green  { background: linear-gradient(135deg, #059669, #10B981); color: #fff; }
+.tfg-badge-amber  { background: linear-gradient(135deg, #B45309, #F59E0B); color: #000; }
+.tfg-badge-purple { background: linear-gradient(135deg, #5B21B6, #818CF8); color: #fff; }
+.tfg-badge-red    { background: linear-gradient(135deg, #991B1B, #EF4444); color: #fff; }
+.tfg-badge-gray   { background: var(--bg3); border: 1px solid var(--border); color: var(--text-dim); }
+
+.tfg-source-note {
+  font-size: 9px;
+  color: var(--muted);
+  text-align: right;
+}
+
+/* ── PILLS ROW ───────────────────────────────────── */
+.tfg-pills {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 26px;
+  flex-wrap: wrap;
+}
+.tfg-pill {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--pill-pad);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+  min-width: 100px;
+}
+.tfg-pill-value {
+  font-size: 20px;
+  font-weight: 900;
+  font-family: var(--font-mono);
+  line-height: 1;
+}
+.tfg-pill-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ── CARDS ───────────────────────────────────────── */
+.tfg-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--card-pad);
+}
+.tfg-card-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  margin-bottom: 4px;
+}
+.tfg-card-subtitle {
+  font-size: 10.5px;
+  color: var(--muted);
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
+/* ── TABLES ──────────────────────────────────────── */
+.tfg-table-wrap {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.tfg-table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.tfg-table-wrap thead tr {
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border-strong);
+}
+.tfg-table-wrap thead th {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  color: var(--muted);
+  padding: 12px 16px;
+  text-align: left;
+}
+.tfg-table-wrap tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.tfg-table-wrap tbody tr:last-child { border-bottom: none; }
+.tfg-table-wrap tbody tr:hover { background: rgba(255,255,255,0.022); }
+.tfg-table-wrap td {
+  padding: 14px 16px;
+  font-size: 11px;
+  vertical-align: middle;
+  line-height: 1.5;
+}
+
+/* ── SECTION ROWS (within table) ────────────────── */
+.tfg-section-row td {
+  padding: 9px 16px;
+  background: var(--bg4);
+  border-top: 2px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: var(--sf);
+}
+.tfg-section-row .section-source {
+  font-size: 9px;
+  color: var(--muted);
+  margin-left: 12px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ── LEVEL BADGES ────────────────────────────────── */
+.tfg-level {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 13px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+.tfg-level-high   { background: rgba(239,68,68,0.13);   color: var(--risk-high); border: 1px solid rgba(239,68,68,0.35); }
+.tfg-level-med    { background: rgba(245,158,11,0.12);  color: var(--risk-med);  border: 1px solid rgba(245,158,11,0.3); }
+.tfg-level-low    { background: rgba(16,185,129,0.12);  color: var(--risk-low);  border: 1px solid rgba(16,185,129,0.3); }
+.tfg-level-info   { background: rgba(0,161,224,0.1);    color: var(--sf);        border: 1px solid rgba(0,161,224,0.25); }
+.tfg-level-crm    { background: rgba(129,140,248,0.12); color: var(--crm-accent);border: 1px solid rgba(129,140,248,0.3); }
+
+/* ── FOCO TFG CHIP ───────────────────────────────── */
+.tfg-foco-tag {
+  display: inline-block;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 2px 9px;
+  border-radius: 10px;
+  background: var(--foco-tfg);
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* ── ID CHIP ─────────────────────────────────────── */
+.tfg-id-chip {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--sf);
+  background: rgba(0,161,224,0.1);
+  border: 1px solid rgba(0,161,224,0.2);
+  padding: 4px 9px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── VALUE DISPLAY ───────────────────────────────── */
+.tfg-val-big {
+  font-size: 16px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  display: block;
+  margin-bottom: 5px;
+  line-height: 1.3;
+}
+.tfg-val-sub {
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+.tfg-pct-pill {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 5px;
+}
+.tfg-pct-elec   { background: rgba(251,191,36,0.15);   color: var(--elec); }
+.tfg-pct-gas    { background: rgba(52,211,153,0.15);   color: var(--gas); }
+.tfg-pct-libre  { background: rgba(96,165,250,0.15);   color: #60A5FA; }
+.tfg-pct-reg    { background: rgba(167,139,250,0.15);  color: #A78BFA; }
+.tfg-pct-blue   { background: rgba(0,161,224,0.12);    color: var(--sf); }
+
+/* ── MINI BARS ───────────────────────────────────── */
+.tfg-bar-track {
+  width: 100%;
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 5px;
+}
+.tfg-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+}
+.tfg-bar-elec  { background: linear-gradient(90deg, #D97706, #FBBF24); }
+.tfg-bar-gas   { background: linear-gradient(90deg, #059669, #34D399); }
+.tfg-bar-blue  { background: linear-gradient(90deg, var(--sf-dark), var(--sf)); }
+.tfg-bar-crm   { background: linear-gradient(90deg, #4338CA, #818CF8); }
+.tfg-bar-red   { background: linear-gradient(90deg, #991B1B, #EF4444); }
+
+/* ── SOURCE BOX ──────────────────────────────────── */
+.tfg-source {
+  margin-top: 14px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 11px 16px;
+  font-size: 9.5px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.tfg-source strong { color: #94A3B8; font-weight: 600; }
+
+/* ── CONCLUSION BOX ──────────────────────────────── */
+.tfg-conclusion {
+  margin-top: 16px;
+  border: 1px solid rgba(251,191,36,0.25);
+  background: linear-gradient(to right, rgba(217,119,6,0.07), rgba(11,15,26,0));
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+}
+.tfg-conclusion .label {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--elec);
+  margin-bottom: 8px;
+}
+.tfg-conclusion p {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #D1D5DB;
+}
+.tfg-hl-crm   { color: #A5B4FC; font-weight: 600; }
+.tfg-hl-risk  { color: #FCA5A5; font-weight: 600; }
+.tfg-hl-data  { color: #6EE7B7; font-weight: 600; }
+
+/* ── LEGEND ──────────────────────────────────────── */
+.tfg-legend {
+  margin-top: 16px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 20px;
+}
+.tfg-legend-title {
+  font-size: 8.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.tfg-legend-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+}
+.tfg-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.tfg-legend-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.tfg-legend-line {
+  width: 24px;
+  height: 3px;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+.tfg-legend-label {
+  font-size: 9.5px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* ── FOOTER ──────────────────────────────────────── */
+.tfg-footer {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.tfg-footer-note  { font-size: 9px; color: var(--muted); }
+.tfg-footer-brand { font-size: 9px; color: var(--muted); font-weight: 600; }
+
+/* ── CHART.JS DEFAULTS (aplicar via options) ─────── */
+/*
+  Configuración Chart.js recomendada para mantener consistencia visual:
+
+  defaults:
+    font.family = 'Inter'
+    color = '#6B7280'
+    plugins.legend.labels.color = '#9CA3AF'
+    plugins.tooltip.backgroundColor = '#1C2333'
+    plugins.tooltip.borderColor = 'rgba(255,255,255,0.1)'
+    plugins.tooltip.titleColor = '#E5E7EB'
+    plugins.tooltip.bodyColor = '#9CA3AF'
+    scales.x/y:
+      grid.color = 'rgba(255,255,255,0.05)'
+      ticks.color = '#6B7280'
+      ticks.font.family = 'JetBrains Mono'
+*/
+
+/* ── UTILITY: MONO NUMBER ────────────────────────── */
+.tfg-mono {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+.tfg-text-elec   { color: var(--elec); }
+.tfg-text-gas    { color: var(--gas); }
+.tfg-text-sf     { color: var(--sf); }
+.tfg-text-crm    { color: var(--crm-accent); }
+.tfg-text-risk   { color: var(--risk-high); }
+.tfg-text-muted  { color: var(--muted); }
+.tfg-text-dim    { color: var(--text-dim); }

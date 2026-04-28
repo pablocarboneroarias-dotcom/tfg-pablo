@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arquitectura CRM — Comercializadora Energética B2C v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:   #07090F;
+  --bg-base:   #0C1018;
+  --bg-card:   #101520;
+  --bg-hover:  #161D2C;
+  --border-xs: rgba(255,255,255,0.05);
+  --border-sm: rgba(255,255,255,0.09);
+  --border-md: rgba(255,255,255,0.14);
+
+  --ch:     #6B7CF6;   /* channels */
+  --mkt:    #F97316;   /* marketing cloud */
+  --sales:  #3B8BEB;   /* sales cloud */
+  --svc:    #06B6D4;   /* service cloud */
+  --eu:     #A78BFA;   /* E&U cloud */
+  --ai:     #E879F9;   /* AI layer */
+  --mule:   #F59E0B;   /* mulesoft */
+  --sap:    #10B981;   /* SAP */
+  --ext-op: #FB7185;   /* ext operational */
+  --ext-dt: #2DD4BF;   /* ext data */
+
+  --text:   #EEF2FF;
+  --muted:  #8896AC;
+  --dim:    #3D4A5C;
+
+  --ff-d: 'Syne', sans-serif;
+  --ff-b: 'DM Sans', sans-serif;
+  --ff-m: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: var(--ff-b);
+  min-height: 100vh;
+}
+
+/* ═══ GRID BACKGROUND ═══ */
+.grid-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+.glow-orb {
+  position: fixed; pointer-events: none; z-index: 0;
+  border-radius: 50%; filter: blur(120px); opacity: 0.07;
+}
+
+/* ═══ PAGE ═══ */
+.page {
+  position: relative; z-index: 1;
+  padding: 28px 32px 40px;
+  max-width: 1420px;
+  margin: 0 auto;
+}
+
+/* ═══ HEADER ═══ */
+.hdr {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 28px;
+  animation: fadeUp .5s ease both;
+}
+.hdr-left h1 {
+  font-family: var(--ff-d);
+  font-size: 26px; font-weight: 800; letter-spacing: -.4px;
+  line-height: 1.15; margin-bottom: 8px;
+}
+.hdr-left h1 em {
+  font-style: normal;
+  background: linear-gradient(120deg, #3B8BEB 20%, #A78BFA 80%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hdr-left p {
+  font-size: 11.5px; color: var(--muted); max-width: 560px; line-height: 1.65;
+}
+.badges { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+.badge {
+  font-family: var(--ff-m); font-size: 9px; letter-spacing: .6px;
+  text-transform: uppercase; padding: 3px 10px; border-radius: 4px;
+}
+.b-sf  { background: rgba(59,139,235,.12); border: 1px solid rgba(59,139,235,.28); color: #3B8BEB; }
+.b-b2c { background: rgba(249,115,22,.12); border: 1px solid rgba(249,115,22,.28); color: #F97316; }
+.b-meta{ background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09); color: var(--muted); font-size: 8px; }
+
+/* ═══ DIAGRAM WRAPPER ═══ */
+.diag-wrap {
+  background: var(--bg-base);
+  border: 1px solid var(--border-xs);
+  border-radius: 18px;
+  padding: 26px 24px 22px;
+  position: relative; overflow: hidden;
+  animation: fadeUp .55s .1s ease both;
+}
+.diag-wrap::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(59,139,235,.55), rgba(167,139,250,.55), transparent);
+}
+
+/* Diagram title */
+.diag-title { text-align: center; margin-bottom: 6px; }
+.diag-title h2 {
+  font-family: var(--ff-d); font-size: 15px; font-weight: 700; color: var(--text);
+}
+.diag-title p {
+  font-family: var(--ff-m); font-size: 9.5px; color: var(--muted); margin-top: 4px;
+}
+
+/* Journey steps */
+.journey {
+  display: flex; align-items: center; justify-content: center;
+  gap: 2px; margin: 12px 0 18px;
+}
+.jstep {
+  font-family: var(--ff-m); font-size: 8.5px; letter-spacing: .4px;
+  text-transform: uppercase; padding: 3px 10px; border-radius: 3px;
+}
+.jarr { color: var(--dim); font-size: 10px; margin: 0 2px; }
+
+/* Column headers */
+.col-hdrs {
+  display: grid;
+  grid-template-columns: 174px 1fr 238px;
+  gap: 14px; margin-bottom: 6px;
+}
+.col-hdr {
+  font-family: var(--ff-m); font-size: 8px; letter-spacing: 1.4px;
+  text-transform: uppercase; color: var(--dim); text-align: center;
+}
+
+/* ═══ MAIN 3-COLUMN GRID ═══ */
+.main-grid {
+  display: grid;
+  grid-template-columns: 174px 1fr 238px;
+  gap: 14px;
+  align-items: start;
+}
+
+/* ═══ LEFT — CHANNELS ═══ */
+.channels { display: flex; flex-direction: column; gap: 5px; }
+
+.ch-card {
+  background: rgba(107,124,246,.07);
+  border: 1px solid rgba(107,124,246,.18);
+  border-radius: 8px; padding: 9px 11px;
+  cursor: pointer; position: relative;
+  transition: all .2s ease;
+}
+.ch-card:hover {
+  background: rgba(107,124,246,.15);
+  border-color: rgba(107,124,246,.38);
+  transform: translateX(2px);
+  box-shadow: 0 0 14px rgba(107,124,246,.1);
+}
+.ch-card::after {
+  content: ''; position: absolute;
+  right: -14px; top: 50%; transform: translateY(-50%);
+  width: 14px; height: 1px;
+  background: linear-gradient(90deg, rgba(107,124,246,.35), transparent);
+}
+.ch-icon { font-size: 13px; margin-bottom: 3px; display: block; }
+.ch-name {
+  font-family: var(--ff-d); font-size: 10.5px; font-weight: 700;
+  color: var(--text); display: block;
+}
+.ch-desc {
+  font-size: 8.5px; color: var(--muted); margin-top: 2px; line-height: 1.4; display: block;
+}
+.ch-tag {
+  display: inline-block; margin-top: 4px;
+  font-family: var(--ff-m); font-size: 7px; letter-spacing: .4px;
+  padding: 1px 6px; border-radius: 3px;
+  background: rgba(107,124,246,.12); color: rgba(107,124,246,.85);
+  border: 1px solid rgba(107,124,246,.2);
+}
+
+/* Partner divider */
+.ch-divider {
+  height: 1px; background: var(--border-xs); margin: 2px 4px;
+}
+
+/* ═══ CENTER — SALESFORCE + MULESOFT + SAP ═══ */
+.center { display: flex; flex-direction: column; gap: 9px; }
+
+/* AI stripe */
+.ai-stripe {
+  background: linear-gradient(135deg, rgba(232,121,249,.07), rgba(167,139,250,.07));
+  border: 1px solid rgba(232,121,249,.22);
+  border-radius: 8px; padding: 8px 14px;
+  display: flex; align-items: center; gap: 10px;
+  position: relative; overflow: hidden;
+}
+.ai-stripe::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232,121,249,.7), transparent);
+  animation: shimmer 2.5s infinite;
+}
+@keyframes shimmer { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+.ai-lbl {
+  font-family: var(--ff-m); font-size: 8.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .8px; color: var(--ai);
+  white-space: nowrap;
+}
+.ai-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.ai-chip {
+  background: rgba(232,121,249,.1); border: 1px solid rgba(232,121,249,.22);
+  border-radius: 4px; padding: 3px 9px;
+  font-family: var(--ff-m); font-size: 8px; color: var(--ai);
+  cursor: pointer; transition: all .2s;
+  white-space: nowrap;
+}
+.ai-chip:hover { background: rgba(232,121,249,.2); transform: translateY(-1px); }
+
+/* Salesforce block */
+.sf-block {
+  background: rgba(59,139,235,.05);
+  border: 1px solid rgba(59,139,235,.18);
+  border-radius: 12px; padding: 14px;
+  position: relative;
+}
+.sf-block-hdr {
+  display: flex; align-items: center; gap: 7px; margin-bottom: 12px;
+}
+.sf-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--sales); box-shadow: 0 0 8px var(--sales);
+}
+.sf-title {
+  font-family: var(--ff-d); font-size: 11.5px; font-weight: 800;
+  color: var(--sales); text-transform: uppercase; letter-spacing: .8px;
+}
+.sf-sor {
+  margin-left: auto; font-family: var(--ff-m); font-size: 7.5px;
+  padding: 2px 8px; border-radius: 3px;
+  background: rgba(59,139,235,.1); color: rgba(59,139,235,.75);
+  border: 1px solid rgba(59,139,235,.2);
+}
+
+/* Clouds 3-col */
+.clouds { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; }
+
+.cloud {
+  border-radius: 9px; padding: 11px;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: all .25s ease;
+}
+.cloud::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  opacity: .5;
+}
+.cloud:hover { transform: translateY(-2px); }
+
+.c-mkt {
+  background: rgba(249,115,22,.07); border: 1px solid rgba(249,115,22,.2);
+  color: var(--mkt);
+}
+.c-mkt:hover { background: rgba(249,115,22,.13); border-color: rgba(249,115,22,.35); box-shadow: 0 4px 20px rgba(249,115,22,.07); }
+
+.c-sales {
+  background: rgba(59,139,235,.07); border: 1px solid rgba(59,139,235,.2);
+  color: var(--sales);
+}
+.c-sales:hover { background: rgba(59,139,235,.13); border-color: rgba(59,139,235,.35); box-shadow: 0 4px 20px rgba(59,139,235,.07); }
+
+.c-svc {
+  background: rgba(6,182,212,.07); border: 1px solid rgba(6,182,212,.2);
+  color: var(--svc);
+}
+.c-svc:hover { background: rgba(6,182,212,.13); border-color: rgba(6,182,212,.35); box-shadow: 0 4px 20px rgba(6,182,212,.07); }
+
+.cloud-hdr {
+  display: flex; align-items: center; gap: 5px; margin-bottom: 9px;
+}
+.cloud-icon { font-size: 11px; }
+.cloud-name {
+  font-family: var(--ff-d); font-size: 9.5px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .4px;
+}
+.cloud-phase {
+  margin-left: auto; font-family: var(--ff-m); font-size: 7px;
+  padding: 1px 5px; border-radius: 2px;
+  border: 1px solid currentColor; opacity: .7;
+}
+.cloud-feats { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+.cloud-feats li {
+  font-size: 8.5px; color: var(--muted); padding: 4px 6px;
+  background: rgba(255,255,255,.025); border: 1px solid rgba(255,255,255,.04);
+  border-radius: 4px; line-height: 1.35; transition: all .15s;
+}
+.cloud-feats li:hover { background: rgba(255,255,255,.06); color: var(--text); }
+
+/* E&U strip */
+.eu-strip {
+  margin-top: 9px; border-radius: 6px; padding: 8px 12px;
+  background: rgba(167,139,250,.07); border: 1px solid rgba(167,139,250,.2);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.eu-lbl {
+  font-family: var(--ff-m); font-size: 7.5px; font-weight: 600;
+  color: var(--eu); text-transform: uppercase; letter-spacing: .7px; white-space: nowrap;
+}
+.eu-objs { display: flex; gap: 5px; flex-wrap: wrap; }
+.eu-obj {
+  font-family: var(--ff-m); font-size: 7.5px;
+  padding: 2px 7px; border-radius: 3px;
+  background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.2);
+  color: rgba(167,139,250,.9); cursor: pointer; transition: all .2s;
+}
+.eu-obj:hover { background: rgba(167,139,250,.22); transform: translateY(-1px); }
+
+/* Vertical connector between blocks */
+.v-conn {
+  display: flex; align-items: center; justify-content: center;
+  height: 13px; gap: 6px;
+}
+.v-conn-line {
+  width: 1px; height: 100%;
+  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.04));
+}
+.v-conn-lbl {
+  font-family: var(--ff-m); font-size: 6.5px; letter-spacing: .5px;
+  text-transform: uppercase; opacity: .6; white-space: nowrap;
+}
+
+/* MuleSoft block */
+.mule-block {
+  background: rgba(245,158,11,.06); border: 1px solid rgba(245,158,11,.2);
+  border-radius: 10px; padding: 11px 13px; position: relative; overflow: hidden;
+}
+.mule-block::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(245,158,11,.55), transparent);
+}
+.block-hdr {
+  display: flex; align-items: center; gap: 7px; margin-bottom: 9px;
+}
+.bdot {
+  width: 6px; height: 6px; border-radius: 50%;
+}
+.bdot-mule { background: var(--mule); box-shadow: 0 0 6px var(--mule); }
+.bdot-sap  { background: var(--sap);  box-shadow: 0 0 6px var(--sap);  }
+.btitle {
+  font-family: var(--ff-d); font-size: 10.5px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .7px;
+}
+.btitle-mule { color: var(--mule); }
+.btitle-sap  { color: var(--sap);  }
+.bsubt {
+  margin-left: auto; font-family: var(--ff-m); font-size: 7.5px; opacity: .6;
+}
+.bsubt-mule { color: var(--mule); }
+.bsubt-sap  { color: var(--sap);  }
+
+.items4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+.b-item {
+  border-radius: 6px; padding: 8px 7px; text-align: center;
+  cursor: pointer; transition: all .2s;
+}
+.b-item:hover { transform: translateY(-1px); }
+.bi-mule {
+  background: rgba(245,158,11,.07); border: 1px solid rgba(245,158,11,.14);
+}
+.bi-mule:hover { background: rgba(245,158,11,.14); }
+.bi-sap {
+  background: rgba(16,185,129,.07); border: 1px solid rgba(16,185,129,.14);
+}
+.bi-sap:hover { background: rgba(16,185,129,.14); }
+.b-item-name {
+  font-family: var(--ff-m); font-size: 8px; font-weight: 600;
+  display: block; margin-bottom: 2px;
+}
+.bi-mule .b-item-name { color: var(--mule); }
+.bi-sap  .b-item-name { color: var(--sap);  }
+.b-item-desc { font-size: 7.5px; color: var(--muted); line-height: 1.3; }
+
+/* SAP block */
+.sap-block {
+  background: rgba(16,185,129,.05); border: 1px solid rgba(16,185,129,.18);
+  border-radius: 10px; padding: 11px 13px; position: relative; overflow: hidden;
+}
+.sap-block::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(16,185,129,.55), transparent);
+}
+
+/* ═══ RIGHT — EXTERNAL SYSTEMS ═══ */
+.ext-panel { display: flex; flex-direction: column; gap: 8px; }
+
+.ext-sect-lbl {
+  font-family: var(--ff-m); font-size: 7.5px; text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 4px; padding: 0 3px;
+}
+.ext-group { display: flex; flex-direction: column; gap: 4px; }
+
+.ext-card {
+  border-radius: 7px; padding: 7px 9px;
+  cursor: pointer; position: relative; transition: all .2s ease;
+}
+.ext-card:hover { transform: translateX(-2px); }
+.ext-card::before {
+  content: ''; position: absolute;
+  left: -14px; top: 50%; transform: translateY(-50%);
+  width: 14px; height: 1px;
+}
+
+.ext-ops {
+  background: rgba(251,113,133,.07); border: 1px solid rgba(251,113,133,.18);
+}
+.ext-ops::before { background: linear-gradient(90deg, transparent, rgba(251,113,133,.45)); }
+.ext-ops:hover { background: rgba(251,113,133,.13); border-color: rgba(251,113,133,.3); box-shadow: 0 0 12px rgba(251,113,133,.07); }
+
+.ext-dat {
+  background: rgba(45,212,191,.07); border: 1px solid rgba(45,212,191,.18);
+}
+.ext-dat::before { background: linear-gradient(90deg, transparent, rgba(45,212,191,.45)); }
+.ext-dat:hover { background: rgba(45,212,191,.13); border-color: rgba(45,212,191,.3); box-shadow: 0 0 12px rgba(45,212,191,.07); }
+
+.ext-dist {
+  background: rgba(251,146,60,.09); border: 1px solid rgba(251,146,60,.25);
+}
+.ext-dist::before { background: linear-gradient(90deg, transparent, rgba(251,146,60,.45)); }
+.ext-dist:hover { background: rgba(251,146,60,.16); border-color: rgba(251,146,60,.35); }
+
+.ext-name {
+  font-family: var(--ff-d); font-size: 10px; font-weight: 700;
+  display: block; margin-bottom: 2px;
+}
+.ext-ops .ext-name  { color: var(--ext-op); }
+.ext-dat .ext-name  { color: var(--ext-dt); }
+.ext-dist .ext-name { color: #FB923C; }
+.ext-desc { font-size: 8px; color: var(--muted); line-height: 1.4; }
+
+.ext-sep { height: 1px; background: var(--border-xs); margin: 3px 0; }
+
+/* ═══ LEGEND ═══ */
+.legend {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  margin-top: 18px; padding-top: 14px;
+  border-top: 1px solid var(--border-xs);
+  align-items: center;
+}
+.leg-lbl {
+  font-family: var(--ff-m); font-size: 8px; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--dim); margin-right: 4px;
+}
+.leg-item {
+  display: flex; align-items: center; gap: 5px;
+  font-family: var(--ff-m); font-size: 8px; color: var(--muted);
+}
+.leg-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.leg-line { width: 18px; height: 1px; flex-shrink: 0; }
+.leg-solid { background: rgba(255,255,255,.3); }
+.leg-dash  {
+  background: repeating-linear-gradient(90deg,
+    rgba(255,255,255,.3) 0, rgba(255,255,255,.3) 3px,
+    transparent 3px, transparent 7px);
+}
+
+/* ═══ TOOLTIP ═══ */
+.tip {
+  position: fixed; z-index: 9999; pointer-events: none;
+  background: #131C2E; border: 1px solid rgba(255,255,255,.14);
+  border-radius: 9px; padding: 10px 13px; max-width: 230px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.6);
+  opacity: 0; transition: opacity .15s ease;
+}
+.tip.show { opacity: 1; }
+.tip-title {
+  font-family: var(--ff-d); font-size: 11px; font-weight: 700;
+  color: var(--text); margin-bottom: 4px;
+}
+.tip-body { font-size: 9.5px; color: var(--muted); line-height: 1.55; }
+
+/* ═══ SVG FLOWS ═══ */
+#flow-svg { position: absolute; inset: 0; pointer-events: none; overflow: visible; z-index: 2; }
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:600px;height:600px;top:-200px;left:-100px;background:#3B8BEB;"></div>
+<div class="glow-orb" style="width:500px;height:500px;bottom:-150px;right:-80px;background:#A78BFA;"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1>Arquitectura CRM — <em>Comercializadora Energética B2C</em></h1>
+      <p>Visión funcional end-to-end: canales de entrada, ciclo de vida del cliente sobre Salesforce (Marketing, Captación, Preventa/Venta, Contratación y Postventa), capa de IA transversal, plataforma de integración MuleSoft iPaaS y ecosistema completo de sistemas externos. Mercado residencial español liberalizado.</p>
+    </div>
+    <div class="badges">
+      <span class="badge b-sf">Salesforce CRM</span>
+      <span class="badge b-b2c">Mercado B2C · Residencial</span>
+      <span class="badge b-meta">Elaboración propia · TFG 2025 · Mercado energético español</span>
+    </div>
+  </div>
+
+  <!-- DIAGRAM -->
+  <div class="diag-wrap" id="diag-wrap">
+
+    <!-- SVG overlay (flows populated by JS) -->
+    <svg id="flow-svg"></svg>
+
+    <!-- Title -->
+    <div class="diag-title">
+      <h2>Arquitectura funcional del sistema CRM — Visión end-to-end</h2>
+      <p>Journey completo: Marketing &amp; Generación de Leads → Captación &amp; Preventa → Oferta &amp; Contratación → Postventa &amp; ATC</p>
+    </div>
+
+    <!-- Journey -->
+    <div class="journey">
+      <span class="jstep" style="background:rgba(249,115,22,.14);color:#F97316;border:1px solid rgba(249,115,22,.28)">① Marketing</span>
+      <span class="jarr">→</span>
+      <span class="jstep" style="background:rgba(59,139,235,.14);color:#3B8BEB;border:1px solid rgba(59,139,235,.28)">② Captación</span>
+      <span class="jarr">→</span>
+      <span class="jstep" style="background:rgba(59,139,235,.14);color:#3B8BEB;border:1px solid rgba(59,139,235,.28)">③ Oferta &amp; Contratación</span>
+      <span class="jarr">→</span>
+      <span class="jstep" style="background:rgba(6,182,212,.14);color:#06B6D4;border:1px solid rgba(6,182,212,.28)">④ Postventa &amp; ATC</span>
+    </div>
+
+    <!-- Column headers -->
+    <div class="col-hdrs">
+      <div class="col-hdr">Canales de entrada</div>
+      <div class="col-hdr">Salesforce CRM Platform</div>
+      <div class="col-hdr">Sistemas externos</div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="main-grid">
+
+      <!-- ─── LEFT: CHANNELS ─── -->
+      <div class="channels">
+
+        <div class="ch-card" id="ch-web"
+          data-tt-title="Web / App Móvil"
+          data-tt-body="Portal de autoservicio digital B2C: consulta de facturas y consumos, contratación online, modificación de datos y gestión del suministro. Integrado con Salesforce Experience Cloud mediante API REST.">
+          <span class="ch-icon">🌐</span>
+          <span class="ch-name">Web / App Móvil</span>
+          <span class="ch-desc">Portal autoservicio · Contratación online · Consulta facturas</span>
+          <span class="ch-tag">Experience Cloud</span>
+        </div>
+
+        <div class="ch-card" id="ch-cti"
+          data-tt-title="Amazon Connect CTI"
+          data-tt-body="Centro de llamadas integrado en Salesforce Service Cloud mediante el conector Amazon Connect CTI. Identificación automática del cliente por CLI, apertura de la ficha CRM, gestión de grabaciones y transcripción con IA.">
+          <span class="ch-icon">📞</span>
+          <span class="ch-name">Amazon Connect CTI</span>
+          <span class="ch-desc">Identificación automática · Apertura ficha CRM</span>
+          <span class="ch-tag">CTI · Service Cloud</span>
+        </div>
+
+        <div class="ch-card" id="ch-wa"
+          data-tt-title="WhatsApp / Chat en vivo"
+          data-tt-body="Canal conversacional bidireccional integrado en Service Cloud Messaging. Gestión de casos, notificaciones de estado de alta y resolución automatizada de consultas mediante chatbot con escalado a agente.">
+          <span class="ch-icon">💬</span>
+          <span class="ch-name">WhatsApp / Chat</span>
+          <span class="ch-desc">Chat en vivo · Chatbot · Casos Service Cloud</span>
+          <span class="ch-tag">Messaging</span>
+        </div>
+
+        <div class="ch-card" id="ch-email"
+          data-tt-title="Email"
+          data-tt-body="Canal de comunicación masiva y transaccional. Campañas de captación y retención desde Marketing Cloud, notificaciones de contrato, alertas de factura y comunicaciones regulatorias obligatorias (CNMC).">
+          <span class="ch-icon">📧</span>
+          <span class="ch-name">Email</span>
+          <span class="ch-desc">Campañas · Transaccional · Regulatorio</span>
+          <span class="ch-tag">Marketing Cloud</span>
+        </div>
+
+        <div class="ch-card" id="ch-sms"
+          data-tt-title="SMS"
+          data-tt-body="Notificaciones transaccionales de alto impacto: confirmación de alta de contrato, avisos de factura emitida, OTPs para el proceso de firma digital y alertas de incidencia en el suministro.">
+          <span class="ch-icon">📱</span>
+          <span class="ch-name">SMS</span>
+          <span class="ch-desc">Notificaciones · OTP firma digital · Alertas</span>
+          <span class="ch-tag">Marketing Cloud</span>
+        </div>
+
+        <div class="ch-divider"></div>
+
+        <div class="ch-card" id="ch-f2f"
+          data-tt-title="Canal F2F / Fuerza de Ventas"
+          data-tt-body="Red de comerciales de campo con acceso a Salesforce desde tablet o móvil. Gestión de visitas, presentación de ofertas presenciales y contratación in-situ. Integra la firma biométrica en el proceso de alta.">
+          <span class="ch-icon">🤝</span>
+          <span class="ch-name">Canal F2F</span>
+          <span class="ch-desc">Ventas directas · Oferta presencial · Firma biométrica</span>
+          <span class="ch-tag">Sales Cloud Mobile</span>
+        </div>
+
+        <div class="ch-card" id="ch-partner"
+          data-tt-title="Red de Partners / Distribuidores"
+          data-tt-body="Acceso diferenciado a Salesforce para partners y agentes comerciales externos. Visibilidad limitada a su propia cartera. Gestión de comisiones y actividad comercial mediante Experience Cloud.">
+          <span class="ch-icon">🏪</span>
+          <span class="ch-name">Partner / Distribuidores</span>
+          <span class="ch-desc">Agentes externos · Comisiones · Cartera propia</span>
+          <span class="ch-tag">Partner Community</span>
+        </div>
+
+        <div class="ch-card" id="ch-comp"
+          data-tt-title="Comparadores / Agregadores de tarifas"
+          data-tt-body="Integración con agregadores de tarifas energéticas (Rastreator, Kelisto, etc.). Leads cualificados entrantes vía API REST directamente al CRM, con enriquecimiento automático de datos y asignación de scoring.">
+          <span class="ch-icon">🔗</span>
+          <span class="ch-name">Comparadores / APIs</span>
+          <span class="ch-desc">Rastreator · Kelisto · Leads API REST</span>
+          <span class="ch-tag">API REST → Leads</span>
+        </div>
+
+      </div>
+
+      <!-- ─── CENTER ─── -->
+      <div class="center">
+
+        <!-- AI STRIPE -->
+        <div class="ai-stripe">
+          <span class="ai-lbl">⚡ Capa IA Transversal — Salesforce Einstein</span>
+          <div class="ai-chips">
+            <span class="ai-chip"
+              data-tt-title="Einstein Churn Prediction"
+              data-tt-body="Modelo predictivo ML que identifica clientes con alta probabilidad de baja en los próximos 30-90 días. Activa workflows de retención proactiva en Service Cloud y sugiere la acción de NBA correspondiente.">
+              🎯 Churn Prediction
+            </span>
+            <span class="ai-chip"
+              data-tt-title="Next Best Action (NBA)"
+              data-tt-body="Motor de decisión en tiempo real que recomienda al agente la siguiente mejor acción comercial o de retención. Combina datos del cliente, historial, segmento de consumo y contexto de la interacción actual.">
+              💡 Next Best Action
+            </span>
+            <span class="ai-chip"
+              data-tt-title="Clasificación automática de casos"
+              data-tt-body="NLP que clasifica y prioriza casos entrantes de ATC automáticamente (facturación, suministro, contrato, reclamación), asignándolos al agente o cola adecuada y sugiriendo artículos de Knowledge Base relevantes.">
+              🤖 Auto-clasificación casos
+            </span>
+          </div>
+        </div>
+
+        <!-- SALESFORCE BLOCK -->
+        <div class="sf-block" id="sf-block">
+          <div class="sf-block-hdr">
+            <div class="sf-dot"></div>
+            <span class="sf-title">Salesforce CRM</span>
+            <span class="sf-sor">Sistema de registro — Relación comercial con el cliente</span>
+          </div>
+
+          <div class="clouds">
+
+            <!-- Marketing Cloud -->
+            <div class="cloud c-mkt" id="cloud-mkt"
+              data-tt-title="Marketing Cloud"
+              data-tt-body="Plataforma de marketing digital B2C. Gestiona la segmentación de audiencias, el diseño y envío de campañas multicanal (email, SMS, push), el lead nurturing automatizado y los customer journeys de ciclo de vida del cliente.">
+              <div class="cloud-hdr">
+                <span class="cloud-icon">📢</span>
+                <span class="cloud-name">Marketing Cloud</span>
+                <span class="cloud-phase">Fase 1</span>
+              </div>
+              <ul class="cloud-feats">
+                <li>Segmentación y audiencias B2C</li>
+                <li>Campañas multicanal (email/SMS/push)</li>
+                <li>Lead nurturing &amp; lead scoring</li>
+                <li>Customer journeys ciclo de vida</li>
+              </ul>
+            </div>
+
+            <!-- Sales Cloud -->
+            <div class="cloud c-sales" id="cloud-sales"
+              data-tt-title="Sales Cloud"
+              data-tt-body="Gestión del proceso de captación y contratación: cualificación de leads (metodología BANT), configuración de la oferta (CPQ simplificado), contratación digital con firma electrónica y gestión del proceso ATR de switching de suministrador.">
+              <div class="cloud-hdr">
+                <span class="cloud-icon">⚡</span>
+                <span class="cloud-name">Sales Cloud</span>
+                <span class="cloud-phase">Fase 2</span>
+              </div>
+              <ul class="cloud-feats">
+                <li>Registro &amp; cualificación leads (BANT)</li>
+                <li>Configuración de oferta (CPQ)</li>
+                <li>Contratación digital &amp; firma electrónica</li>
+                <li>Gestión switching proceso ATR</li>
+              </ul>
+            </div>
+
+            <!-- Service Cloud -->
+            <div class="cloud c-svc" id="cloud-svc"
+              data-tt-title="Service Cloud"
+              data-tt-body="Plataforma de atención al cliente omnicanal. Gestiona casos e incidencias, modificaciones contractuales, consulta de facturas y consumos, y los procesos de retención y gestión de baja. Integra todos los canales en una única cola de trabajo (Omni-Channel).">
+              <div class="cloud-hdr">
+                <span class="cloud-icon">🎧</span>
+                <span class="cloud-name">Service Cloud</span>
+                <span class="cloud-phase">Fase 3</span>
+              </div>
+              <ul class="cloud-feats">
+                <li>Gestión de casos e incidencias</li>
+                <li>Modificaciones contractuales</li>
+                <li>Consulta facturas &amp; consumos</li>
+                <li>Retención y gestión de baja</li>
+              </ul>
+            </div>
+
+          </div>
+
+          <!-- E&U Cloud strip -->
+          <div class="eu-strip">
+            <span class="eu-lbl">⚙ Energy &amp; Utilities Cloud</span>
+            <div class="eu-objs">
+              <span class="eu-obj"
+                data-tt-title="ServicePoint__c"
+                data-tt-body="Punto de suministro del cliente. Almacena el CUPS, tipo de acceso a red (BT/AT), tensión, potencia contratada por periodo y distribuidora asignada al suministro.">
+                ServicePoint (CUPS)
+              </span>
+              <span class="eu-obj"
+                data-tt-title="Premise__c"
+                data-tt-body="Dirección física del punto de suministro. Vinculada al ServicePoint y usada para la validación contra el callejero del INE y la geolocalización del inmueble.">
+                Premise
+              </span>
+              <span class="eu-obj"
+                data-tt-title="Billing Account (RT)"
+                data-tt-body="Cuenta de facturación del cliente. Gestiona el método de pago, IBAN para domiciliación SEPA, ciclo de facturación y preferencias de envío de factura.">
+                Billing Account
+              </span>
+              <span class="eu-obj"
+                data-tt-title="Service Account (RT)"
+                data-tt-body="Cuenta de servicio que agrupa los contratos activos y los puntos de suministro del cliente. Pivot central del modelo de datos energético.">
+                Service Account
+              </span>
+              <span class="eu-obj"
+                data-tt-title="PaymentMethod__c"
+                data-tt-body="Método de pago vinculado al Billing Account. Soporta domiciliación SEPA, transferencia bancaria y pago online mediante pasarela de pago.">
+                PaymentMethod
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connector SF → MuleSoft -->
+        <div class="v-conn">
+          <div class="v-conn-line"></div>
+          <span class="v-conn-lbl" style="color:var(--mule)">API REST · Platform Events · Change Data Capture · Batch</span>
+          <div class="v-conn-line"></div>
+        </div>
+
+        <!-- MULESOFT -->
+        <div class="mule-block" id="mule-block">
+          <div class="block-hdr">
+            <div class="bdot bdot-mule"></div>
+            <span class="btitle btitle-mule">MuleSoft — Plataforma de Integración iPaaS</span>
+            <span class="bsubt bsubt-mule">Capa de desacoplamiento · Patrón API-led · 3 capas</span>
+          </div>
+          <div class="items4">
+            <div class="b-item bi-mule"
+              data-tt-title="API-led Connectivity"
+              data-tt-body="Arquitectura de 3 capas: Experience APIs (adaptadas a cada canal), Process APIs (lógica de negocio e integración) y System APIs (interfaces con SAP, distribuidoras y sistemas externos). Desacopla completamente Salesforce del backend.">
+              <span class="b-item-name">API-led Connectivity</span>
+              <span class="b-item-desc">Experience · Process · System APIs</span>
+            </div>
+            <div class="b-item bi-mule"
+              data-tt-title="Platform Events & CDC"
+              data-tt-body="Integración event-driven: Salesforce publica Platform Events al activar un contrato, registrar un caso o detectar un cambio crítico. Change Data Capture sincroniza modificaciones en objetos clave hacia SAP en tiempo casi-real.">
+              <span class="b-item-name">Platform Events / CDC</span>
+              <span class="b-item-desc">Event-driven · Sync tiempo real</span>
+            </div>
+            <div class="b-item bi-mule"
+              data-tt-title="REE / Switching ATR"
+              data-tt-body="Orquestación de mensajes del proceso ATR (F1, F2, A1, B1...) hacia las distribuidoras vía EDIEL/CONTAX. Gestiona el ciclo completo de cambio de suministrador: solicitud, validación, activación y notificación.">
+              <span class="b-item-name">REE / Switching</span>
+              <span class="b-item-desc">Mensajes ATR · Cambio suministrador</span>
+            </div>
+            <div class="b-item bi-mule"
+              data-tt-title="Entidades Bancarias / Pagos"
+              data-tt-body="Validación de IBAN (norma ISO 13616) y domiciliación bancaria SEPA. Integración con pasarela de pago para cobros online, gestión de devoluciones e impagados con envío a SAP-IS-U.">
+              <span class="b-item-name">Entidades Bancarias</span>
+              <span class="b-item-desc">IBAN · SEPA · Pagos online</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connector MuleSoft → SAP -->
+        <div class="v-conn">
+          <div class="v-conn-line"></div>
+          <span class="v-conn-lbl" style="color:var(--sap)">BAPI · RFC · IDoc · REST/OData (S/4HANA)</span>
+          <div class="v-conn-line"></div>
+        </div>
+
+        <!-- SAP BLOCK -->
+        <div class="sap-block" id="sap-block">
+          <div class="block-hdr">
+            <div class="bdot bdot-sap"></div>
+            <span class="btitle btitle-sap">SAP S/4HANA for Utilities — Sistema de registro</span>
+            <span class="bsubt bsubt-sap">Facturación, contratos y datos financieros · SoR</span>
+          </div>
+          <div class="items4">
+            <div class="b-item bi-sap"
+              data-tt-title="Contratos & Punto de Servicio (IS-U)"
+              data-tt-body="Gestión de contratos de suministro en el módulo IS-U de SAP. Datos maestros del punto de servicio (PS): CUPS, tarifas de acceso, potencias contratadas por periodo y configuración del equipo de medida.">
+              <span class="b-item-name">Contratos &amp; PS</span>
+              <span class="b-item-desc">IS-U · Datos maestros · CUPS</span>
+            </div>
+            <div class="b-item bi-sap"
+              data-tt-title="Facturación & Cobros (IS-U FI-CA)"
+              data-tt-body="Ciclo de facturación energética completo: lectura de medidas, cálculo de factura (PVPC o mercado libre), emisión, cobro y gestión de impagados. Sistema de registro (SoR) del dato de factura. Los datos se consultan desde Salesforce vía API.">
+              <span class="b-item-name">Facturación &amp; Cobros</span>
+              <span class="b-item-desc">Ciclo factura · FI-CA · Impagados</span>
+            </div>
+            <div class="b-item bi-sap"
+              data-tt-title="Medida & ATR"
+              data-tt-body="Gestión de curvas de carga y medidas horarias recibidas desde REE/distribuidoras. Procesamiento de mensajes ATR (R1, P1, Q1...) para la liquidación de energía y el cierre del proceso de switching.">
+              <span class="b-item-name">Medida &amp; ATR</span>
+              <span class="b-item-desc">Curvas carga · Liquidación energía</span>
+            </div>
+            <div class="b-item bi-sap"
+              data-tt-title="S4 Core — Módulos FI/CO"
+              data-tt-body="Módulos financieros de SAP S/4HANA: contabilidad financiera (FI), controlling (CO), tesorería y reporting regulatorio para CNMC y AEAT. Genera los balances e indicadores financieros de la comercializadora.">
+              <span class="b-item-name">S4 Core (FI/CO)</span>
+              <span class="b-item-desc">Finanzas · Tesorería · Reporting</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /center -->
+
+      <!-- ─── RIGHT: EXTERNAL SYSTEMS ─── -->
+      <div class="ext-panel">
+
+        <!-- OPERATIONAL SYSTEMS -->
+        <div>
+          <div class="ext-sect-lbl" style="color:var(--ext-op)">⬡ Sistemas operacionales</div>
+          <div class="ext-group">
+
+            <div class="ext-card ext-ops" id="ext-sips"
+              data-tt-title="SIPS (Red Eléctrica de España)"
+              data-tt-body="Sistema de Información de Puntos de Suministro. Consulta obligatoria en la contratación B2C para validar el CUPS ante REE: titular, distribuidora, potencia contratada y estado del punto de suministro.">
+              <span class="ext-name">SIPS · REE</span>
+              <span class="ext-desc">Validación CUPS · Datos punto suministro</span>
+            </div>
+
+            <div class="ext-card ext-ops" id="ext-informa"
+              data-tt-title="Informa / Experian"
+              data-tt-body="Scoring de riesgo crediticio del cliente potencial. Consultado durante la cualificación del lead para clientes en mercado libre. Permite segmentar la oferta y ajustar las condiciones de contratación según el perfil de riesgo.">
+              <span class="ext-name">Informa (Experian)</span>
+              <span class="ext-desc">Scoring riesgo crediticio · Perfil cliente</span>
+            </div>
+
+            <div class="ext-card ext-ops" id="ext-gmaps"
+              data-tt-title="Google Maps API / Callejero INE"
+              data-tt-body="Geocodificación y validación de direcciones de suministro. Integración con el Callejero Postal del INE para normalización y verificación de la dirección en el proceso de contratación. Validación de cobertura geográfica.">
+              <span class="ext-name">Google Maps / Callejero</span>
+              <span class="ext-desc">Geocodificación · Validación dirección INE</span>
+            </div>
+
+            <div class="ext-card ext-ops" id="ext-servi"
+              data-tt-title="Serviinform — BPO & Firma Digital"
+              data-tt-body="Proveedor BPO especializado. Orquesta la firma electrónica avanzada de contratos (eIDAS), la custodia documental certificada y las comunicaciones fehacientes. Gestión de expedientes de reclamación y burofax electrónico.">
+              <span class="ext-name">Serviinform</span>
+              <span class="ext-desc">Firma digital eIDAS · Custodia documental · BPO</span>
+            </div>
+
+            <div class="ext-card ext-dist" id="ext-dist"
+              data-tt-title="Distribuidoras (ATR / REE)"
+              data-tt-body="Interlocutor principal en el proceso ATR (Acceso de Terceros a la Red). Intercambio de mensajes de switching (F1/A1/B1), notificaciones de activación/desactivación del suministro y datos de medida, vía CONTAX/EDIEL.">
+              <span class="ext-name">Distribuidoras ATR</span>
+              <span class="ext-desc">Switching · Activación · EDIEL/CONTAX · REE</span>
+            </div>
+
+            <div class="ext-card ext-ops" id="ext-seres"
+              data-tt-title="SERES — Facturación Electrónica"
+              data-tt-body="Plataforma de facturación electrónica y declaraciones fiscales. Gestión de delegaciones AEAT (IVA, Impuesto Especial sobre la Electricidad), comunicación con la Agencia Tributaria y obligaciones de factura-e B2B (Ley Crea y Crece).">
+              <span class="ext-name">SERES</span>
+              <span class="ext-desc">Facturación electrónica · AEAT · Impuestos energía</span>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="ext-sep"></div>
+
+        <!-- DATA / STORAGE -->
+        <div>
+          <div class="ext-sect-lbl" style="color:var(--ext-dt)">⬡ Datos, almacenamiento &amp; colaboración</div>
+          <div class="ext-group">
+
+            <div class="ext-card ext-dat" id="ext-dl"
+              data-tt-title="Data Lake / Data Warehouse"
+              data-tt-body="Repositorio centralizado de datos históricos: consumos horarios, curvas de carga, histórico de contratos e interacciones CRM, datos de mercado OMIE y precios PVPC. Base para reporting avanzado (BI), modelos predictivos de IA y auditoría regulatoria.">
+              <span class="ext-name">Data Lake / DWH</span>
+              <span class="ext-desc">Histórico consumos · BI · Modelos IA · Auditoría</span>
+            </div>
+
+            <div class="ext-card ext-dat" id="ext-docmgr"
+              data-tt-title="Gestor Documental"
+              data-tt-body="Sistema de gestión documental para contratos firmados, documentación acreditativa del cliente (DNI/NIE, CIF), comunicaciones regulatorias, expedientes de reclamación y correspondencia fehaciente. Integrado con Serviinform para la custodia certificada.">
+              <span class="ext-name">Gestor Documental</span>
+              <span class="ext-desc">Contratos · Expedientes · Regulatorio · Custodia</span>
+            </div>
+
+            <div class="ext-card ext-dat" id="ext-sharepoint"
+              data-tt-title="SharePoint / Microsoft 365"
+              data-tt-body="Plataforma de colaboración interna del equipo comercial y de operaciones. Repositorio de plantillas de comunicación, procedimientos operativos normalizados (PONs), documentación del proyecto de implantación y gestión del conocimiento interno.">
+              <span class="ext-name">SharePoint / M365</span>
+              <span class="ext-desc">Colaboración · Plantillas · PONs · Conocimiento</span>
+            </div>
+
+            <div class="ext-card ext-dat" id="ext-s3"
+              data-tt-title="Amazon S3"
+              data-tt-body="Almacenamiento de objetos en nube para archivos de gran volumen: backups de documentos firmados, archivos de curvas de carga (formato EDIEL), exports del CRM, archivos de integración batch con SAP (IDocs) y logs de auditoría.">
+              <span class="ext-name">Amazon S3</span>
+              <span class="ext-desc">Almacenamiento objetos · Batch files · Backups · Logs</span>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /ext-panel -->
+
+    </div><!-- /main-grid -->
+
+    <!-- LEGEND -->
+    <div class="legend">
+      <span class="leg-lbl">Leyenda</span>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--mkt)"></div>Marketing Cloud</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--sales)"></div>Sales Cloud</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--svc)"></div>Service Cloud</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--eu)"></div>E&amp;U Cloud</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--ai)"></div>Capa IA transversal</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--mule)"></div>MuleSoft iPaaS</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--sap)"></div>SAP S/4HANA</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--ext-op)"></div>Sistemas operacionales</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--ext-dt)"></div>Datos &amp; colaboración</div>
+      <div class="leg-item" style="margin-left:10px">
+        <div class="leg-line leg-solid"></div>Flujo unidireccional
+      </div>
+      <div class="leg-item">
+        <div class="leg-line leg-dash"></div>Flujo bidireccional
+      </div>
+    </div>
+
+  </div><!-- /diag-wrap -->
+
+</div><!-- /page -->
+
+<!-- TOOLTIP -->
+<div class="tip" id="tip">
+  <div class="tip-title" id="tip-title"></div>
+  <div class="tip-body"  id="tip-body"></div>
+</div>
+
+<script>
+// ── TOOLTIP ──────────────────────────────────────────────────────────────────
+const tip = document.getElementById('tip');
+const tipT = document.getElementById('tip-title');
+const tipB = document.getElementById('tip-body');
+
+function positionTip(e) {
+  const mx = e.clientX, my = e.clientY;
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  tip.style.left = (mx + 16 + tw > vw ? mx - tw - 16 : mx + 16) + 'px';
+  tip.style.top  = (my + 16 + th > vh ? my - th - 16 : my + 16) + 'px';
+}
+
+document.querySelectorAll('[data-tt-title]').forEach(el => {
+  el.addEventListener('mouseenter', e => {
+    tipT.textContent = el.dataset.ttTitle;
+    tipB.textContent = el.dataset.ttBody;
+    tip.classList.add('show');
+    positionTip(e);
+  });
+  el.addEventListener('mousemove', positionTip);
+  el.addEventListener('mouseleave', () => tip.classList.remove('show'));
+});
+
+// ── FLOW SVG ──────────────────────────────────────────────────────────────────
+function drawFlows() {
+  const svg = document.getElementById('flow-svg');
+  const wrap = document.getElementById('diag-wrap');
+  const wr = wrap.getBoundingClientRect();
+
+  svg.setAttribute('width', wrap.offsetWidth);
+  svg.setAttribute('height', wrap.offsetHeight);
+  svg.innerHTML = '';
+
+  function rect(id) {
+    const el = document.getElementById(id);
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return {
+      l: r.left  - wr.left,
+      r: r.right  - wr.left,
+      t: r.top   - wr.top,
+      b: r.bottom - wr.top,
+      cx: (r.left + r.right)  / 2 - wr.left,
+      cy: (r.top  + r.bottom) / 2 - wr.top,
+    };
+  }
+
+  function bezier(x1,y1,x2,y2) {
+    const dx = Math.abs(x2-x1)*0.45;
+    return `M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}`;
+  }
+
+  function addFlow(x1,y1,x2,y2, color, animated, speed=2.8) {
+    const d = bezier(x1,y1,x2,y2);
+    // base static dashed
+    const base = document.createElementNS('http://www.w3.org/2000/svg','path');
+    base.setAttribute('d', d);
+    base.setAttribute('fill','none');
+    base.setAttribute('stroke', color);
+    base.setAttribute('stroke-width','1');
+    base.setAttribute('stroke-dasharray','4 5');
+    base.setAttribute('opacity','0.22');
+    svg.appendChild(base);
+
+    if (animated) {
+      const anim = document.createElementNS('http://www.w3.org/2000/svg','path');
+      anim.setAttribute('d', d);
+      anim.setAttribute('fill','none');
+      anim.setAttribute('stroke', color);
+      anim.setAttribute('stroke-width','2');
+      anim.setAttribute('stroke-dasharray','7 120');
+      anim.setAttribute('stroke-dashoffset','0');
+      anim.setAttribute('opacity','0.75');
+      const a = document.createElementNS('http://www.w3.org/2000/svg','animate');
+      a.setAttribute('attributeName','stroke-dashoffset');
+      a.setAttribute('from','0'); a.setAttribute('to','-127');
+      a.setAttribute('dur', speed+'s'); a.setAttribute('repeatCount','indefinite');
+      anim.appendChild(a);
+      svg.appendChild(anim);
+    }
+  }
+
+  // Build connections
+  const conns = [
+    // Channels → Clouds
+    { from:'ch-web',    to:'cloud-mkt',  color:'#6B7CF6', anim:true,  spd:2.4 },
+    { from:'ch-cti',    to:'cloud-svc',  color:'#6B7CF6', anim:true,  spd:2.9 },
+    { from:'ch-wa',     to:'cloud-svc',  color:'#6B7CF6', anim:false },
+    { from:'ch-email',  to:'cloud-mkt',  color:'#6B7CF6', anim:true,  spd:3.2 },
+    { from:'ch-sms',    to:'cloud-mkt',  color:'#6B7CF6', anim:false },
+    { from:'ch-f2f',    to:'cloud-sales',color:'#6B7CF6', anim:true,  spd:2.6 },
+    { from:'ch-partner',to:'cloud-sales',color:'#6B7CF6', anim:false },
+    { from:'ch-comp',   to:'cloud-sales',color:'#6B7CF6', anim:true,  spd:3.5 },
+    // Clouds → External ops
+    { from:'cloud-sales',to:'ext-sips',   color:'#FB7185', anim:true,  spd:2.8 },
+    { from:'cloud-sales',to:'ext-informa',color:'#FB7185', anim:false },
+    { from:'cloud-sales',to:'ext-gmaps',  color:'#FB7185', anim:true,  spd:3.1 },
+    { from:'cloud-sales',to:'ext-servi',  color:'#FB7185', anim:false },
+    { from:'cloud-svc',  to:'ext-seres',  color:'#FB7185', anim:true,  spd:3.4 },
+    // MuleSoft → Distribuidoras
+    { from:'mule-block', to:'ext-dist',   color:'#F59E0B', anim:true,  spd:2.2 },
+    // MuleSoft / SF → Data systems
+    { from:'sf-block',  to:'ext-dl',       color:'#2DD4BF', anim:false },
+    { from:'sf-block',  to:'ext-docmgr',   color:'#2DD4BF', anim:true,  spd:3.8 },
+    { from:'cloud-sales',to:'ext-sharepoint',color:'#2DD4BF',anim:false },
+    { from:'mule-block', to:'ext-s3',      color:'#2DD4BF', anim:true,  spd:3.0 },
+  ];
+
+  conns.forEach(c => {
+    const f = rect(c.from), t = rect(c.to);
+    if (!f || !t) return;
+
+    let x1, y1, x2, y2;
+    if (f.r < t.l - 5) {
+      x1 = f.r; y1 = f.cy; x2 = t.l; y2 = t.cy;
+    } else if (f.l > t.r + 5) {
+      x1 = f.l; y1 = f.cy; x2 = t.r; y2 = t.cy;
+    } else {
+      x1 = f.cx; y1 = f.b; x2 = t.cx; y2 = t.t;
+    }
+    addFlow(x1,y1,x2,y2, c.color, c.anim !== false, c.spd);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(drawFlows, 300);
+  window.addEventListener('resize', drawFlows);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tabla 6.3 — Entregables por fase</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-deep:#07090F;--bg-base:#0C1018;--bg-hover:#141B2A;
+  --border-xs:rgba(255,255,255,0.05);--border-sm:rgba(255,255,255,0.09);
+  --c-dis:#6B7CF6;--c-mvp:#F59E0B;--c-f2:#3B8BEB;--c-f3:#06B6D4;
+  --c-f4:#10B981;--c-f56:#E879F9;--c-f7:#FB7185;--c-tr:#94A3B8;
+  --text:#EEF2FF;--muted:#8896AC;--dim:#4B5563;
+  --ff-d:'Syne',sans-serif;--ff-b:'DM Sans',sans-serif;--ff-m:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg-deep);color:var(--text);font-family:var(--ff-b);min-height:100vh;}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(255,255,255,0.016) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,0.016) 1px,transparent 1px);
+  background-size:36px 36px;}
+.glow-orb{position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(140px);opacity:0.045;}
+.page{position:relative;z-index:1;padding:28px 36px 40px;max-width:1180px;margin:0 auto;}
+
+/* HEADER */
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;}
+.hdr h1{font-family:var(--ff-d);font-size:22px;font-weight:800;letter-spacing:-.3px;margin-bottom:7px;}
+.hdr h1 em{font-style:normal;background:linear-gradient(120deg,#F59E0B 10%,#10B981 90%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hdr p{font-size:11.5px;color:var(--muted);max-width:640px;line-height:1.65;}
+.badges{display:flex;flex-direction:column;gap:5px;align-items:flex-end;}
+.badge{font-family:var(--ff-m);font-size:9px;letter-spacing:.5px;text-transform:uppercase;padding:3px 10px;border-radius:4px;}
+.b1{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#F59E0B;}
+.b2{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:8px;}
+
+/* CARD */
+.card{background:var(--bg-base);border:1px solid var(--border-xs);border-radius:18px;padding:22px 20px 20px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(245,158,11,.5),rgba(16,185,129,.5),transparent);}
+
+/* FILTER */
+.filter-bar{display:flex;gap:7px;margin-bottom:16px;flex-wrap:wrap;align-items:center;}
+.filter-lbl{font-family:var(--ff-m);font-size:7.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);}
+.fbtn{font-family:var(--ff-m);font-size:7.5px;padding:4px 11px;border-radius:5px;border:1px solid var(--border-sm);background:rgba(255,255,255,.03);color:var(--muted);cursor:pointer;transition:all .18s;}
+.fbtn:hover{background:rgba(255,255,255,.07);color:var(--text);}
+.fbtn.active{color:var(--text);background:rgba(255,255,255,.06);}
+
+/* PHASE BLOCKS */
+.phase-block{margin-bottom:10px;border-radius:12px;overflow:hidden;}
+.phase-hdr{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;user-select:none;transition:filter .15s;}
+.phase-hdr:hover{filter:brightness(1.08);}
+.phase-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.phase-name{font-family:var(--ff-d);font-size:12px;font-weight:800;}
+.phase-period{font-family:var(--ff-m);font-size:8px;color:var(--muted);margin-left:auto;}
+.phase-golive{font-family:var(--ff-m);font-size:8px;font-weight:700;padding:2px 9px;border-radius:4px;margin-left:10px;}
+.phase-count{font-family:var(--ff-m);font-size:7.5px;padding:2px 8px;border-radius:3px;background:rgba(255,255,255,.06);border:1px solid var(--border-xs);color:var(--muted);margin-left:6px;}
+.ph-toggle{font-size:10px;color:var(--dim);margin-left:8px;transition:transform .2s;}
+
+.phase-content{display:none;}
+.phase-content.open{display:block;}
+
+/* DELIVERABLES TABLE */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:rgba(255,255,255,.025);border-bottom:1px solid var(--border-sm);}
+th{font-family:var(--ff-m);font-size:7.5px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);padding:8px 14px;text-align:left;}
+tbody tr{border-bottom:1px solid var(--border-xs);transition:background .12s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--bg-hover);}
+td{padding:9px 14px;vertical-align:middle;font-size:9px;}
+
+.td-num{font-family:var(--ff-m);font-size:8px;font-weight:700;color:var(--dim);width:32px;}
+.td-entregable{color:var(--text);font-weight:600;font-size:9px;line-height:1.4;width:260px;}
+.td-desc{color:var(--muted);line-height:1.5;font-size:8.5px;}
+.td-type{width:100px;}
+.type-pill{font-family:var(--ff-m);font-size:7px;padding:2px 8px;border-radius:3px;white-space:nowrap;}
+.tp-func{background:rgba(59,139,235,.1);border:1px solid rgba(59,139,235,.25);color:#3B8BEB;}
+.tp-tech{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#10B981;}
+.tp-int{background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.25);color:#06B6D4;}
+.tp-data{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#F59E0B;}
+.tp-gov{background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);color:#A78BFA;}
+.tp-mkt{background:rgba(232,121,249,.1);border:1px solid rgba(232,121,249,.25);color:#E879F9;}
+.tp-sec{background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.25);color:#FB7185;}
+.tp-doc{background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.25);color:#94A3B8;}
+
+/* LEGEND */
+.legend{border-top:1px solid var(--border-xs);padding-top:14px;margin-top:14px;}
+.leg-row{display:flex;flex-wrap:wrap;gap:7px 16px;}
+.leg-item{display:flex;align-items:center;gap:5px;font-family:var(--ff-m);font-size:8px;color:var(--muted);}
+.leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:600px;height:600px;top:-200px;left:-100px;background:#F59E0B;"></div>
+<div class="glow-orb" style="width:500px;height:500px;bottom:-150px;right:-60px;background:#10B981;"></div>
+
+<div class="page">
+  <div class="hdr">
+    <div>
+      <h1>Tabla 6.3 — <em>Entregables por fase</em></h1>
+      <p>Catálogo de entregables del proyecto de implantación Salesforce CRM organizados por fase. Cada entregable es medible, verificable y forma parte del criterio de aceptación del go-live correspondiente.</p>
+    </div>
+    <div class="badges">
+      <span class="badge b1">8 fases · go-live incremental · criterios de aceptación</span>
+      <span class="badge b2">Elaboración propia · TFG 2025 · Cap. 6.2</span>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <div class="filter-bar">
+      <span class="filter-lbl">Tipo</span>
+      <button class="fbtn active" onclick="filterType('all',this)">Todos</button>
+      <button class="fbtn" onclick="filterType('Funcional',this)" style="border-color:rgba(59,139,235,.3);color:#3B8BEB;">Funcional</button>
+      <button class="fbtn" onclick="filterType('Técnico',this)" style="border-color:rgba(16,185,129,.3);color:#10B981;">Técnico</button>
+      <button class="fbtn" onclick="filterType('Integración',this)" style="border-color:rgba(6,182,212,.3);color:#06B6D4;">Integración</button>
+      <button class="fbtn" onclick="filterType('Datos',this)" style="border-color:rgba(245,158,11,.3);color:#F59E0B;">Datos</button>
+      <button class="fbtn" onclick="filterType('Seguridad',this)" style="border-color:rgba(251,113,133,.3);color:#FB7185;">Seguridad</button>
+      <button class="fbtn" onclick="filterType('Gobierno',this)" style="border-color:rgba(167,139,250,.3);color:#A78BFA;">Gobierno</button>
+      <button class="fbtn" onclick="filterType('Documentación',this)" style="border-color:rgba(148,163,184,.3);color:#94A3B8;">Documentación</button>
+    </div>
+
+    <!-- DISEÑO -->
+    <div class="phase-block" id="ph-dis">
+      <div class="phase-hdr" style="background:rgba(107,124,246,.08);border:1px solid rgba(107,124,246,.2);" onclick="togglePhase('dis')">
+        <div class="phase-dot" style="background:#6B7CF6;box-shadow:0 0 7px #6B7CF6;"></div>
+        <span class="phase-name" style="color:#6B7CF6;">Diseño / Discovery</span>
+        <span class="phase-period">M1 – M2 · 2 meses</span>
+        <span class="phase-golive" style="background:rgba(107,124,246,.15);border:1px solid rgba(107,124,246,.3);color:#6B7CF6;">Prerequisito construcción</span>
+        <span class="phase-count">6 entregables</span>
+        <span class="ph-toggle" id="tog-dis">▼</span>
+      </div>
+      <div class="phase-content open" id="pc-dis">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Entregable</th><th>Descripción</th><th>Tipo</th></tr></thead>
+          <tbody>
+            <tr data-type="Gobierno"><td class="td-num">1</td><td class="td-entregable">Backlog priorizado y estimado</td><td class="td-desc">197 historias de usuario organizadas por fase, estimadas en story points, con criterios de aceptación definidos y dependencias identificadas. Validado por el Product Owner.</td><td class="td-type"><span class="type-pill tp-gov">Gobierno</span></td></tr>
+            <tr data-type="Técnico"><td class="td-num">2</td><td class="td-entregable">Arquitectura objetivo validada</td><td class="td-desc">Documento de arquitectura: modelo de datos E&U Cloud, diseño de seguridad, estrategia de integraciones, pipeline CI/CD y decisiones de org design. Aprobado por el cliente.</td><td class="td-type"><span class="type-pill tp-tech">Técnico</span></td></tr>
+            <tr data-type="Técnico"><td class="td-num">3</td><td class="td-entregable">Setup de entornos DEV/INT/UAT/PRE</td><td class="td-desc">Entornos Salesforce aprovisionados y configurados: sandbox DEV para desarrollo, INT para integraciones, UAT para validaciones cliente, PRE para pruebas de rendimiento.</td><td class="td-type"><span class="type-pill tp-tech">Técnico</span></td></tr>
+            <tr data-type="Gobierno"><td class="td-num">4</td><td class="td-entregable">Plan de proyecto (Gantt + RACI)</td><td class="td-desc">Planificación detallada del proyecto con asignación de recursos por sprint, matriz RACI por entregable y plan de gestión de riesgos. Firmado por sponsor y PM.</td><td class="td-type"><span class="type-pill tp-gov">Gobierno</span></td></tr>
+            <tr data-type="Gobierno"><td class="td-num">5</td><td class="td-entregable">PI Planning inicial</td><td class="td-desc">Program Increment Planning del MVP: objetivos por equipo, dependencias críticas, capacidad por sprint y PI Board con compromisos y riesgos identificados.</td><td class="td-type"><span class="type-pill tp-gov">Gobierno</span></td></tr>
+            <tr data-type="Datos"><td class="td-num">6</td><td class="td-entregable">Plan de migración de datos</td><td class="td-desc">Análisis del sistema legacy, mapeo de objetos, estrategia de limpieza y deduplicación, plan de carga y criterios de aceptación de la migración histórica.</td><td class="td-type"><span class="type-pill tp-data">Datos</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- MVP -->
+    <div class="phase-block" id="ph-mvp">
+      <div class="phase-hdr" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);" onclick="togglePhase('mvp')">
+        <div class="phase-dot" style="background:#F59E0B;box-shadow:0 0 7px #F59E0B;"></div>
+        <span class="phase-name" style="color:#F59E0B;">MVP · Fundación, venta básica y alta A3/C1</span>
+        <span class="phase-period">M2 – M7 · 5 sprints</span>
+        <span class="phase-golive" style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);color:#F59E0B;">★ Go-live M7</span>
+        <span class="phase-count">8 entregables</span>
+        <span class="ph-toggle" id="tog-mvp">▼</span>
+      </div>
+      <div class="phase-content open" id="pc-mvp">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Entregable</th><th>Descripción</th><th>Tipo</th></tr></thead>
+          <tbody>
+            <tr data-type="Técnico"><td class="td-num">1</td><td class="td-entregable">Org Salesforce configurada y securizada</td><td class="td-desc">Modelo de datos E&U Cloud implantado, perfiles y Permission Set Groups configurados, SSO corporativo + MFA activado, pipeline CI/CD operativo entre entornos.</td><td class="td-type"><span class="type-pill tp-tech">Técnico</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">2</td><td class="td-entregable">Ficha de cliente y CUPS básico</td><td class="td-desc">Person Account con datos personales, fiscales y de contacto. Objeto Punto de Suministro con CUPS, distribuidora y datos técnicos. Búsqueda global y detección de duplicados.</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">3</td><td class="td-entregable">Flujo lead → oferta → contrato → firma</td><td class="td-desc">Proceso comercial extremo a extremo: captación de lead, cualificación, CPQ básico, generación de oferta en PDF, envío y firma digital eIDAS vía DocuSign/Signaturit.</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">4</td><td class="td-entregable">Alta A3 y switching C1 operativos</td><td class="td-desc">Proceso ATR completo para alta nueva (A3) y cambio de comercializador (C1): generación de mensaje EDIEL, envío a distribuidora, gestión de respuesta (A1/B1) y activación de contrato.</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+            <tr data-type="Integración"><td class="td-num">5</td><td class="td-entregable">Integración SAP básica activa</td><td class="td-desc">Replicación de datos maestros de cliente (BP Replication) y activación de contrato hacia SAP IS-U. Consulta bajo demanda de facturas desde la ficha del cliente (INT-001, INT-002, INT-003).</td><td class="td-type"><span class="type-pill tp-int">Integración</span></td></tr>
+            <tr data-type="Integración"><td class="td-num">6</td><td class="td-entregable">Validación CUPS/SIPS operativa</td><td class="td-desc">Integración síncrona con SIPS/REE para validación obligatoria del CUPS durante la contratación. Llamada bloqueante con respuesta en menos de 2 segundos (INT-009).</td><td class="td-type"><span class="type-pill tp-int">Integración</span></td></tr>
+            <tr data-type="Datos"><td class="td-num">7</td><td class="td-entregable">Migración de datos históricos</td><td class="td-desc">Carga de registros de clientes, contratos activos y puntos de suministro desde el sistema legacy. Validación de calidad de datos, deduplicación y aceptación formal del cliente.</td><td class="td-type"><span class="type-pill tp-data">Datos</span></td></tr>
+            <tr data-type="Técnico"><td class="td-num">8</td><td class="td-entregable">Dashboard de monitorización integraciones</td><td class="td-desc">Panel de control del estado de las integraciones activas: alertas en tiempo real, logs de errores, reintentos y métricas de latencia para el equipo de operaciones.</td><td class="td-type"><span class="type-pill tp-tech">Técnico</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- F2 -->
+    <div class="phase-block" id="ph-f2">
+      <div class="phase-hdr" style="background:rgba(59,139,235,.08);border:1px solid rgba(59,139,235,.2);" onclick="togglePhase('f2')">
+        <div class="phase-dot" style="background:#3B8BEB;box-shadow:0 0 7px #3B8BEB;"></div>
+        <span class="phase-name" style="color:#3B8BEB;">F2 · Captación avanzada y motor comercial</span>
+        <span class="phase-period">M7 – M10 · 3 sprints</span>
+        <span class="phase-golive" style="background:rgba(59,139,235,.15);border:1px solid rgba(59,139,235,.3);color:#3B8BEB;">★ Go-live M10</span>
+        <span class="phase-count">6 entregables</span>
+        <span class="ph-toggle" id="tog-f2">▼</span>
+      </div>
+      <div class="phase-content open" id="pc-f2">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Entregable</th><th>Descripción</th><th>Tipo</th></tr></thead>
+          <tbody>
+            <tr data-type="Funcional"><td class="td-num">1</td><td class="td-entregable">CPQ completo con descuentos y aprobaciones</td><td class="td-desc">Salesforce CPQ configurado con catálogo de productos energéticos completo, reglas de pricing, descuentos por segmento, flujos de aprobación y generación de oferta personalizada en PDF.</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+            <tr data-type="Integración"><td class="td-num">2</td><td class="td-entregable">Canal CTI operativo</td><td class="td-desc">Integración CTI con Amazon Connect y Salesforce Service Cloud: identificación automática del cliente por CLI, pantalla emergente (screen-pop), grabación de llamadas y trazabilidad en CRM (INT-020).</td><td class="td-type"><span class="type-pill tp-int">Integración</span></td></tr>
+            <tr data-type="Integración"><td class="td-num">3</td><td class="td-entregable">Captación desde comparadores y canales digitales</td><td class="td-desc">Recepción de leads desde agregadores de tarifas vía REST API, captura desde formulario web, leads desde campaña de email y desde conversación en WhatsApp Business (INT-018).</td><td class="td-type"><span class="type-pill tp-int">Integración</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">4</td><td class="td-entregable">App móvil FFVV y scoring crediticio</td><td class="td-desc">Interfaz móvil optimizada para agentes de campo (iOS/Android): registro de leads y visitas sin conexión. Scoring crediticio automático durante la cualificación vía Informa/Experian (INT-010).</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">5</td><td class="td-entregable">Workflows y SLAs comerciales</td><td class="td-desc">Workflows automáticos para los procesos comerciales clave: asignación automática de leads, alertas de SLA, escalado al supervisor y notificaciones configuradas por canal y tipo de evento.</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">6</td><td class="td-entregable">Dashboard comercial y forecast</td><td class="td-desc">Dashboard de ventas con embudo de captación, tasa de conversión por canal, forecast por producto y período, y análisis de motivos de pérdida. Disponible en tiempo real para el responsable comercial.</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- F3 -->
+    <div class="phase-block" id="ph-f3">
+      <div class="phase-hdr" style="background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.2);" onclick="togglePhase('f3')">
+        <div class="phase-dot" style="background:#06B6D4;box-shadow:0 0 7px #06B6D4;"></div>
+        <span class="phase-name" style="color:#06B6D4;">F3 · Contratación avanzada, ATR completo e integración SAP</span>
+        <span class="phase-period">M10 – M14 · 3 sprints</span>
+        <span class="phase-golive" style="background:rgba(6,182,212,.15);border:1px solid rgba(6,182,212,.3);color:#06B6D4;">★ Go-live M14</span>
+        <span class="phase-count">5 entregables</span>
+        <span class="ph-toggle" id="tog-f3">▼</span>
+      </div>
+      <div class="phase-content open" id="pc-f3">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Entregable</th><th>Descripción</th><th>Tipo</th></tr></thead>
+          <tbody>
+            <tr data-type="Integración"><td class="td-num">1</td><td class="td-entregable">Integración ATR corporativa completa</td><td class="td-desc">Integración completa con la mensajería ATR corporativa: envío y recepción de mensajes EDIEL/XML normalizados para todos los procesos C1, C2, A3, M1, D1, E1 y R1 (INT-018 completo).</td><td class="td-type"><span class="type-pill tp-int">Integración</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">2</td><td class="td-entregable">Gestión de rechazos ATR subsanables y procesos C2/M1</td><td class="td-desc">Flujo completo de gestión de rechazos B1 subsanables con instrucciones de corrección y reenvío. Procesos C2 (cambio con modificación de acceso) y M1 (modificación sin cambio de comercializador).</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">3</td><td class="td-entregable">Alta nueva construcción A3 y dashboard ATR</td><td class="td-desc">Proceso A3 para activación de puntos sin contrato previo (nueva construcción). Dashboard operativo ATR con KPIs en tiempo real: mensajes en curso, tasas de aceptación/rechazo y alertas de plazos CNMC.</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+            <tr data-type="Integración"><td class="td-num">4</td><td class="td-entregable">Sincronización bidireccional SAP IS-U</td><td class="td-desc">Integración bidireccional completa SAP↔Salesforce: facturas, consumos, depósitos y deuda accesibles en tiempo real desde la ficha del cliente. Sincronización de tarifas desde SAP IS-U al catálogo CPQ (INT-002, FAC-009).</td><td class="td-type"><span class="type-pill tp-int">Integración</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">5</td><td class="td-entregable">Contratación avanzada y auditoría</td><td class="td-desc">Checklist documental automatizado, gestión del consentimiento RGPD por tipo de comunicación, auditoría completa del expediente de contratación y plantillas de contrato diferenciadas por producto.</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- F4 -->
+    <div class="phase-block" id="ph-f4">
+      <div class="phase-hdr" style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);" onclick="togglePhase('f4')">
+        <div class="phase-dot" style="background:#10B981;box-shadow:0 0 7px #10B981;"></div>
+        <span class="phase-name" style="color:#10B981;">F4 · Postventa, atención al cliente y canales digitales</span>
+        <span class="phase-period">M12 – M17 · 4 sprints</span>
+        <span class="phase-golive" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#10B981;">★ Go-live M17</span>
+        <span class="phase-count">7 entregables</span>
+        <span class="ph-toggle" id="tog-f4">▼</span>
+      </div>
+      <div class="phase-content open" id="pc-f4">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Entregable</th><th>Descripción</th><th>Tipo</th></tr></thead>
+          <tbody>
+            <tr data-type="Funcional"><td class="td-num">1</td><td class="td-entregable">ATC completo con SLAs y omnicanal</td><td class="td-desc">Service Cloud configurado: creación de casos desde todos los canales, clasificación, asignación automática, gestión de SLAs por prioridad (P1/P2/P3), escalado automático y gestión de reclamaciones CNMC con trazabilidad regulatoria.</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+            <tr data-type="Integración"><td class="td-num">2</td><td class="td-entregable">Portal de autoservicio y WhatsApp Business</td><td class="td-desc">Portal Experience Cloud para consulta de facturas, estado del contrato y gestión de datos personales por el propio cliente. Canal de WhatsApp Business bidireccional integrado con Service Cloud (INT-015, CAN-004).</td><td class="td-type"><span class="type-pill tp-int">Integración</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">3</td><td class="td-entregable">Ciclo de vida postventa completo</td><td class="td-desc">Gestión de bajas voluntarias, desistimientos, cambios de titular, modificaciones de potencia, reconexiones tras corte por impago y subrogaciones. Procesos ATR inverso y gestión de disputas con distribuidora.</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">4</td><td class="td-entregable">Facturación vista CRM</td><td class="td-desc">Vista integrada de facturas, consumos y deuda del cliente directamente desde la ficha en Salesforce, en tiempo real desde SAP IS-U. Alertas de impago, anomalías de consumo y gestión de reclamaciones de facturación.</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">5</td><td class="td-entregable">Gestión de impagos</td><td class="td-desc">Flujo completo de gestión de deuda: notificación al cliente, registro de plan de pago, bloqueo de comunicaciones comerciales, escalado a corte de suministro y seguimiento del expediente de recuperación.</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">6</td><td class="td-entregable">NPS / CSAT y alerta de churn temprana</td><td class="td-desc">Encuesta NPS/CSAT automatizada al cierre de cada caso. Alerta de riesgo de churn cuando el NPS post-caso es inferior a 6. Integración con Marketing Cloud para activar journey de retención (ATC-014, ATC-015).</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">7</td><td class="td-entregable">Dashboard de servicio ATC</td><td class="td-desc">Dashboard operativo de atención al cliente: SLA, FCR (First Contact Resolution), AHT (Average Handle Time), NPS y volumen por canal. Disponible en tiempo real para el responsable de ATC.</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- F5/F6 -->
+    <div class="phase-block" id="ph-f56">
+      <div class="phase-hdr" style="background:rgba(232,121,249,.08);border:1px solid rgba(232,121,249,.2);" onclick="togglePhase('f56')">
+        <div class="phase-dot" style="background:#E879F9;box-shadow:0 0 7px #E879F9;"></div>
+        <span class="phase-name" style="color:#E879F9;">F5 ‖ F6 · Marketing Cloud, Analytics e IA <span style="font-size:9px;opacity:.7">(paralelas)</span></span>
+        <span class="phase-period">M16 – M18 · 2 sprints ‖</span>
+        <span class="phase-golive" style="background:rgba(232,121,249,.15);border:1px solid rgba(232,121,249,.3);color:#E879F9;">★ Go-live M18</span>
+        <span class="phase-count">6 entregables</span>
+        <span class="ph-toggle" id="tog-f56">▼</span>
+      </div>
+      <div class="phase-content open" id="pc-f56">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Entregable</th><th>Descripción</th><th>Tipo</th></tr></thead>
+          <tbody>
+            <tr data-type="Funcional"><td class="td-num">1</td><td class="td-entregable">Segmentación dinámica y journeys de nurturing</td><td class="td-desc">Segmentación dinámica de la cartera en Marketing Cloud. Journey de nurturing para leads no cualificados y journey de onboarding para nuevos clientes con comunicaciones personalizadas por canal preferido.</td><td class="td-type"><span class="type-pill tp-mkt">Marketing</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">2</td><td class="td-entregable">Journeys de retención y upsell</td><td class="td-desc">Journey anti-churn activado automáticamente cuando el score de riesgo supera el umbral. Journey de upsell de gas a dual para clientes con un solo suministro. Reglas de supresión y gestión de consentimientos.</td><td class="td-type"><span class="type-pill tp-mkt">Marketing</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">3</td><td class="td-entregable">Comunicaciones transaccionales automatizadas</td><td class="td-desc">Notificaciones automáticas de factura emitida, aviso de vencimiento, confirmación de contrato activado y resolución de incidencia. Integradas con el ciclo operativo de Salesforce y SAP IS-U.</td><td class="td-type"><span class="type-pill tp-mkt">Marketing</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">4</td><td class="td-entregable">Dashboards ejecutivos y operativos</td><td class="td-desc">Dashboard ejecutivo con KPIs clave: cartera activa, churn mensual, LTV por segmento y CAC por canal. Dashboards operativos de ventas, ATR y ATC. Informes regulatorios CNMC de reclamaciones.</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">5</td><td class="td-entregable">Predicción de churn con IA (Einstein)</td><td class="td-desc">Modelo predictivo de churn con score individual por cliente, entrenado sobre datos históricos de NPS, casos, impagos y consumo. Alertas automáticas al responsable comercial cuando el score supera el umbral.</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+            <tr data-type="Funcional"><td class="td-num">6</td><td class="td-entregable">Alertas KPI y reporting automatizado</td><td class="td-desc">Alertas automáticas cuando los KPIs superan umbrales configurados: churn, SLA, rechazo ATR. Informe semanal automatizado para dirección con los indicadores clave del negocio.</td><td class="td-type"><span class="type-pill tp-func">Funcional</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- F7 -->
+    <div class="phase-block" id="ph-f7">
+      <div class="phase-hdr" style="background:rgba(251,113,133,.06);border:1px solid rgba(251,113,133,.18);" onclick="togglePhase('f7')">
+        <div class="phase-dot" style="background:#FB7185;box-shadow:0 0 7px #FB7185;"></div>
+        <span class="phase-name" style="color:#FB7185;">F7 · Seguridad avanzada y RGPD</span>
+        <span class="phase-period">M2 – M18 · Transversal</span>
+        <span class="phase-golive" style="background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.25);color:#FB7185;">Transversal</span>
+        <span class="phase-count">5 entregables</span>
+        <span class="ph-toggle" id="tog-f7">▼</span>
+      </div>
+      <div class="phase-content open" id="pc-f7">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Entregable</th><th>Descripción</th><th>Tipo</th></tr></thead>
+          <tbody>
+            <tr data-type="Seguridad"><td class="td-num">1</td><td class="td-entregable">Derecho al olvido y portabilidad</td><td class="td-desc">Implementación del derecho de supresión (anonimización de datos personales manteniendo integridad referencial) y derecho de portabilidad (exportación en formato estructurado). Flujo automatizado con registro de solicitud y evidencia de cumplimiento.</td><td class="td-type"><span class="type-pill tp-sec">Seguridad</span></td></tr>
+            <tr data-type="Seguridad"><td class="td-num">2</td><td class="td-entregable">Audit trail completo de accesos y modificaciones</td><td class="td-desc">Registro inmutable de todos los accesos y modificaciones sobre datos de carácter personal. Trazabilidad completa: usuario, timestamp, campo modificado, valor anterior y valor nuevo. Retención configurable conforme a política RGPD.</td><td class="td-type"><span class="type-pill tp-sec">Seguridad</span></td></tr>
+            <tr data-type="Seguridad"><td class="td-num">3</td><td class="td-entregable">Política de retención automatizada</td><td class="td-desc">Configuración de ciclos de vida de datos por categoría (clientes activos, inactivos, prospectos) con archivado y purga automatizados conforme a los plazos establecidos por el RGPD y la regulación energética.</td><td class="td-type"><span class="type-pill tp-sec">Seguridad</span></td></tr>
+            <tr data-type="Seguridad"><td class="td-num">4</td><td class="td-entregable">Protocolo de notificación de brechas a la AEPD</td><td class="td-desc">Procedimiento documentado y automatizado para la detección, evaluación y notificación de brechas de seguridad a la AEPD en el plazo máximo de 72 horas. Integrado con el sistema de alertas del equipo de seguridad.</td><td class="td-type"><span class="type-pill tp-sec">Seguridad</span></td></tr>
+            <tr data-type="Seguridad"><td class="td-num">5</td><td class="td-entregable">Cumplimiento AI Act (modelos IA desplegados)</td><td class="td-desc">Documentación de transparencia y explicabilidad de los modelos de IA desplegados (churn prediction, NBA): ficha técnica del modelo, sesgos identificados, mecanismo de revisión humana y registro de decisiones automatizadas.</td><td class="td-type"><span class="type-pill tp-sec">Seguridad</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- TRANSICIÓN -->
+    <div class="phase-block" id="ph-tr">
+      <div class="phase-hdr" style="background:rgba(148,163,184,.06);border:1px solid rgba(148,163,184,.18);" onclick="togglePhase('tr')">
+        <div class="phase-dot" style="background:#94A3B8;"></div>
+        <span class="phase-name" style="color:#94A3B8;">Transición y Hypercare</span>
+        <span class="phase-period">M19 – M20 · 2 meses</span>
+        <span class="phase-golive" style="background:rgba(148,163,184,.1);border:1px solid rgba(148,163,184,.25);color:#94A3B8;">Cierre del proyecto</span>
+        <span class="phase-count">5 entregables</span>
+        <span class="ph-toggle" id="tog-tr">▼</span>
+      </div>
+      <div class="phase-content open" id="pc-tr">
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Entregable</th><th>Descripción</th><th>Tipo</th></tr></thead>
+          <tbody>
+            <tr data-type="Documentación"><td class="td-num">1</td><td class="td-entregable">Documentación técnica y funcional completa</td><td class="td-desc">Arquitectura técnica actualizada, modelo de datos, documentación de APIs e integraciones, guías de configuración y runbooks operativos. Manual funcional por área (comercial, ATC, operaciones, marketing).</td><td class="td-type"><span class="type-pill tp-doc">Documentación</span></td></tr>
+            <tr data-type="Documentación"><td class="td-num">2</td><td class="td-entregable">Formación de administradores Salesforce</td><td class="td-desc">Programa de formación para el equipo de administración interno: gestión de usuarios, configuración de objetos, mantenimiento de workflows, gestión de sandbox y procedimientos de despliegue.</td><td class="td-type"><span class="type-pill tp-doc">Documentación</span></td></tr>
+            <tr data-type="Gobierno"><td class="td-num">3</td><td class="td-entregable">Modelo de soporte L1/L2/L3 definido</td><td class="td-desc">Definición del modelo de soporte post-go-live: L1 (usuarios finales → equipo interno), L2 (administradores Salesforce), L3 (implantador en modalidad soporte evolutivo). SLAs, escalado y herramienta de ticketing configurada.</td><td class="td-type"><span class="type-pill tp-gov">Gobierno</span></td></tr>
+            <tr data-type="Gobierno"><td class="td-num">4</td><td class="td-entregable">Hypercare y estabilización</td><td class="td-desc">Soporte intensivo post go-live final durante 4 semanas: monitorización continua, resolución de incidencias en menos de 4 horas, ajustes de configuración y acompañamiento al equipo de operaciones en la adopción.</td><td class="td-type"><span class="type-pill tp-gov">Gobierno</span></td></tr>
+            <tr data-type="Documentación"><td class="td-num">5</td><td class="td-entregable">Informe de cierre y lecciones aprendidas</td><td class="td-desc">Informe ejecutivo de cierre: cumplimiento de objetivos, KPIs de proyecto (velocidad de sprints, tasa de aceptación, deuda técnica), desviaciones respecto al plan y recomendaciones para proyectos futuros.</td><td class="td-type"><span class="type-pill tp-doc">Documentación</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- LEGEND -->
+    <div class="legend">
+      <div class="leg-row">
+        <div class="leg-item"><div class="leg-dot" style="background:#3B8BEB;"></div>Funcional</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#10B981;"></div>Técnico</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#06B6D4;"></div>Integración</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#F59E0B;"></div>Datos / Migración</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#E879F9;"></div>Marketing Cloud</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#FB7185;"></div>Seguridad / RGPD</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#A78BFA;"></div>Gobierno</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#94A3B8;"></div>Documentación</div>
+        <div class="leg-item" style="margin-left:auto;font-family:var(--ff-m);font-size:7.5px;color:var(--dim);">★ = Hito de go-live · criterio de aceptación binario</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function togglePhase(id){
+  const c=document.getElementById('pc-'+id);
+  const t=document.getElementById('tog-'+id);
+  if(c.classList.contains('open')){c.classList.remove('open');t.innerHTML='▼';}
+  else{c.classList.add('open');t.innerHTML='▲';}
+}
+function filterType(type,btn){
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('tbody tr[data-type]').forEach(tr=>{
+    if(type==='all'||tr.dataset.type===type){tr.style.display='';}
+    else{tr.style.display='none';}
+  });
+  // Show phases that have visible rows
+  document.querySelectorAll('.phase-block').forEach(block=>{
+    const visible=[...block.querySelectorAll('tbody tr[data-type]')].filter(r=>r.style.display!=='none');
+    block.style.display=visible.length===0&&type!=='all'?'none':'';
+  });
+}
+</script>
+</body>
+</html>

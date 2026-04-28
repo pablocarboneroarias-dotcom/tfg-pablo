@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seguimiento de oferta y cierre · Tabla · CRM Comercializadora B2C</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:   #07090F;
+  --bg-base:   #0C1018;
+  --bg-card:   #101520;
+  --bg-hover:  #161D2C;
+  --border-xs: rgba(255,255,255,0.05);
+  --border-sm: rgba(255,255,255,0.09);
+
+  --c-agent: #F59E0B;
+  --c-cli:   #06B6D4;
+  --c-crm:   #3B8BEB;
+  --c-both:  #A78BFA;
+  --c-end:   #10B981;
+  --c-rose:  #FB7185;
+
+  --text:  #EEF2FF;
+  --muted: #8896AC;
+  --dim:   #3D4A5C;
+  --ff-d: 'Syne', sans-serif;
+  --ff-b: 'DM Sans', sans-serif;
+  --ff-m: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg-deep); color: var(--text); font-family: var(--ff-b); min-height: 100vh; }
+
+.grid-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+.glow-orb { position: fixed; pointer-events: none; z-index: 0; border-radius: 50%; filter: blur(140px); opacity: 0.06; }
+.page { position: relative; z-index: 1; padding: 28px 32px 44px; max-width: 1020px; margin: 0 auto; }
+
+/* ── HEADER ── */
+.hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; animation: fadeUp .45s ease both; }
+.hdr-left h1 { font-family: var(--ff-d); font-size: 21px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 7px; }
+.hdr-left h1 em { font-style: normal; background: linear-gradient(120deg, #F59E0B 10%, #3B8BEB 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hdr-left p { font-size: 11.5px; color: var(--muted); max-width: 620px; line-height: 1.65; }
+.badges { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+.badge { font-family: var(--ff-m); font-size: 9px; letter-spacing: .5px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; }
+.b-sf  { background: rgba(59,139,235,.1);  border:1px solid rgba(59,139,235,.3);  color:#3B8BEB; }
+.b-pr  { background: rgba(245,158,11,.1);  border:1px solid rgba(245,158,11,.3);  color:#F59E0B; }
+
+/* ── TABLE WRAPPER ── */
+.table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border-sm);
+  border-radius: 14px;
+  overflow: hidden;
+  animation: fadeUp .5s .1s ease both;
+  box-shadow: 0 0 0 1px var(--border-xs), 0 16px 48px rgba(0,0,0,.45);
+}
+
+table { width: 100%; border-collapse: collapse; }
+
+/* ── HEAD ── */
+thead tr {
+  background: linear-gradient(90deg, rgba(245,158,11,.07) 0%, rgba(59,139,235,.06) 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+th {
+  font-family: var(--ff-m);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 13px 18px;
+  text-align: left;
+}
+th.th-paso { width: 80px; text-align: center; }
+th.th-resp { width: 170px; }
+
+/* ── ROWS ── */
+tbody tr {
+  border-bottom: 1px solid var(--border-xs);
+  transition: background .15s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg-hover); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,0.012); }
+tbody tr:nth-child(even):hover { background: var(--bg-hover); }
+
+td {
+  padding: 13px 18px;
+  font-size: 13px;
+  line-height: 1.55;
+  vertical-align: middle;
+}
+
+/* ── PASO BADGE ── */
+td.paso-col { text-align: center; }
+.paso-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--ff-m);
+  font-size: 11px;
+  font-weight: 700;
+  width: 36px; height: 36px;
+  border-radius: 10px;
+}
+
+/* ── RESPONSABLE PILL ── */
+td.resp-col { }
+.resp-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ff-m);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .3px;
+  padding: 4px 11px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.rdot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+.r-agent  { background: rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.35); color:#F59E0B; }
+.r-cli    { background: rgba(6,182,212,.12);  border:1px solid rgba(6,182,212,.35);  color:#06B6D4; }
+.r-crm    { background: rgba(59,139,235,.12); border:1px solid rgba(59,139,235,.35); color:#3B8BEB; }
+.r-both   { background: rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.35);color:#A78BFA; }
+
+.paso-agent { background: rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.3); color:#F59E0B; }
+.paso-cli   { background: rgba(6,182,212,.12);  border:1px solid rgba(6,182,212,.3);  color:#06B6D4; }
+.paso-crm   { background: rgba(59,139,235,.12); border:1px solid rgba(59,139,235,.3); color:#3B8BEB; }
+.paso-both  { background: rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);color:#A78BFA; }
+.paso-lost  { background: rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.3);color:#FB7185; }
+.paso-end   { background: rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.3); color:#10B981; }
+
+/* ── ACCION col ── */
+td.accion-col { color: var(--text); }
+td.accion-col strong { color: #C7D2FE; font-weight: 500; }
+td.accion-col em { color: var(--muted); font-style: normal; font-size: 11.5px; display: block; margin-top: 4px; }
+
+/* ── CHIPS ── */
+.chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 7px; }
+.chip {
+  font-family: var(--ff-m);
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.ch-blue   { background: rgba(59,139,235,.12); border:1px solid rgba(59,139,235,.28); color:#3B8BEB; }
+.ch-cyan   { background: rgba(6,182,212,.12);  border:1px solid rgba(6,182,212,.28);  color:#06B6D4; }
+.ch-green  { background: rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.28); color:#10B981; }
+.ch-rose   { background: rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.28);color:#FB7185; }
+.ch-amber  { background: rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.28); color:#F59E0B; }
+
+/* ── NOTA col ── */
+td.nota-col { color: var(--muted); font-size: 12px; }
+td.nota-col strong { color: var(--text); font-weight: 500; }
+
+/* ── FOOTER ── */
+.footer-note {
+  margin-top: 14px;
+  font-size: 11px;
+  color: var(--dim);
+  line-height: 1.7;
+  animation: fadeUp .5s .18s ease both;
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+.fn-item { display: flex; align-items: center; gap: 6px; }
+.fn-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:600px;height:500px;top:-150px;left:-80px;background:#F59E0B;"></div>
+<div class="glow-orb" style="width:500px;height:400px;bottom:-80px;right:-60px;background:#3B8BEB;"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1><em>Seguimiento de oferta y cierre</em></h1>
+      <p>Secuencia de pasos, responsables y acciones desde el envío de la oferta 
+         hasta la transición al bloque de contratación</p>
+    </div>
+    <div class="badges">
+      <span class="badge b-sf">Salesforce CRM</span>
+      <span class="badge b-pr">Lead → Opportunity</span>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="th-paso">Paso</th>
+          <th class="th-resp">Responsable</th>
+          <th>Acción</th>
+          <th>Notas / Condición</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- 1 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge paso-crm">1</div></td>
+          <td class="resp-col"><span class="resp-pill r-crm"><span class="rdot"></span>CRM</span></td>
+          <td class="accion-col">Monitorizar oferta enviada</td>
+          <td class="nota-col">Si sin respuesta en <strong>48 h</strong> → alerta automática al agente</td>
+        </tr>
+
+        <!-- 2 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge paso-agent">2</div></td>
+          <td class="resp-col"><span class="resp-pill r-agent"><span class="rdot"></span>Agente</span></td>
+          <td class="accion-col">Contactar cliente por <strong>canal preferido</strong>
+            <em>Registrar resultado del contacto en CRM</em>
+          </td>
+          <td class="nota-col">—</td>
+        </tr>
+
+        <!-- 3 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge paso-cli">3</div></td>
+          <td class="resp-col"><span class="resp-pill r-cli"><span class="rdot"></span>Cliente</span></td>
+          <td class="accion-col">Responde a la oferta
+            <div class="chips">
+              <span class="chip ch-green">✅ Acepta</span>
+              <span class="chip ch-amber">🔄 Pide mejora</span>
+              <span class="chip ch-rose">❌ Rechaza</span>
+            </div>
+          </td>
+          <td class="nota-col">Punto de decisión · derivar a paso 4a, 4b o continuar</td>
+        </tr>
+
+        <!-- 4a -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge paso-agent">4a</div></td>
+          <td class="resp-col"><span class="resp-pill r-agent"><span class="rdot"></span>Agente</span></td>
+          <td class="accion-col">Ajustar oferta y re-enviar al cliente</td>
+          <td class="nota-col">Máx. <strong>3 versiones</strong> · volver a paso 1 tras re-envío</td>
+        </tr>
+
+        <!-- 4b -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge paso-lost">4b</div></td>
+          <td class="resp-col"><span class="resp-pill r-crm"><span class="rdot"></span>CRM</span></td>
+          <td class="accion-col">Cerrar oportunidad como <strong>"Perdida"</strong>
+            <div class="chips">
+              <span class="chip ch-rose">🏁 FIN</span>
+            </div>
+          </td>
+          <td class="nota-col">Registrar motivo de rechazo · activar campaña de recuperación <strong>(30 días)</strong></td>
+        </tr>
+
+        <!-- 5 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge paso-both">5</div></td>
+          <td class="resp-col"><span class="resp-pill r-both"><span class="rdot"></span>Agente + CRM</span></td>
+          <td class="accion-col">Convertir Lead en registros vinculados
+            <div class="chips">
+              <span class="chip ch-blue">Cuenta</span>
+              <span class="chip ch-blue">Contacto</span>
+              <span class="chip ch-blue">Oportunidad</span>
+              <span class="chip ch-cyan">Punto de Suministro</span>
+            </div>
+          </td>
+          <td class="nota-col">Acción declarativa automática en Salesforce tras aceptación</td>
+        </tr>
+
+        <!-- 6 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge paso-end">6</div></td>
+          <td class="resp-col"><span class="resp-pill r-crm"><span class="rdot"></span>CRM</span></td>
+          <td class="accion-col">Estado oportunidad: <strong>"En proceso de contratación"</strong>
+            <div class="chips">
+              <span class="chip ch-green">→ Inicio Bloque B</span>
+            </div>
+          </td>
+          <td class="nota-col">Transición automática de estado en el pipeline de Salesforce</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-note">
+    <div class="fn-item"><div class="fn-dot" style="background:#F59E0B"></div><span>Agente Comercial</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#06B6D4"></div><span>Cliente</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#3B8BEB"></div><span>CRM (Sistema)</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#A78BFA"></div><span>Agente + CRM</span></div>
+    <div class="fn-item" style="margin-left:auto;">
+      <span style="color:var(--muted)">Fuente:</span>
+      <span>Elaboración propia · Salesforce Lead &amp; Opportunity lifecycle · Comercializadora B2C</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

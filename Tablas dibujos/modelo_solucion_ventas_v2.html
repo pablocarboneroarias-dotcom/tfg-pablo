@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelo de Solución — Escenario A: Ventas</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    /* PRE SALES — azul medio */
+    --pre-dark:   #1565C0;
+    --pre-mid:    #1976D2;
+    --pre-lt:     #BBDEFB;
+    --pre-bg:     #E3F2FD;
+
+    /* SALES — azul oscuro / navy */
+    --sal-dark:   #0D2B5E;
+    --sal-mid:    #1A3F7A;
+    --sal-lt:     #90CAF9;
+    --sal-bg:     #ffffff;
+    --sal-border: #1A3F7A;
+    --sal-accent: #1565C0;
+
+    /* POST SALES — azul claro / sky */
+    --post-dark:  #0277BD;
+    --post-mid:   #0288D1;
+    --post-lt:    #B3E5FC;
+    --post-bg:    #E1F5FE;
+
+    /* REPORT BAR */
+    --rep-from:   #0D2B5E;
+    --rep-to:     #1976D2;
+
+    /* neutrals */
+    --gray-900:   #111827;
+    --gray-700:   #374151;
+    --gray-500:   #6B7280;
+    --gray-300:   #D1D5DB;
+    --gray-200:   #E5E7EB;
+    --gray-100:   #F3F4F6;
+  }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: #F0F4FA;
+    padding: 40px 32px 48px;
+    min-width: 1200px;
+    color: var(--gray-700);
+  }
+
+  /* ── HEADER ─────────────────────────────────────── */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .header-left h1 {
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--gray-900);
+    letter-spacing: -0.3px;
+  }
+  .header-left p {
+    font-size: 12.5px;
+    color: var(--gray-500);
+    margin-top: 5px;
+    max-width: 700px;
+    line-height: 1.55;
+  }
+  .badge-row { display: flex; gap: 7px; margin-top: 10px; flex-wrap: wrap; }
+  .badge {
+    font-size: 9.5px; font-weight: 600;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 20px;
+    border: 1px solid currentColor;
+  }
+  .badge-blue { color: var(--pre-dark); background: var(--pre-bg); }
+  .badge-gray { color: var(--gray-500); background: var(--gray-100); }
+  .header-right { display: flex; gap: 6px; }
+  .scenario-box {
+    width: 42px; height: 42px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; border-radius: 6px;
+  }
+  .scenario-a { background: var(--sal-dark); color: #fff; }
+  .scenario-b { background: var(--gray-100); color: var(--gray-300); border: 1px solid var(--gray-200); }
+
+  /* ── ACTOR ROW ───────────────────────────────────── */
+  .actor-row {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  }
+  .actor-icon {
+    width: 34px; height: 34px;
+    background: var(--pre-bg); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
+  }
+  .actor-label { font-size: 11px; color: var(--gray-500); font-weight: 500; }
+
+  /* ── PHASE HEADER BAND ───────────────────────────── */
+  .phase-band {
+    display: grid;
+    grid-template-columns: 160px 1fr 284px;
+    gap: 4px;
+    margin-bottom: 0;
+  }
+  .phase-label {
+    display: flex; align-items: center; justify-content: center;
+    padding: 10px 16px;
+    font-size: 10.5px; font-weight: 700;
+    letter-spacing: 1.3px; text-transform: uppercase;
+    border-radius: 8px 8px 0 0;
+    color: #fff;
+  }
+  .phase-presales  { background: var(--pre-mid);  }
+  .phase-sales     { background: var(--sal-dark);
+                     position: relative;
+                     clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%);
+                     padding-right: 28px; }
+  .phase-postsales { background: var(--post-mid); }
+
+  /* ── STEPS GRID ──────────────────────────────────── */
+  .steps-row {
+    display: grid;
+    grid-template-columns: 160px repeat(4, 1fr) 284px;
+    gap: 4px;
+    align-items: stretch;
+  }
+
+  .step-card {
+    padding: 16px 13px 14px;
+    position: relative;
+    min-height: 290px;
+  }
+
+  /* Pre Sales card */
+  .step-presales {
+    background: var(--pre-bg);
+    border: 1.5px solid var(--pre-lt);
+    border-top: 3px solid var(--pre-mid);
+    border-radius: 0 0 8px 8px;
+  }
+
+  /* Sales cards */
+  .step-sales {
+    background: var(--sal-bg);
+    border-top: 3px solid var(--sal-dark);
+    border-left: 1px solid var(--gray-200);
+    border-bottom: 1px solid var(--gray-200);
+    border-right: 1px solid var(--gray-200);
+  }
+
+  /* Post Sales wrapper */
+  .step-postsales {
+    background: var(--post-bg);
+    border: 1.5px solid var(--post-lt);
+    border-top: 3px solid var(--post-mid);
+    border-radius: 0 0 8px 8px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    padding: 0;
+    min-height: 290px;
+  }
+
+  /* Step number bubble */
+  .step-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--sal-dark); color: #fff;
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 9px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .step-presales .step-num { background: var(--pre-dark); }
+
+  .step-title {
+    font-size: 11px; font-weight: 700;
+    color: var(--gray-900);
+    text-align: center; margin-bottom: 10px;
+    line-height: 1.35; min-height: 30px;
+  }
+  .step-divider {
+    height: 1px; background: var(--gray-200);
+    margin: 0 -13px 10px;
+  }
+  .step-presales .step-divider { background: var(--pre-lt); }
+  .step-postsales .step-divider { background: var(--post-lt); }
+
+  /* Bullet list */
+  .step-list { list-style: none; }
+  .step-list li {
+    font-size: 10px; color: var(--gray-700);
+    line-height: 1.45; padding: 2px 0 2px 13px; position: relative;
+  }
+  .step-list li::before {
+    content: '›'; position: absolute; left: 0;
+    color: var(--sal-dark); font-weight: 700; font-size: 13px; line-height: 1.25;
+  }
+  .step-presales .step-list li::before { color: var(--pre-dark); }
+  .step-postsales .step-list li::before { color: var(--post-dark); }
+
+  /* Arrow between sales steps */
+  .step-arrow {
+    position: absolute; top: 50%; right: -10px;
+    transform: translateY(-50%);
+    width: 0; height: 0;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    border-left: 10px solid var(--sal-lt);
+    z-index: 5;
+  }
+
+  /* Integration tags */
+  .tags { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .int-tag {
+    display: inline-block;
+    font-size: 8.5px; font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace;
+    border-radius: 3px; padding: 2px 6px;
+  }
+  .tag-pre  { background: var(--pre-lt);  color: var(--pre-dark); }
+  .tag-sal  { background: #DBEAFE;         color: var(--sal-dark); }
+  .tag-post { background: var(--post-lt); color: var(--post-dark); }
+
+  /* Post Sales sub-columns */
+  .postsales-col {
+    padding: 14px 10px;
+    border-right: 1px solid var(--post-lt);
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .postsales-col:last-child { border-right: none; }
+  .postsales-col .step-title { color: var(--post-dark); font-size: 10.5px; }
+  .postsales-icon { font-size: 20px; margin-bottom: 7px; }
+
+  /* ── REPORT BAR ──────────────────────────────────── */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 160px repeat(4, 1fr) 284px;
+    gap: 4px;
+    margin-top: 6px;
+    align-items: center;
+  }
+  .report-bar {
+    grid-column: 2 / 6;
+    background: linear-gradient(90deg, var(--rep-from) 0%, var(--sal-mid) 45%, var(--sal-accent) 75%, var(--pre-mid) 100%);
+    border-radius: 4px;
+    padding: 7px 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .report-bar-text {
+    font-size: 10.5px; font-weight: 700;
+    color: #fff; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .report-bar-sub {
+    font-size: 9.5px; color: rgba(255,255,255,0.75);
+    margin-left: auto; font-style: italic;
+  }
+
+  /* Step icon */
+  .step-icon { font-size: 22px; display: block; text-align: center; margin-bottom: 5px; }
+
+  /* ── FOOTER ──────────────────────────────────────── */
+  .footer {
+    margin-top: 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 14px; border-top: 1px solid var(--gray-200);
+  }
+  .footer-note  { font-size: 9.5px; color: var(--gray-500); }
+  .footer-brand { font-size: 9.5px; color: var(--gray-500); font-weight: 600; letter-spacing: 0.4px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Modelo de Solución · Escenario A — Ventas</h1>
+    <p>Los procesos de contratación se ejecutan sobre el módulo de Ventas de Salesforce CRM, integrando la gestión omnicanal de leads, el motor de oferta CPQ, la generación y firma digital del contrato y el proceso de switching con distribuidoras vía mensajería ATR.</p>
+    <div class="badge-row">
+      <span class="badge badge-blue">Sales Cloud</span>
+      <span class="badge badge-blue">Service Cloud</span>
+      <span class="badge badge-blue">Marketing Cloud</span>
+      <span class="badge badge-gray">SAP IS-U</span>
+      <span class="badge badge-gray">Firma Digital</span>
+      <span class="badge badge-gray">ATR · REE</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="scenario-box scenario-a">A</div>
+    <div class="scenario-box scenario-b">B</div>
+  </div>
+</div>
+
+<!-- ACTOR -->
+<div class="actor-row">
+  <div class="actor-icon">🖥️</div>
+  <div class="actor-icon">👤</div>
+  <div class="actor-label">Agente Comercial / Canal Digital / FFVV</div>
+</div>
+
+<!-- PHASE LABELS -->
+<div class="phase-band">
+  <div class="phase-label phase-presales">Pre&nbsp;Sales</div>
+  <div class="phase-label phase-sales">⚡&nbsp;&nbsp;Sales</div>
+  <div class="phase-label phase-postsales">Post&nbsp;Sales</div>
+</div>
+
+<!-- STEPS -->
+<div class="steps-row">
+
+  <!-- PRE SALES -->
+  <div class="step-card step-presales">
+    <span class="step-icon">🎯</span>
+    <div class="step-title">Lead Management</div>
+    <div class="step-divider"></div>
+    <ul class="step-list">
+      <li>Identificación de clientes potenciales por segmento y scoring</li>
+      <li>Enriquecimiento de la información de contacto</li>
+      <li>Lanzamiento de campañas de captación para contratación o upselling</li>
+    </ul>
+    <div class="tags">
+      <span class="int-tag tag-pre">MKT Cloud</span>
+      <span class="int-tag tag-pre">Einstein Scoring</span>
+    </div>
+  </div>
+
+  <!-- SALES 1 -->
+  <div class="step-card step-sales" style="position:relative">
+    <div class="step-num">1</div>
+    <div class="step-title">Identificación Cliente y Datos PS</div>
+    <div class="step-divider"></div>
+    <ul class="step-list">
+      <li>Alta iniciada por canal definido (web, teléfono, comparador, FFVV, bot)</li>
+      <li>Selección del tipo de energía a contratar</li>
+      <li>Selección de Energía + SVAs</li>
+      <li>Identificación del cliente (DNI/NIE)</li>
+      <li>Dirección y datos del Punto de Suministro (CUPS)</li>
+    </ul>
+    <div class="tags">
+      <span class="int-tag tag-sal">SIPS · REE</span>
+      <span class="int-tag tag-sal">Omni-Channel</span>
+    </div>
+    <div class="step-arrow"></div>
+  </div>
+
+  <!-- SALES 2 -->
+  <div class="step-card step-sales" style="position:relative">
+    <div class="step-num">2</div>
+    <div class="step-title">Gestión de Oferta</div>
+    <div class="step-divider"></div>
+    <ul class="step-list">
+      <li>Confirmación o selección de tarifa de electricidad o gas</li>
+      <li>Selección de SVAs adicionales</li>
+      <li>Visualización de precios y comparativa de ahorro estimado</li>
+      <li>Confirmación de la oferta por el cliente</li>
+    </ul>
+    <div class="tags">
+      <span class="int-tag tag-sal">CPQ · Salesforce</span>
+      <span class="int-tag tag-sal">Tarifa__c</span>
+    </div>
+    <div class="step-arrow"></div>
+  </div>
+
+  <!-- SALES 3 -->
+  <div class="step-card step-sales" style="position:relative">
+    <div class="step-num">3</div>
+    <div class="step-title">Generación del Contrato y Firma</div>
+    <div class="step-divider"></div>
+    <ul class="step-list">
+      <li>Integración con gestor documental para composición del contrato</li>
+      <li>Generación PDF con condiciones particulares y RGPD</li>
+      <li>Firma digital (OTP SMS / biometría presencial)</li>
+      <li>Integración con backend para activación del contrato</li>
+    </ul>
+    <div class="tags">
+      <span class="int-tag tag-sal">Signaturit</span>
+      <span class="int-tag tag-sal">DocuSign</span>
+      <span class="int-tag tag-sal">Salesforce Docs</span>
+    </div>
+    <div class="step-arrow"></div>
+  </div>
+
+  <!-- SALES 4 -->
+  <div class="step-card step-sales">
+    <div class="step-num">4</div>
+    <div class="step-title">Switching (ATR)</div>
+    <div class="step-divider"></div>
+    <ul class="step-list">
+      <li>Comunicación con distribuidora para procesos ATR (C1 / C2 / A3)</li>
+      <li>Proceso orquestado desde la plataforma Salesforce</li>
+      <li>Integración con backend (SAP IS-U) para alta del contrato</li>
+      <li>Gestión de rechazos ATR subsanables y reenvíos</li>
+    </ul>
+    <div class="tags">
+      <span class="int-tag tag-sal">ATR · REE</span>
+      <span class="int-tag tag-sal">MuleSoft</span>
+      <span class="int-tag tag-sal">SAP IS-U</span>
+    </div>
+  </div>
+
+  <!-- POST SALES -->
+  <div class="step-postsales">
+    <div class="postsales-col">
+      <div class="postsales-icon">💶</div>
+      <div class="step-title">Billing</div>
+      <div class="step-divider"></div>
+      <ul class="step-list">
+        <li>Gestión de facturas con el cliente</li>
+        <li>Preparación, emisión y rectificación</li>
+      </ul>
+      <div class="tags" style="justify-content:center">
+        <span class="int-tag tag-post">SAP IS-U</span>
+      </div>
+    </div>
+    <div class="postsales-col">
+      <div class="postsales-icon">🎧</div>
+      <div class="step-title">Case Management</div>
+      <div class="step-divider"></div>
+      <ul class="step-list">
+        <li>Atención al cliente multicanal</li>
+        <li>Tipificación y enrutamiento a agente especializado</li>
+        <li>SLA y escalados regulatorios</li>
+      </ul>
+      <div class="tags" style="justify-content:center">
+        <span class="int-tag tag-post">Service Cloud</span>
+      </div>
+    </div>
+    <div class="postsales-col">
+      <div class="postsales-icon">📋</div>
+      <div class="step-title">Gestión Contrato</div>
+      <div class="step-divider"></div>
+      <ul class="step-list">
+        <li>Cambio de titular y potencia</li>
+        <li>Modificaciones contractuales</li>
+        <li>Gestión de baja y recuperación</li>
+      </ul>
+      <div class="tags" style="justify-content:center">
+        <span class="int-tag tag-post">ATR Avanzado</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- REPORT BAR -->
+<div class="bottom-row">
+  <div></div>
+  <div class="report-bar">
+    <span style="font-size:13px">📊</span>
+    <span class="report-bar-text">Report Management</span>
+    <span class="report-bar-sub">Trazabilidad extremo a extremo · KPIs comerciales · Dashboards ejecutivos · Auditoría regulatoria CNMC</span>
+  </div>
+  <div></div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="footer-note">Fuente: Elaboración propia · TFG — Propuesta de implantación de sistemas comerciales en una comercializadora energética B2C · UOC 2026</span>
+  <span class="footer-brand">Salesforce CRM · Mercado Residencial Español</span>
+</div>
+
+</body>
+</html>

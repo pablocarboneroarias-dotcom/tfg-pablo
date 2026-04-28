@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gantt PEC1 — TFG CRM Comercializadora Energética</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #060D1A;
+    --bg2:     #0D1B2E;
+    --bg3:     #112035;
+    --border:  rgba(255,255,255,0.07);
+    --text:    #E2EAF4;
+    --muted:   #4B6A8A;
+    --sf:      #00A1E0;
+    --sf-dark: #0070D2;
+
+    --bar-pec:     #1A3F7A;
+    --bar-pec-acc: #00A1E0;
+    --bar-cap:     #1E4D6B;
+    --bar-cap-acc: #38BDF8;
+    --bar-sub:     #1E3A50;
+    --bar-sub-acc: #7DD3FC;
+    --bar-hito:    #F59E0B;
+  }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 36px 32px 48px;
+    min-width: 1100px;
+  }
+
+  /* ── HEADER ─────────────────────────────────────── */
+  .header { text-align: center; margin-bottom: 32px; }
+  .header .eyebrow {
+    font-size: 10px; font-weight: 600; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--sf); margin-bottom: 8px;
+  }
+  .header h1 {
+    font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -0.3px;
+  }
+  .header .subtitle {
+    font-size: 12px; color: var(--muted); margin-top: 6px;
+  }
+  .header .subtitle span {
+    color: var(--sf); font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── LEGEND ROW ──────────────────────────────────── */
+  .legend {
+    display: flex; gap: 20px; justify-content: center;
+    margin-bottom: 24px; flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 10px; color: var(--muted); font-weight: 500;
+  }
+  .legend-bar { width: 24px; height: 10px; border-radius: 3px; }
+  .lb-pec  { background: linear-gradient(90deg, var(--bar-pec), var(--bar-pec-acc)); }
+  .lb-cap  { background: linear-gradient(90deg, var(--bar-cap), var(--bar-cap-acc)); }
+  .lb-sub  { background: linear-gradient(90deg, var(--bar-sub), var(--bar-sub-acc)); }
+
+  /* ── GANTT WRAPPER ───────────────────────────────── */
+  .gantt-wrapper {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  /* HEADER ROW — 14 columns for the timeline */
+  .gantt-header {
+    display: grid;
+    grid-template-columns: 340px 72px 72px 1fr;
+    background: var(--bg3);
+    border-bottom: 1px solid rgba(0,161,224,0.2);
+  }
+  .gh-cell {
+    padding: 12px 14px;
+    font-size: 9.5px; font-weight: 700;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--muted);
+    border-right: 1px solid var(--border);
+    display: flex; align-items: center;
+  }
+  .gh-cell:last-child { border-right: none; }
+
+  .gh-timeline {
+    display: grid;
+    grid-template-columns: repeat(14, 1fr);
+    padding: 0;
+  }
+  .gh-day {
+    padding: 7px 2px 5px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    line-height: 1.3;
+  }
+  .gh-day:last-child { border-right: none; }
+  .gh-day.weekend { background: rgba(255,255,255,0.025); }
+  .gh-day .day-num  { font-size: 11px; font-weight: 700; display: block; color: var(--text); }
+  .gh-day .day-name { font-size: 7.5px; color: var(--muted); font-weight: 500; }
+  .gh-day.weekend .day-num  { color: var(--muted); }
+
+  /* ROWS */
+  .gantt-row {
+    display: grid;
+    grid-template-columns: 340px 72px 72px 1fr;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .gantt-row:last-child { border-bottom: none; }
+  .gantt-row:hover { background: rgba(255,255,255,0.015); }
+
+  .row-pec1 {
+    background: rgba(0,112,210,0.07);
+    border-left: 3px solid var(--sf);
+  }
+  .row-cap {
+    background: rgba(0,112,210,0.03);
+    border-left: 3px solid rgba(56,189,248,0.45);
+  }
+  .row-sub {
+    border-left: 3px solid rgba(125,211,252,0.18);
+  }
+  .row-hito {
+    background: rgba(245,158,11,0.05);
+    border-left: 3px solid var(--bar-hito);
+  }
+
+  /* task + id cell */
+  .gc-info {
+    display: flex; align-items: center;
+    padding: 0 14px;
+    border-right: 1px solid var(--border);
+    gap: 10px;
+    min-height: 44px;
+  }
+  .gc-id-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; font-weight: 700;
+    color: var(--muted);
+    min-width: 30px; flex-shrink: 0;
+  }
+  .row-pec1 .gc-id-label { font-size: 12px; color: var(--sf); }
+  .row-hito .gc-id-label  { color: #FBBF24; }
+
+  .task-name {
+    font-size: 11px; font-weight: 600; color: var(--text); line-height: 1.3;
+  }
+  .row-pec1 .task-name { font-size: 13px; font-weight: 800; color: #fff; }
+  .row-cap  .task-name { font-size: 11.5px; font-weight: 700; color: #CBD5E1; }
+  .row-sub  .task-name { font-size: 10.5px; font-weight: 500; color: #94A3B8; }
+  .row-hito .task-name { font-size: 12px; font-weight: 800; color: #FBBF24; }
+
+  .gc-date {
+    padding: 0 8px;
+    font-size: 9.5px; font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    border-right: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    text-align: center;
+  }
+  .gc-date.hito-date { color: #FBBF24; font-weight: 800; }
+
+  /* Timeline cell area */
+  .gc-timeline {
+    display: grid;
+    grid-template-columns: repeat(14, 1fr);
+    position: relative;
+    align-items: stretch;
+    min-height: 44px;
+  }
+
+  .td-cell {
+    height: 100%;
+    border-right: 1px solid rgba(255,255,255,0.04);
+  }
+  .td-cell:last-child { border-right: none; }
+  .td-cell.weekend { background: rgba(255,255,255,0.018); }
+
+  /* BARS — absolutely positioned */
+  .gantt-bar {
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: rgba(255,255,255,0.9);
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    letter-spacing: 0.3px;
+    pointer-events: none;
+  }
+  .bar-pec1 {
+    background: linear-gradient(90deg, #0D2B5E, #0070D2, #00A1E0);
+    height: 22px; border-radius: 6px;
+    box-shadow: 0 0 18px rgba(0,161,224,0.22);
+  }
+  .bar-cap {
+    background: linear-gradient(90deg, #1E4D6B, #0284C7);
+    height: 18px;
+  }
+  .bar-sub {
+    background: linear-gradient(90deg, #1E3A50, #38BDF8);
+    height: 11px; border-radius: 3px; opacity: 0.8;
+  }
+
+  /* ── STATS ROW ───────────────────────────────────── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .stat-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .stat-icon {
+    width: 36px; height: 36px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .stat-val { font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+  .stat-lbl { font-size: 9px; color: var(--muted); margin-top: 2px; }
+
+  /* ── FOOTER ──────────────────────────────────────── */
+  .footer {
+    margin-top: 20px; padding-top: 14px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-note  { font-size: 9px; color: var(--muted); }
+  .footer-brand { font-size: 9px; color: var(--muted); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="eyebrow">TFG · Propuesta de implantación CRM en comercializadora energética</div>
+  <h1>PEC1 · Plan de Trabajo</h1>
+  <div class="subtitle">
+    <span>23 feb (lun) → 8 mar (dom) 2026</span> &nbsp;·&nbsp; 14 días · 1 hito de entrega
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-bar lb-pec"></div>PEC principal</div>
+  <div class="legend-item"><div class="legend-bar lb-cap"></div>Capítulo / entregable</div>
+  <div class="legend-item"><div class="legend-bar lb-sub"></div>Subtarea</div>
+  <div class="legend-item">
+    <div style="width:12px;height:12px;background:var(--bar-hito);transform:rotate(45deg)"></div>
+    Hito entrega
+  </div>
+</div>
+
+<!-- GANTT TABLE -->
+<div class="gantt-wrapper">
+
+  <!-- ── HEADER ── -->
+  <!-- Days: Feb23=Lun Feb24=Mar Feb25=Mié Feb26=Jue Feb27=Vie Feb28=Sáb
+             Mar01=Dom Mar02=Lun Mar03=Mar Mar04=Mié Mar05=Jue Mar06=Vie Mar07=Sáb Mar08=Dom -->
+  <div class="gantt-header">
+    <div class="gh-cell">
+      <span style="min-width:30px;font-family:'JetBrains Mono',monospace">ID</span>
+      <span style="margin-left:10px">Tarea / Entregable</span>
+    </div>
+    <div class="gh-cell" style="justify-content:center">Inicio</div>
+    <div class="gh-cell" style="justify-content:center">Fin</div>
+    <div class="gh-timeline">
+      <!-- Col 0 --> <div class="gh-day"><span class="day-num">23</span><span class="day-name">Lun</span></div>
+      <!-- Col 1 --> <div class="gh-day"><span class="day-num">24</span><span class="day-name">Mar</span></div>
+      <!-- Col 2 --> <div class="gh-day"><span class="day-num">25</span><span class="day-name">Mié</span></div>
+      <!-- Col 3 --> <div class="gh-day"><span class="day-num">26</span><span class="day-name">Jue</span></div>
+      <!-- Col 4 --> <div class="gh-day"><span class="day-num">27</span><span class="day-name">Vie</span></div>
+      <!-- Col 5 --> <div class="gh-day weekend"><span class="day-num">28</span><span class="day-name">Sáb</span></div>
+      <!-- Col 6 --> <div class="gh-day weekend"><span class="day-num">01</span><span class="day-name">Dom</span></div>
+      <!-- Col 7 --> <div class="gh-day"><span class="day-num">02</span><span class="day-name">Lun</span></div>
+      <!-- Col 8 --> <div class="gh-day"><span class="day-num">03</span><span class="day-name">Mar</span></div>
+      <!-- Col 9 --> <div class="gh-day"><span class="day-num">04</span><span class="day-name">Mié</span></div>
+      <!-- Col 10--> <div class="gh-day"><span class="day-num">05</span><span class="day-name">Jue</span></div>
+      <!-- Col 11--> <div class="gh-day"><span class="day-num">06</span><span class="day-name">Vie</span></div>
+      <!-- Col 12--> <div class="gh-day weekend"><span class="day-num">07</span><span class="day-name">Sáb</span></div>
+      <!-- Col 13--> <div class="gh-day weekend"><span class="day-num">08</span><span class="day-name">Dom</span></div>
+    </div>
+  </div>
+
+  <!-- ── ROW 1: PEC1 (cols 0–13, full width) ── -->
+  <div class="gantt-row row-pec1" style="min-height:52px">
+    <div class="gc-info">
+      <span class="gc-id-label">1</span>
+      <span class="task-name">PEC1 — Plan de Trabajo</span>
+    </div>
+    <div class="gc-date">23/02</div>
+    <div class="gc-date">08/03</div>
+    <div class="gc-timeline">
+      <div class="td-cell"></div><div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell weekend"></div><div class="td-cell weekend"></div>
+      <div class="td-cell"></div><div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell weekend"></div><div class="td-cell weekend"></div>
+      <!-- bar: col0→col13 = 0% to 100% -->
+      <div class="gantt-bar bar-pec1" style="left:1%;right:1%">14d</div>
+    </div>
+  </div>
+
+  <!-- ── ROW 1.1: Cap 1 (cols 0–13, full width) ── -->
+  <div class="gantt-row row-cap" style="min-height:48px">
+    <div class="gc-info">
+      <span class="gc-id-label">1.1</span>
+      <span class="task-name">Cap. 1 — Introducción completa</span>
+    </div>
+    <div class="gc-date">23/02</div>
+    <div class="gc-date">08/03</div>
+    <div class="gc-timeline">
+      <div class="td-cell"></div><div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell weekend"></div><div class="td-cell weekend"></div>
+      <div class="td-cell"></div><div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell weekend"></div><div class="td-cell weekend"></div>
+      <div class="gantt-bar bar-cap" style="left:1%;right:1%">14d</div>
+    </div>
+  </div>
+
+  <!-- ── ROW 1.1a: cols 0–5 (23/02 – 28/02, 6 días) ── -->
+  <!-- col0=23feb col1=24 col2=25 col3=26 col4=27 col5=28feb -->
+  <!-- left=0/14=0% width=6/14≈42.86% -->
+  <div class="gantt-row row-sub" style="min-height:40px">
+    <div class="gc-info">
+      <span class="gc-id-label" style="font-size:9px">1.1a</span>
+      <span class="task-name">1.1–1.3 Contexto, objetivos e impactos</span>
+    </div>
+    <div class="gc-date" style="font-size:9px">23/02</div>
+    <div class="gc-date" style="font-size:9px">01/03</div>
+    <div class="gc-timeline">
+      <div class="td-cell"></div><div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell weekend"></div><div class="td-cell weekend"></div>
+      <div class="td-cell"></div><div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell weekend"></div><div class="td-cell weekend"></div>
+      <!-- 23feb(0) → 01mar(6) = 7 cols = 7/14 = 50% -->
+      <div class="gantt-bar bar-sub" style="left:1%;width:calc(7/14*100% - 6px)">7d</div>
+    </div>
+  </div>
+
+  <!-- ── ROW 1.1b: cols 7–11 (02/03 – 06/03, 5 días) ── -->
+  <!-- col7=02mar col8=03 col9=04 col10=05 col11=06mar -->
+  <!-- left=7/14=50% width=5/14≈35.71% -->
+  <div class="gantt-row row-sub" style="min-height:40px">
+    <div class="gc-info">
+      <span class="gc-id-label" style="font-size:9px">1.1b</span>
+      <span class="task-name">1.4–1.5 Enfoque y planificación del trabajo</span>
+    </div>
+    <div class="gc-date" style="font-size:9px">02/03</div>
+    <div class="gc-date" style="font-size:9px">06/03</div>
+    <div class="gc-timeline">
+      <div class="td-cell"></div><div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell weekend"></div><div class="td-cell weekend"></div>
+      <div class="td-cell"></div><div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell weekend"></div><div class="td-cell weekend"></div>
+      <!-- left at col7 = 7/14*100% = 50% -->
+      <div class="gantt-bar bar-sub" style="left:calc(7/14*100% + 2px);width:calc(5/14*100% - 6px)">5d</div>
+    </div>
+  </div>
+
+  <!-- ── ROW 1.1c: cols 12–13 (07/03 – 08/03, 2 días) ── -->
+  <!-- col12=07mar(Sáb) col13=08mar(Dom) -->
+  <!-- left=12/14≈85.71% width=2/14≈14.29% -->
+  <div class="gantt-row row-sub" style="min-height:40px">
+    <div class="gc-info">
+      <span class="gc-id-label" style="font-size:9px">1.1c</span>
+      <span class="task-name">1.6–1.8 Sumario, otros capítulos y declaración IA</span>
+    </div>
+    <div class="gc-date" style="font-size:9px">07/03</div>
+    <div class="gc-date" style="font-size:9px">08/03</div>
+    <div class="gc-timeline">
+      <div class="td-cell"></div><div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell weekend"></div><div class="td-cell weekend"></div>
+      <div class="td-cell"></div><div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell weekend"></div><div class="td-cell weekend"></div>
+      <!-- col12 = 12/14*100% -->
+      <div class="gantt-bar bar-sub" style="left:calc(12/14*100% + 2px);right:1%">2d</div>
+    </div>
+  </div>
+
+  <!-- ── ROW M1: Hito entrega (col13 = 08/03) ── -->
+  <div class="gantt-row row-hito" style="min-height:48px">
+    <div class="gc-info">
+      <span class="gc-id-label">M1</span>
+      <span class="task-name">🏁 HITO · Entrega PEC1</span>
+    </div>
+    <div class="gc-date hito-date">08/03</div>
+    <div class="gc-date hito-date">08/03</div>
+    <div class="gc-timeline">
+      <div class="td-cell"></div><div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell weekend"></div><div class="td-cell weekend"></div>
+      <div class="td-cell"></div><div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell"></div><div class="td-cell"></div>
+      <div class="td-cell weekend"></div><div class="td-cell weekend"></div>
+      <!-- Diamond at center of col13 = (13 + 0.5)/14 * 100% -->
+      <div style="position:absolute;top:50%;left:calc(13.5/14*100%);transform:translate(-50%,-50%)">
+        <div style="width:18px;height:18px;background:var(--bar-hito);transform:rotate(45deg);box-shadow:0 0 14px rgba(245,158,11,0.6)"></div>
+      </div>
+      <div style="position:absolute;top:50%;left:calc(13.5/14*100% + 16px);transform:translateY(-50%);
+                  font-size:9px;font-weight:800;color:#FBBF24;font-family:'JetBrains Mono',monospace;white-space:nowrap">
+        08/03/26
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(0,161,224,0.1)">📅</div>
+    <div>
+      <div class="stat-val" style="color:var(--sf)">14</div>
+      <div class="stat-lbl">días naturales · lun 23/02 → dom 08/03</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(56,189,248,0.1)">💼</div>
+    <div>
+      <div class="stat-val" style="color:#38BDF8">10</div>
+      <div class="stat-lbl">días laborables (excl. 4 días de fin de semana)</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(125,211,252,0.1)">📝</div>
+    <div>
+      <div class="stat-val" style="color:#7DD3FC">3</div>
+      <div class="stat-lbl">bloques de trabajo — 1.1a · 1.1b · 1.1c</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(245,158,11,0.1)">🏁</div>
+    <div>
+      <div class="stat-val" style="color:#FBBF24">M1</div>
+      <div class="stat-lbl">Entrega PEC1 · domingo 08/03/2026</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="footer-note">TFG · Propuesta de implantación de sistemas comerciales en una comercializadora energética B2C · Tutor: Santiago Andrés Bruno Pérez · UOC 2026</span>
+  <span class="footer-brand">PEC1 · Plan de Trabajo · Gantt detallado</span>
+</div>
+
+</body>
+</html>

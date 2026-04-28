@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gantt PEC4 — TFG CRM Comercializadora Energética</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:     #060D1A;
+    --bg2:    #0D1B2E;
+    --bg3:    #112035;
+    --border: rgba(255,255,255,0.07);
+    --text:   #E2EAF4;
+    --muted:  #4B6A8A;
+    --acc:    #9333EA;
+    --acc-lt: #A855F7;
+    --acc-ll: #D8B4FE;
+    --hito:   #F59E0B;
+  }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 36px 32px 48px;
+    min-width: 1200px;
+  }
+
+  .header { text-align: center; margin-bottom: 28px; }
+  .header .eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--acc-lt); margin-bottom: 8px; }
+  .header h1 { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+  .header .subtitle { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .header .subtitle span { color: var(--acc-lt); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+  .legend { display: flex; gap: 20px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 10px; color: var(--muted); font-weight: 500; }
+  .lb { width: 24px; height: 10px; border-radius: 3px; }
+  .lb-pec { background: linear-gradient(90deg, #3B0764, #9333EA); }
+  .lb-cap { background: linear-gradient(90deg, #3B0764, #A855F7); }
+  .lb-sub { background: linear-gradient(90deg, #3B0764, #D8B4FE); }
+
+  .gantt-wrapper { background: var(--bg2); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+
+  /* 28 columns */
+  .gantt-header {
+    display: grid; grid-template-columns: 340px 72px 72px 1fr;
+    background: var(--bg3); border-bottom: 1px solid rgba(147,51,234,0.2);
+  }
+  .gh-cell {
+    padding: 12px 14px; font-size: 9.5px; font-weight: 700;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted);
+    border-right: 1px solid var(--border); display: flex; align-items: center;
+  }
+  .gh-cell:last-child { border-right: none; }
+
+  .gh-timeline { display: grid; grid-template-columns: repeat(28, 1fr); padding: 0; }
+  .gh-day { padding: 5px 1px 4px; text-align: center; border-right: 1px solid var(--border); line-height: 1.2; min-width: 0; }
+  .gh-day:last-child { border-right: none; }
+  .gh-day.we { background: rgba(255,255,255,0.025); }
+  .gh-day.ws { background: rgba(147,51,234,0.04); }
+  .gh-day .dn { font-size: 9px; font-weight: 700; display: block; color: var(--text); }
+  .gh-day .dm { font-size: 7px; color: var(--muted); font-weight: 500; }
+  .gh-day.we .dn { color: var(--muted); }
+  .gh-day.ws .dn { color: var(--acc-lt); }
+  .gh-day.mc { border-left: 2px solid rgba(147,51,234,0.3); }
+
+  .gantt-row {
+    display: grid; grid-template-columns: 340px 72px 72px 1fr;
+    border-bottom: 1px solid var(--border); transition: background 0.15s;
+  }
+  .gantt-row:last-child { border-bottom: none; }
+  .gantt-row:hover { background: rgba(255,255,255,0.015); }
+
+  .row-pec  { background: rgba(147,51,234,0.07); border-left: 3px solid var(--acc); }
+  .row-cap  { background: rgba(147,51,234,0.03); border-left: 3px solid rgba(168,85,247,0.45); }
+  .row-sub  { border-left: 3px solid rgba(216,180,254,0.2); }
+  .row-hito { background: rgba(245,158,11,0.05); border-left: 3px solid var(--hito); }
+
+  .gc-info { display: flex; align-items: center; padding: 0 14px; border-right: 1px solid var(--border); gap: 10px; min-height: 44px; }
+  .gc-id { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 700; color: var(--muted); min-width: 30px; flex-shrink: 0; }
+  .row-pec  .gc-id { font-size: 12px; color: var(--acc-lt); }
+  .row-hito .gc-id { color: #FBBF24; font-size: 12px; }
+
+  .tname { font-size: 11px; font-weight: 600; color: var(--text); line-height: 1.3; }
+  .row-pec  .tname { font-size: 13px; font-weight: 800; color: #fff; }
+  .row-cap  .tname { font-size: 11.5px; font-weight: 700; color: #CBD5E1; }
+  .row-sub  .tname { font-size: 10.5px; font-weight: 500; color: #94A3B8; }
+  .row-hito .tname { font-size: 12px; font-weight: 800; color: #FBBF24; }
+
+  .gc-date {
+    padding: 0 6px; font-size: 9.5px; font-weight: 600;
+    font-family: 'JetBrains Mono', monospace; color: var(--muted);
+    border-right: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; text-align: center;
+  }
+  .gc-date.hd { color: #FBBF24; font-weight: 800; }
+
+  .gc-timeline {
+    display: grid; grid-template-columns: repeat(28, 1fr);
+    position: relative; align-items: stretch; min-height: 44px;
+  }
+  .td { height: 100%; border-right: 1px solid rgba(255,255,255,0.03); }
+  .td:last-child { border-right: none; }
+  .td.we { background: rgba(255,255,255,0.018); }
+  .td.mc { border-left: 2px solid rgba(147,51,234,0.2); }
+
+  .bar {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    border-radius: 5px; display: flex; align-items: center; justify-content: center;
+    font-size: 8.5px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+    color: rgba(255,255,255,0.9); white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3); pointer-events: none;
+  }
+  .bar-pec { background: linear-gradient(90deg, #3B0764, #7E22CE, #9333EA); height: 22px; border-radius: 6px; box-shadow: 0 0 18px rgba(147,51,234,0.2); }
+  .bar-cap { background: linear-gradient(90deg, #3B0764, #9333EA); height: 18px; }
+  .bar-sub { background: linear-gradient(90deg, #4C1D95, #C084FC); height: 11px; border-radius: 3px; opacity: 0.8; }
+  .bar-rev { background: linear-gradient(90deg, #1E1B4B, #6366F1); height: 18px; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+  .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; }
+  .stat-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .stat-val { font-size: 20px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+  .stat-lbl { font-size: 9px; color: var(--muted); margin-top: 2px; }
+
+  .footer { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .footer-note  { font-size: 9px; color: var(--muted); }
+  .footer-brand { font-size: 9px; color: var(--muted); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!--
+  CALENDAR MAP — 28 cols (0–27):
+  Col  0 = 11/05 Lun    Col  1 = 12/05 Mar    Col  2 = 13/05 Mié
+  Col  3 = 14/05 Jue    Col  4 = 15/05 Vie
+  Col  5 = 16/05 Sáb★  Col  6 = 17/05 Dom★
+  Col  7 = 18/05 Lun    Col  8 = 19/05 Mar    Col  9 = 20/05 Mié
+  Col 10 = 21/05 Jue    Col 11 = 22/05 Vie
+  Col 12 = 23/05 Sáb★  Col 13 = 24/05 Dom★
+  Col 14 = 25/05 Lun    Col 15 = 26/05 Mar    Col 16 = 27/05 Mié
+  Col 17 = 28/05 Jue    Col 18 = 29/05 Vie
+  Col 19 = 30/05 Sáb★  Col 20 = 31/05 Dom★
+  Col 21 = 01/06 Lun ⟵ cambio de mes
+  Col 22 = 02/06 Mar    Col 23 = 03/06 Mié    Col 24 = 04/06 Jue
+  Col 25 = 05/06 Vie
+  Col 26 = 06/06 Sáb★  Col 27 = 07/06 Dom★
+-->
+
+<div class="header">
+  <div class="eyebrow">TFG · Propuesta de implantación CRM en comercializadora energética</div>
+  <h1>PEC4 · Memoria Final</h1>
+  <div class="subtitle">
+    <span>11 may (lun) → 7 jun (dom) 2026</span> &nbsp;·&nbsp; 28 días · 5 entregables · 1 hito de entrega
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="lb lb-pec"></div>PEC principal</div>
+  <div class="legend-item"><div class="lb lb-cap"></div>Capítulo / entregable</div>
+  <div class="legend-item"><div class="lb lb-sub"></div>Subtarea</div>
+  <div class="legend-item">
+    <div style="width:12px;height:12px;background:var(--hito);transform:rotate(45deg)"></div>Hito entrega
+  </div>
+  <div class="legend-item">
+    <div style="width:12px;height:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:2px"></div>Fin de semana
+  </div>
+</div>
+
+<div class="gantt-wrapper">
+
+  <!-- HEADER -->
+  <div class="gantt-header">
+    <div class="gh-cell">
+      <span style="min-width:30px;font-family:'JetBrains Mono',monospace">ID</span>
+      <span style="margin-left:10px">Tarea / Entregable</span>
+    </div>
+    <div class="gh-cell" style="justify-content:center">Inicio</div>
+    <div class="gh-cell" style="justify-content:center">Fin</div>
+    <div class="gh-timeline">
+      <div class="gh-day ws"><span class="dn">11</span><span class="dm">Lun</span></div>
+      <div class="gh-day"><span class="dn">12</span><span class="dm">Mar</span></div>
+      <div class="gh-day"><span class="dn">13</span><span class="dm">Mié</span></div>
+      <div class="gh-day"><span class="dn">14</span><span class="dm">Jue</span></div>
+      <div class="gh-day"><span class="dn">15</span><span class="dm">Vie</span></div>
+      <div class="gh-day we"><span class="dn">16</span><span class="dm">Sáb</span></div>
+      <div class="gh-day we"><span class="dn">17</span><span class="dm">Dom</span></div>
+      <div class="gh-day ws"><span class="dn">18</span><span class="dm">Lun</span></div>
+      <div class="gh-day"><span class="dn">19</span><span class="dm">Mar</span></div>
+      <div class="gh-day"><span class="dn">20</span><span class="dm">Mié</span></div>
+      <div class="gh-day"><span class="dn">21</span><span class="dm">Jue</span></div>
+      <div class="gh-day"><span class="dn">22</span><span class="dm">Vie</span></div>
+      <div class="gh-day we"><span class="dn">23</span><span class="dm">Sáb</span></div>
+      <div class="gh-day we"><span class="dn">24</span><span class="dm">Dom</span></div>
+      <div class="gh-day ws"><span class="dn">25</span><span class="dm">Lun</span></div>
+      <div class="gh-day"><span class="dn">26</span><span class="dm">Mar</span></div>
+      <div class="gh-day"><span class="dn">27</span><span class="dm">Mié</span></div>
+      <div class="gh-day"><span class="dn">28</span><span class="dm">Jue</span></div>
+      <div class="gh-day"><span class="dn">29</span><span class="dm">Vie</span></div>
+      <div class="gh-day we"><span class="dn">30</span><span class="dm">Sáb</span></div>
+      <div class="gh-day we"><span class="dn">31</span><span class="dm">Dom</span></div>
+      <!-- June -->
+      <div class="gh-day ws mc"><span class="dn" style="color:#C084FC">01</span><span class="dm" style="color:var(--acc-lt)">Jun</span></div>
+      <div class="gh-day"><span class="dn">02</span><span class="dm">Mar</span></div>
+      <div class="gh-day"><span class="dn">03</span><span class="dm">Mié</span></div>
+      <div class="gh-day"><span class="dn">04</span><span class="dm">Jue</span></div>
+      <div class="gh-day"><span class="dn">05</span><span class="dm">Vie</span></div>
+      <div class="gh-day we"><span class="dn">06</span><span class="dm">Sáb</span></div>
+      <div class="gh-day we"><span class="dn">07</span><span class="dm">Dom</span></div>
+    </div>
+  </div>
+
+  <!-- ROW 4: PEC4 full (col0–col27) -->
+  <div class="gantt-row row-pec" style="min-height:52px">
+    <div class="gc-info"><span class="gc-id">4</span><span class="tname">PEC4 — Memoria Final</span></div>
+    <div class="gc-date">11/05</div>
+    <div class="gc-date">07/06</div>
+    <div class="gc-timeline">
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td mc"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="bar bar-pec" style="left:1%;right:1%">28d</div>
+    </div>
+  </div>
+
+  <!-- ROW 4.1: Cap.10 — col0(11/05)–col7(18/05) = 8 cols -->
+  <div class="gantt-row row-cap" style="min-height:48px">
+    <div class="gc-info"><span class="gc-id">4.1</span><span class="tname">Cap. 10 — Resultados esperados y viabilidad</span></div>
+    <div class="gc-date">11/05</div>
+    <div class="gc-date">18/05</div>
+    <div class="gc-timeline">
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td mc"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <!-- col0–col7: width=8/28 -->
+      <div class="bar bar-cap" style="left:1%;width:calc(8/28*100% - 4px)">8d</div>
+    </div>
+  </div>
+
+  <!-- ROW 4.1a: col0(11/05)–col4(15/05) = 5 cols -->
+  <div class="gantt-row row-sub" style="min-height:40px">
+    <div class="gc-info"><span class="gc-id" style="font-size:9px">4.1a</span><span class="tname">10.1–10.3 Resultados por área y viabilidad técnica</span></div>
+    <div class="gc-date" style="font-size:9px">11/05</div>
+    <div class="gc-date" style="font-size:9px">15/05</div>
+    <div class="gc-timeline">
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td mc"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <!-- col0–col4: width=5/28 -->
+      <div class="bar bar-sub" style="left:1%;width:calc(5/28*100% - 4px)">5d</div>
+    </div>
+  </div>
+
+  <!-- ROW 4.1b: col7(18/05) = 1 col. Actually 16/05–18/05 = col5–col7 = 3 cols (Sáb Dom Lun) -->
+  <div class="gantt-row row-sub" style="min-height:40px">
+    <div class="gc-info"><span class="gc-id" style="font-size:9px">4.1b</span><span class="tname">10.4–10.5 Viabilidad económica, KPIs y ROI estimado</span></div>
+    <div class="gc-date" style="font-size:9px">16/05</div>
+    <div class="gc-date" style="font-size:9px">18/05</div>
+    <div class="gc-timeline">
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td mc"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <!-- col5–col7: start=5/28, width=3/28 -->
+      <div class="bar bar-sub" style="left:calc(5/28*100% + 2px);width:calc(3/28*100% - 6px)">3d</div>
+    </div>
+  </div>
+
+  <!-- ROW 4.2: Cap.11 — col8(19/05)–col13(24/05) = 6 cols -->
+  <div class="gantt-row row-cap" style="min-height:48px">
+    <div class="gc-info"><span class="gc-id">4.2</span><span class="tname">Cap. 11 — Conclusiones y trabajo futuro</span></div>
+    <div class="gc-date">19/05</div>
+    <div class="gc-date">24/05</div>
+    <div class="gc-timeline">
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td mc"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <!-- col8–col13: start=8/28, width=6/28 -->
+      <div class="bar bar-cap" style="left:calc(8/28*100% + 2px);width:calc(6/28*100% - 6px)">6d</div>
+    </div>
+  </div>
+
+  <!-- ROW 4.2a: col8(19/05)–col11(22/05) = 4 cols -->
+  <div class="gantt-row row-sub" style="min-height:40px">
+    <div class="gc-info"><span class="gc-id" style="font-size:9px">4.2a</span><span class="tname">11.1–11.3 Conclusiones, reflexión y limitaciones</span></div>
+    <div class="gc-date" style="font-size:9px">19/05</div>
+    <div class="gc-date" style="font-size:9px">22/05</div>
+    <div class="gc-timeline">
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td mc"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <!-- col8–col11: start=8/28, width=4/28 -->
+      <div class="bar bar-sub" style="left:calc(8/28*100% + 2px);width:calc(4/28*100% - 6px)">4d</div>
+    </div>
+  </div>
+
+  <!-- ROW 4.2b: col12(23/05)–col13(24/05) = 2 cols -->
+  <div class="gantt-row row-sub" style="min-height:40px">
+    <div class="gc-info"><span class="gc-id" style="font-size:9px">4.2b</span><span class="tname">11.4–11.5 Trabajo futuro e impactos adicionales</span></div>
+    <div class="gc-date" style="font-size:9px">23/05</div>
+    <div class="gc-date" style="font-size:9px">24/05</div>
+    <div class="gc-timeline">
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td mc"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <!-- col12–col13: start=12/28, width=2/28 -->
+      <div class="bar bar-sub" style="left:calc(12/28*100% + 2px);width:calc(2/28*100% - 4px)">2d</div>
+    </div>
+  </div>
+
+  <!-- ROW 4.3: Cap.12-13 — col14(25/05)–col17(28/05) = 4 cols -->
+  <div class="gantt-row row-cap" style="min-height:48px">
+    <div class="gc-info"><span class="gc-id">4.3</span><span class="tname">Cap. 12-13 — Glosario y Bibliografía</span></div>
+    <div class="gc-date">25/05</div>
+    <div class="gc-date">28/05</div>
+    <div class="gc-timeline">
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td mc"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <!-- col14–col17: start=14/28, width=4/28 -->
+      <div class="bar bar-cap" style="left:calc(14/28*100% + 2px);width:calc(4/28*100% - 6px)">4d</div>
+    </div>
+  </div>
+
+  <!-- ROW 4.4: Cap.14 — col18(29/05)–col22(02/06) = 5 cols -->
+  <div class="gantt-row row-cap" style="min-height:48px">
+    <div class="gc-info"><span class="gc-id">4.4</span><span class="tname">Cap. 14 — Anexos completos (grupos A–F)</span></div>
+    <div class="gc-date">29/05</div>
+    <div class="gc-date">02/06</div>
+    <div class="gc-timeline">
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td mc"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <!-- col18–col22: start=18/28, width=5/28 -->
+      <div class="bar bar-cap" style="left:calc(18/28*100% + 2px);width:calc(5/28*100% - 6px)">5d</div>
+    </div>
+  </div>
+
+  <!-- ROW 4.5: Revisión — col23(03/06)–col27(07/06) = 5 cols -->
+  <div class="gantt-row row-cap" style="min-height:48px">
+    <div class="gc-info"><span class="gc-id">4.5</span><span class="tname">Revisión integral de coherencia de la memoria</span></div>
+    <div class="gc-date">03/06</div>
+    <div class="gc-date">07/06</div>
+    <div class="gc-timeline">
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td mc"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <!-- col23–col27: start=23/28, width=5/28 -->
+      <div class="bar bar-rev" style="left:calc(23/28*100% + 2px);right:1%">5d</div>
+    </div>
+  </div>
+
+  <!-- ROW M4: Hito (col27 = 07/06) -->
+  <div class="gantt-row row-hito" style="min-height:48px">
+    <div class="gc-info"><span class="gc-id">M4</span><span class="tname">🏁 HITO · Entrega Memoria Final (PEC4)</span></div>
+    <div class="gc-date hd">07/06</div>
+    <div class="gc-date hd">07/06</div>
+    <div class="gc-timeline">
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <div class="td mc"></div><div class="td"></div><div class="td"></div><div class="td"></div><div class="td"></div>
+      <div class="td we"></div><div class="td we"></div>
+      <!-- diamond at center of col27 = 27.5/28 -->
+      <div style="position:absolute;top:50%;left:calc(27.5/28*100%);transform:translate(-50%,-50%)">
+        <div style="width:18px;height:18px;background:var(--hito);transform:rotate(45deg);box-shadow:0 0 14px rgba(245,158,11,0.6)"></div>
+      </div>
+      <div style="position:absolute;top:50%;right:3px;transform:translateY(-50%);
+                  font-size:8.5px;font-weight:800;color:#FBBF24;font-family:'JetBrains Mono',monospace;white-space:nowrap">
+        07/06/26
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(147,51,234,0.1)">📅</div>
+    <div>
+      <div class="stat-val" style="color:var(--acc-lt)">28</div>
+      <div class="stat-lbl">días naturales · lun 11/05 → dom 07/06</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(168,85,247,0.1)">💼</div>
+    <div>
+      <div class="stat-val" style="color:#C084FC">20</div>
+      <div class="stat-lbl">días laborables (excl. 4 fines de semana = 8 días)</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(216,180,254,0.1)">📝</div>
+    <div>
+      <div class="stat-val" style="color:#D8B4FE">4+1</div>
+      <div class="stat-lbl">entregables — Cap. 10 · 11 · 12-13 · 14 + Revisión</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:rgba(245,158,11,0.1)">🏁</div>
+    <div>
+      <div class="stat-val" style="color:#FBBF24">M4</div>
+      <div class="stat-lbl">Entrega Memoria Final · domingo 07/06/2026</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span class="footer-note">TFG · Propuesta de implantación de sistemas comerciales en una comercializadora energética B2C · Tutor: Santiago Andrés Bruno Pérez · UOC 2026</span>
+  <span class="footer-brand">PEC4 · Memoria Final · Gantt detallado</span>
+</div>
+
+</body>
+</html>

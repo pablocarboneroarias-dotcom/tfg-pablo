@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mercado Minorista Energético Español — CNMC 2025</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sf:      #00A1E0;
+    --sf-dark: #0070D2;
+
+    --elec:   #FBBF24;   /* amber  — electricidad */
+    --gas:    #34D399;   /* emerald — gas natural */
+    --total:  #00A1E0;   /* sky    — total */
+
+    --libre:  #60A5FA;   /* azul   — mercado libre */
+    --reg:    #A78BFA;   /* violeta — mercado regulado */
+
+    --bg:     #0B0F1A;
+    --bg2:    #111827;
+    --bg3:    #1C2333;
+    --border: rgba(255,255,255,0.07);
+    --text:   #E5E7EB;
+    --muted:  #6B7280;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 40px 40px 52px;
+    min-width: 820px;
+  }
+
+  /* ── HEADER ─────────────────────────────── */
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 28px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-left h1 {
+    font-size: 20px; font-weight: 800;
+    background: linear-gradient(135deg, #E0F2FE 0%, #38BDF8 50%, #0EA5E9 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: -0.4px; margin-bottom: 7px;
+  }
+  .header-left p {
+    font-size: 11.5px; color: var(--muted); max-width: 520px; line-height: 1.6;
+  }
+  .header-right {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+  }
+  .badge {
+    font-size: 9px; font-weight: 800; letter-spacing: 0.8px;
+    text-transform: uppercase; padding: 4px 12px; border-radius: 20px;
+  }
+  .badge-cnmc { background: linear-gradient(135deg, var(--sf-dark), var(--sf)); color: #fff; }
+  .source-note { font-size: 9px; color: var(--muted); text-align: right; }
+
+  /* ── SUMMARY PILLS ──────────────────────── */
+  .summary-row {
+    display: flex; gap: 10px; margin-bottom: 26px;
+  }
+  .summary-pill {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    flex: 1;
+  }
+  .pill-value {
+    font-size: 22px; font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .pill-label {
+    font-size: 9px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.8px; text-align: center;
+    line-height: 1.4;
+  }
+
+  /* ── TABLE WRAPPER ──────────────────────── */
+  .table-wrap {
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  /* Header row */
+  thead tr {
+    background: var(--bg3);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  thead th {
+    font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--muted);
+    padding: 13px 18px;
+    text-align: center;
+  }
+  thead th:first-child { text-align: left; }
+  thead th.th-libre  { color: var(--libre); }
+  thead th.th-reg    { color: var(--reg); }
+
+  /* Body rows */
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  tbody tr:hover { background: rgba(255,255,255,0.025); }
+  tbody tr.row-total {
+    background: linear-gradient(to right, rgba(0,112,210,0.08), rgba(0,161,224,0.04));
+    border-top: 1px solid rgba(0,161,224,0.25);
+    border-bottom: none;
+  }
+  tbody tr.row-total:hover { background: rgba(0,161,224,0.08); }
+
+  td {
+    padding: 18px 18px;
+    vertical-align: middle;
+  }
+  td.center { text-align: center; }
+
+  /* ── MERCADO LABEL ──────────────────────── */
+  .mercado-label {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .mercado-icon {
+    font-size: 22px; flex-shrink: 0;
+  }
+  .mercado-name {
+    font-size: 14px; font-weight: 800; letter-spacing: -0.2px;
+  }
+  .mercado-sub {
+    font-size: 9.5px; color: var(--muted); margin-top: 2px; font-weight: 500;
+  }
+  .color-elec  { color: var(--elec); }
+  .color-gas   { color: var(--gas); }
+  .color-total { color: var(--sf); }
+
+  /* ── VALUE CELLS ────────────────────────── */
+  .val-main {
+    font-size: 16px; font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    display: block; margin-bottom: 5px;
+  }
+  .val-pct {
+    display: inline-block;
+    font-size: 9.5px; font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 2px 8px; border-radius: 4px;
+    margin-bottom: 5px;
+  }
+  .pct-libre { background: rgba(96,165,250,0.15); color: var(--libre); }
+  .pct-reg   { background: rgba(167,139,250,0.15); color: var(--reg); }
+
+  /* Bar under value */
+  .val-bar-track {
+    width: 100%; height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px; overflow: hidden;
+    margin-top: 4px;
+  }
+  .val-bar-fill { height: 100%; border-radius: 2px; }
+  .bar-elec-libre  { background: linear-gradient(90deg, #D97706, #FBBF24); }
+  .bar-elec-reg    { background: linear-gradient(90deg, #D97706, #FDE68A); opacity: 0.5; }
+  .bar-gas-libre   { background: linear-gradient(90deg, #059669, #34D399); }
+  .bar-gas-reg     { background: linear-gradient(90deg, #059669, #A7F3D0); opacity: 0.5; }
+  .bar-total-libre { background: linear-gradient(90deg, var(--sf-dark), var(--sf)); }
+  .bar-total-reg   { background: linear-gradient(90deg, var(--sf-dark), #7DD3FC); opacity: 0.5; }
+
+  /* Total suministros column */
+  .total-supply {
+    font-size: 18px; font-weight: 900;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .total-supply-sub {
+    font-size: 9px; color: var(--muted); margin-top: 3px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
+  /* ── FOOTER / FUENTE ────────────────────── */
+  .source-box {
+    margin-top: 16px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 9.5px; color: var(--muted); line-height: 1.65;
+  }
+  .source-box strong { color: #94A3B8; font-weight: 600; }
+
+  .footer {
+    margin-top: 20px; padding-top: 14px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-note { font-size: 9px; color: var(--muted); }
+  .footer-brand { font-size: 9px; color: var(--muted); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Mercado Minorista Energético Español</h1>
+    <p>Distribución de puntos de suministro entre mercado libre y mercado regulado (PVPC / TUR) 
+       para electricidad y gas natural. Datos a diciembre de 2024.</p>
+  </div>
+  <div class="header-right">
+    <span class="badge badge-cnmc">CNMC 2025</span>
+    <span class="source-note">Informe IS/DE/027/25 &nbsp;·&nbsp; Elaboración propia</span>
+  </div>
+</div>
+
+<!-- SUMMARY PILLS -->
+<div class="summary-row">
+  <div class="summary-pill">
+    <span class="pill-value" style="color:var(--elec)">~30,5 M</span>
+    <span class="pill-label">Puntos suministro electricidad</span>
+  </div>
+  <div class="summary-pill">
+    <span class="pill-value" style="color:var(--gas)">~7,98 M</span>
+    <span class="pill-label">Puntos suministro gas natural</span>
+  </div>
+  <div class="summary-pill">
+    <span class="pill-value" style="color:var(--sf)">~38,5 M</span>
+    <span class="pill-label">Total combinado</span>
+  </div>
+  <div class="summary-pill">
+    <span class="pill-value" style="color:var(--libre)">70,1 %</span>
+    <span class="pill-label">Mercado libre (total)</span>
+  </div>
+  <div class="summary-pill">
+    <span class="pill-value" style="color:var(--reg)">29,9 %</span>
+    <span class="pill-label">Mercado regulado (total)</span>
+  </div>
+</div>
+
+<!-- TABLE -->
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th style="width:200px">Mercado</th>
+        <th>Total puntos de suministro</th>
+        <th class="th-libre">Mercado libre</th>
+        <th class="th-reg">Mercado regulado</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- ELECTRICIDAD -->
+      <tr>
+        <td>
+          <div class="mercado-label">
+            <span class="mercado-icon">⚡</span>
+            <div>
+              <div class="mercado-name color-elec">Electricidad</div>
+              <div class="mercado-sub">PVPC · Tarifa regulada</div>
+            </div>
+          </div>
+        </td>
+        <td class="center">
+          <span class="val-main color-elec">~30,5 millones</span>
+          <div class="val-bar-track">
+            <div class="val-bar-fill bar-elec-libre" style="width:100%"></div>
+          </div>
+        </td>
+        <td class="center">
+          <span class="val-main" style="color:var(--libre)">~22,1 M</span>
+          <span class="val-pct pct-libre">72,5 %</span>
+          <div class="val-bar-track">
+            <div class="val-bar-fill bar-elec-libre" style="width:72.5%"></div>
+          </div>
+        </td>
+        <td class="center">
+          <span class="val-main" style="color:var(--reg)">~8,4 M</span>
+          <span class="val-pct pct-reg">27,5 %</span>
+          <div class="val-bar-track">
+            <div class="val-bar-fill bar-elec-reg" style="width:27.5%"></div>
+          </div>
+        </td>
+      </tr>
+
+      <!-- GAS NATURAL -->
+      <tr>
+        <td>
+          <div class="mercado-label">
+            <span class="mercado-icon">🔥</span>
+            <div>
+              <div class="mercado-name color-gas">Gas natural</div>
+              <div class="mercado-sub">TUR · Tarifa de último recurso</div>
+            </div>
+          </div>
+        </td>
+        <td class="center">
+          <span class="val-main color-gas">~7,98 millones</span>
+          <div class="val-bar-track">
+            <div class="val-bar-fill bar-gas-libre" style="width:100%"></div>
+          </div>
+        </td>
+        <td class="center">
+          <span class="val-main" style="color:var(--libre)">~4,9 M</span>
+          <span class="val-pct pct-libre">61,4 %</span>
+          <div class="val-bar-track">
+            <div class="val-bar-fill bar-gas-libre" style="width:61.4%"></div>
+          </div>
+        </td>
+        <td class="center">
+          <span class="val-main" style="color:var(--reg)">~3,1 M</span>
+          <span class="val-pct pct-reg">38,6 %</span>
+          <div class="val-bar-track">
+            <div class="val-bar-fill bar-gas-reg" style="width:38.6%"></div>
+          </div>
+        </td>
+      </tr>
+
+      <!-- TOTAL COMBINADO -->
+      <tr class="row-total">
+        <td>
+          <div class="mercado-label">
+            <span class="mercado-icon">⚡🔥</span>
+            <div>
+              <div class="mercado-name color-total">TOTAL combinado</div>
+              <div class="mercado-sub">Electricidad + Gas natural</div>
+            </div>
+          </div>
+        </td>
+        <td class="center">
+          <div class="total-supply color-total">~38,5 millones</div>
+          <div class="total-supply-sub">puntos de suministro</div>
+          <div class="val-bar-track" style="margin-top:6px">
+            <div class="val-bar-fill bar-total-libre" style="width:100%"></div>
+          </div>
+        </td>
+        <td class="center">
+          <span class="val-main" style="color:var(--libre); font-size:18px">~27,0 M</span>
+          <span class="val-pct pct-libre" style="font-size:11px; padding:3px 10px">70,1 %</span>
+          <div class="val-bar-track">
+            <div class="val-bar-fill bar-total-libre" style="width:70.1%"></div>
+          </div>
+        </td>
+        <td class="center">
+          <span class="val-main" style="color:var(--reg); font-size:18px">~11,5 M</span>
+          <span class="val-pct pct-reg" style="font-size:11px; padding:3px 10px">29,9 %</span>
+          <div class="val-bar-track">
+            <div class="val-bar-fill bar-total-reg" style="width:29.9%"></div>
+          </div>
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+<!-- FUENTE -->
+<div class="source-box">
+  <strong>Fuente:</strong> Elaboración propia a partir de CNMC (2025). 
+  <em>Informe de supervisión de los mercados minoristas de gas y electricidad 2024</em> (IS/DE/027/25). 
+  Los datos de gas corresponden a diciembre de 2024; los de electricidad, a 31 de diciembre de 2024. 
+  El símbolo (~) indica valor aproximado.
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="footer-note">TFG · CRM Comercializadora Energética B2C · UOC 2025–2026</span>
+  <span class="footer-brand">Pablo · Datos CNMC 2025</span>
+</div>
+
+</body>
+</html>

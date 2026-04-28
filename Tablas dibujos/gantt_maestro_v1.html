@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gantt Maestro — TFG CRM Comercializadora Energética</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:    #060D1A; --bg2: #0D1B2E; --bg3: #112035;
+    --border: rgba(255,255,255,0.07); --text: #E2EAF4; --muted: #4B6A8A;
+    --pec1: #00A1E0; --pec1d: #0D2B5E; --pec1bg: rgba(0,161,224,0.08);
+    --pec2: #10B981; --pec2d: #064E3B; --pec2bg: rgba(16,185,129,0.07);
+    --pec3: #F97316; --pec3d: #431407; --pec3bg: rgba(249,115,22,0.07);
+    --pec4: #A855F7; --pec4d: #3B0764; --pec4bg: rgba(168,85,247,0.07);
+    --pec5: #EF4444; --pec5d: #450A0A; --pec5bg: rgba(239,68,68,0.07);
+    --gold: #F59E0B;
+    --TOTAL: 120; /* days */
+  }
+
+  body { font-family: 'Sora', sans-serif; background: var(--bg); color: var(--text); padding: 32px 28px 44px; min-width: 1200px; }
+
+  /* HEADER */
+  .header { text-align: center; margin-bottom: 24px; }
+  .header .eyebrow { font-size: 9.5px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+  .header h1 { font-size: 19px; font-weight: 800; color: #fff; }
+  .header .sub { font-size: 11px; color: var(--muted); margin-top: 5px; font-family: 'JetBrains Mono', monospace; }
+
+  /* LEGEND */
+  .legend { display: flex; gap: 16px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+  .li { display: flex; align-items: center; gap: 6px; font-size: 9.5px; color: var(--muted); }
+  .lbar { width: 22px; height: 9px; border-radius: 3px; }
+
+  /* GANTT WRAPPER */
+  .gantt { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+
+  /* COLUMN LAYOUT: info=310px + start=62px + end=62px + timeline=1fr */
+  .row { display: grid; grid-template-columns: 310px 62px 62px 1fr; border-bottom: 1px solid var(--border); min-height: 28px; }
+  .row:last-child { border-bottom: none; }
+  .row:hover { background: rgba(255,255,255,0.012); }
+
+  /* ROW TYPES */
+  .r-header { background: var(--bg3); border-bottom: 1px solid rgba(255,255,255,0.1) !important; min-height: 36px !important; }
+  .r-pec1  { background: var(--pec1bg); border-left: 3px solid var(--pec1); }
+  .r-pec2  { background: var(--pec2bg); border-left: 3px solid var(--pec2); }
+  .r-pec3  { background: var(--pec3bg); border-left: 3px solid var(--pec3); }
+  .r-pec4  { background: var(--pec4bg); border-left: 3px solid var(--pec4); }
+  .r-pec5  { background: var(--pec5bg); border-left: 3px solid var(--pec5); }
+  .r-cap1  { border-left: 3px solid rgba(0,161,224,0.4); }
+  .r-cap2  { border-left: 3px solid rgba(16,185,129,0.4); }
+  .r-cap3  { border-left: 3px solid rgba(249,115,22,0.4); }
+  .r-cap4  { border-left: 3px solid rgba(168,85,247,0.4); }
+  .r-cap5  { border-left: 3px solid rgba(239,68,68,0.4); }
+  .r-sub   { border-left: 3px solid rgba(255,255,255,0.08); }
+  .r-hito  { background: rgba(245,158,11,0.04); border-left: 3px solid var(--gold); }
+  .r-hito-final { background: rgba(245,158,11,0.08); border-left: 3px solid var(--gold); min-height: 36px !important; }
+
+  /* INFO CELL */
+  .info { display: flex; align-items: center; padding: 0 10px 0 12px; gap: 8px; border-right: 1px solid var(--border); }
+  .tid { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; font-weight: 700; color: var(--muted); min-width: 28px; flex-shrink: 0; }
+  .tname { font-size: 10px; font-weight: 500; color: #94A3B8; line-height: 1.3; }
+  .r-pec1 .tid, .r-pec2 .tid, .r-pec3 .tid, .r-pec4 .tid, .r-pec5 .tid { font-size: 10px; font-weight: 800; }
+  .r-pec1 .tid { color: var(--pec1); }
+  .r-pec2 .tid { color: var(--pec2); }
+  .r-pec3 .tid { color: var(--pec3); }
+  .r-pec4 .tid { color: var(--pec4); }
+  .r-pec5 .tid { color: var(--pec5); }
+  .r-pec1 .tname, .r-pec2 .tname, .r-pec3 .tname, .r-pec4 .tname, .r-pec5 .tname { font-size: 11px; font-weight: 800; color: #fff; }
+  .r-cap1 .tname, .r-cap2 .tname, .r-cap3 .tname, .r-cap4 .tname, .r-cap5 .tname { font-size: 10px; font-weight: 700; color: #CBD5E1; }
+  .r-hito .tname { color: #FCD34D; font-weight: 700; font-size: 10px; }
+  .r-hito-final .tname { color: #FBBF24; font-weight: 800; font-size: 11.5px; }
+  .r-hito .tid, .r-hito-final .tid { color: #FBBF24; font-size: 10px; }
+
+  /* DATE CELLS */
+  .dt { padding: 0 4px; font-size: 8.5px; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--muted); border-right: 1px solid var(--border); display: flex; align-items: center; justify-content: center; text-align: center; }
+  .r-hito .dt, .r-hito-final .dt { color: #FBBF24; }
+
+  /* TIMELINE */
+  .tl { position: relative; overflow: hidden; }
+
+  /* MONTH BANDS (background) */
+  .month-band { position: absolute; top: 0; bottom: 0; pointer-events: none; }
+
+  /* WEEK TICKS (vertical lines) */
+  .week-tick { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.04); pointer-events: none; z-index: 1; }
+
+  /* BARS */
+  .bar { position: absolute; top: 50%; transform: translateY(-50%); border-radius: 4px; display: flex; align-items: center; padding: 0 6px; pointer-events: none; }
+  .bar-lbl { font-size: 7.5px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; }
+  .bar-pec  { height: 18px; border-radius: 5px; }
+  .bar-cap  { height: 14px; }
+  .bar-sub  { height: 9px; border-radius: 3px; opacity: 0.85; }
+  .bar-pec1 { background: linear-gradient(90deg, var(--pec1d), var(--pec1)); box-shadow: 0 0 12px rgba(0,161,224,0.2); }
+  .bar-pec2 { background: linear-gradient(90deg, var(--pec2d), var(--pec2)); box-shadow: 0 0 12px rgba(16,185,129,0.2); }
+  .bar-pec3 { background: linear-gradient(90deg, var(--pec3d), var(--pec3)); box-shadow: 0 0 12px rgba(249,115,22,0.2); }
+  .bar-pec4 { background: linear-gradient(90deg, var(--pec4d), var(--pec4)); box-shadow: 0 0 12px rgba(168,85,247,0.2); }
+  .bar-pec5 { background: linear-gradient(90deg, var(--pec5d), var(--pec5)); box-shadow: 0 0 12px rgba(239,68,68,0.2); }
+  .bar-sub1 { background: linear-gradient(90deg, rgba(0,112,210,0.5), rgba(0,161,224,0.8)); }
+  .bar-sub2 { background: linear-gradient(90deg, rgba(6,78,59,0.6), rgba(16,185,129,0.8)); }
+  .bar-sub3 { background: linear-gradient(90deg, rgba(67,20,7,0.6), rgba(249,115,22,0.8)); }
+  .bar-sub4 { background: linear-gradient(90deg, rgba(59,7,100,0.6), rgba(168,85,247,0.8)); }
+  .bar-sub5 { background: linear-gradient(90deg, rgba(69,10,10,0.6), rgba(239,68,68,0.8)); }
+
+  /* HITO DIAMOND */
+  .hito-mark { position: absolute; top: 50%; transform: translate(-50%,-50%) rotate(45deg); width: 13px; height: 13px; pointer-events: none; z-index: 5; }
+  /* HITO FINAL STAR */
+  .hito-star { position: absolute; top: 50%; transform: translate(-50%,-50%); width: 18px; height: 18px; pointer-events: none; z-index: 5; }
+
+  /* TIMELINE HEADER ROW */
+  .tl-header { background: var(--bg3); border-bottom: 1px solid rgba(255,255,255,0.1); position: relative; height: 46px; }
+  .month-label { position: absolute; top: 4px; font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+  .week-label { position: absolute; bottom: 4px; font-size: 7.5px; font-weight: 600; font-family: 'JetBrains Mono', monospace; color: var(--muted); transform: translateX(-50%); white-space: nowrap; }
+  .month-line { position: absolute; top: 0; bottom: 0; width: 2px; opacity: 0.25; }
+
+  /* FOOTER */
+  .footer { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .fn { font-size: 8.5px; color: var(--muted); }
+
+  /* Legend pills for PEC sections */
+  .pec-band-legend { display: flex; gap: 10px; margin-bottom: 16px; justify-content: center; flex-wrap: wrap; }
+  .pec-pill { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 4px 12px; font-size: 9px; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">TFG · Propuesta de implantación de sistemas comerciales en comercializadora energética</div>
+  <h1>Planificación Global del Proyecto — Línea de tiempo con hitos</h1>
+  <div class="sub">23/02/2026 (Lun) → 23/06/2026 (Mar) · 121 días naturales · 5 fases · 4 hitos parciales + 1 hito final</div>
+</div>
+
+<!-- PEC color legend pills -->
+<div class="pec-band-legend">
+  <div class="pec-pill" style="color:#00A1E0;border-color:rgba(0,161,224,0.3)">● PEC1 · Plan de Trabajo · 23 feb – 8 mar</div>
+  <div class="pec-pill" style="color:#10B981;border-color:rgba(16,185,129,0.3)">● PEC2 · Desarrollo Parte 1 · 9 mar – 8 abr</div>
+  <div class="pec-pill" style="color:#F97316;border-color:rgba(249,115,22,0.3)">● PEC3 · Desarrollo Parte 2 · 9 abr – 10 may</div>
+  <div class="pec-pill" style="color:#A855F7;border-color:rgba(168,85,247,0.3)">● PEC4 · Memoria Final · 11 may – 7 jun</div>
+  <div class="pec-pill" style="color:#EF4444;border-color:rgba(239,68,68,0.3)">● PEC5 · Defensa · 8 jun – 23 jun</div>
+</div>
+
+<div class="gantt" id="gantt"></div>
+
+<div class="footer">
+  <span class="fn">TFG · Propuesta de implantación de sistemas comerciales en una comercializadora energética B2C · Tutor: Santiago Andrés Bruno Pérez · UOC 2026</span>
+  <span class="fn" style="font-weight:700">Gantt Maestro · Todas las fases</span>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+// Day 0 = 23 Feb 2026; Day 120 = 23 Jun 2026 (121 days total)
+// TOTAL constant for pct calc = 120
+
+const TOTAL = 120;
+const p = (d) => (d / TOTAL * 100).toFixed(3) + '%';
+const w = (s, e) => ((e - s + 1) / TOTAL * 100).toFixed(3) + '%';
+
+// Tasks: [id, name, startDay, endDay, type, pec]
+// Types: pec | cap | sub | hito | hito-final
+const tasks = [
+  // ── PEC1 ──────────────────────────────
+  ['1',    'PEC1 · Plan de Trabajo',                        0,  13, 'pec', 1],
+  ['1.1',  'Cap. 1 — Introducción completa',                0,  13, 'cap', 1],
+  ['1.1a', '1.1–1.3 Contexto, objetivos e impactos',        0,   6, 'sub', 1],
+  ['1.1b', '1.4–1.5 Enfoque y planificación del trabajo',   7,  11, 'sub', 1],
+  ['1.1c', '1.6–1.8 Sumario, otros capítulos y decl. IA',  12,  13, 'sub', 1],
+  ['M1',   '◆ HITO: Entrega PEC1',                         13,  13, 'hito', 1],
+  // ── PEC2 ──────────────────────────────
+  ['2',    'PEC2 · Desarrollo Parte 1',                     14,  44, 'pec', 2],
+  ['2.1',  'Cap. 2 — Contexto sectorial y situación actual',14,  25, 'cap', 2],
+  ['2.1a', '2.1–2.2 Mercado energético y modelo operativo', 14,  19, 'sub', 2],
+  ['2.1b', '2.3–2.4 Diagnóstico AS-IS y justificación',     21,  25, 'sub', 2],
+  ['2.2',  'Cap. 3 — Propuesta de solución: alcance y req.',26,  36, 'cap', 2],
+  ['2.2a', '3.1–3.3 Visión, alcance funcional y Salesforce',28,  31, 'sub', 2],
+  ['2.2b', '3.4–3.5 Requisitos NFR y modelo de datos',      32,  36, 'sub', 2],
+  ['2.3',  'Cap. 4 — Arquitectura objetivo',                37,  44, 'cap', 2],
+  ['2.3a', '4.1–4.3 Principios, arquitectura y org design', 37,  41, 'sub', 2],
+  ['2.3b', '4.4–4.5 Módulos funcionales y gobernanza',      42,  44, 'sub', 2],
+  ['M2',   '◆ HITO: Entrega PEC2',                         44,  44, 'hito', 2],
+  // ── PEC3 ──────────────────────────────
+  ['3',    'PEC3 · Desarrollo Parte 2',                     45,  76, 'pec', 3],
+  ['3.1',  'Cap. 5 — Estrategia de integración',            45,  54, 'cap', 3],
+  ['3.1a', '5.1–5.3 Patrones, ecosistema y arq. integración',45, 50, 'sub', 3],
+  ['3.1b', '5.4–5.5 Flujos críticos y seguridad',           51,  54, 'sub', 3],
+  ['3.2',  'Cap. 6 — Marco metodológico y equipo',          56,  62, 'cap', 3],
+  ['3.2a', '6.1–6.2 Metodología SAFe/Scrum aplicada',       56,  59, 'sub', 3],
+  ['3.2b', '6.3–6.4 Gestión del cambio ADKAR y equipo',     60,  62, 'sub', 3],
+  ['3.3',  'Cap. 7 — Modelo de gobierno del proyecto',      63,  68, 'cap', 3],
+  ['3.3a', '7.1–7.4 Comités, roles y Design Authority',     63,  66, 'sub', 3],
+  ['3.3b', '7.5–7.7 Riesgos, calidad y soporte IT',         67,  68, 'sub', 3],
+  ['3.4',  'Cap. 8 — Planificación y estimación de esf.',   69,  73, 'cap', 3],
+  ['3.4a', '8.1–8.4 WBS, estimación por perfil y Gantt',    69,  72, 'sub', 3],
+  ['3.4b', '8.5–8.6 Camino crítico y asunciones',           73,  73, 'sub', 3],
+  ['3.5',  'Cap. 9 — Inteligencia Artificial: casos de uso',74,  76, 'cap', 3],
+  ['3.5a', '9.1–9.5 Marco IA Einstein y 3 casos detallados',74,  75, 'sub', 3],
+  ['3.5b', '9.6–9.7 Impacto metodológico y ética de la IA', 76,  76, 'sub', 3],
+  ['M3',   '◆ HITO: Entrega PEC3',                         76,  76, 'hito', 3],
+  // ── PEC4 ──────────────────────────────
+  ['4',    'PEC4 · Memoria Final',                          77, 104, 'pec', 4],
+  ['4.1',  'Cap. 10 — Resultados esperados y viabilidad',   77,  84, 'cap', 4],
+  ['4.1a', '10.1–10.3 Resultados por área y viab. técnica', 77,  81, 'sub', 4],
+  ['4.1b', '10.4–10.5 Viabilidad económica, KPIs y ROI',    82,  84, 'sub', 4],
+  ['4.2',  'Cap. 11 — Conclusiones y trabajo futuro',       85,  90, 'cap', 4],
+  ['4.2a', '11.1–11.3 Conclusiones, reflexión y limitac.',  85,  88, 'sub', 4],
+  ['4.2b', '11.4–11.5 Trabajo futuro e impactos adicionales',89, 90, 'sub', 4],
+  ['4.3',  'Cap. 12-13 — Glosario y Bibliografía',          91,  94, 'cap', 4],
+  ['4.4',  'Cap. 14 — Anexos completos (grupos A–F)',        95,  99, 'cap', 4],
+  ['4.5',  'Revisión integral de coherencia de la memoria', 100, 104, 'cap', 4],
+  ['M4',   '◆ HITO: Entrega Memoria Final (PEC4)',         104, 104, 'hito', 4],
+  // ── PEC5 ──────────────────────────────
+  ['5',    'PEC5 · Defensa del TFG',                       105, 120, 'pec', 5],
+  ['5.1',  'Diseño y producción de la presentación',       105, 114, 'cap', 5],
+  ['5.1a', 'Estructura narrativa, storyboard y slides',    105, 110, 'sub', 5],
+  ['5.1b', 'Ensayo y preparación de respuestas al tribunal',111, 114, 'sub', 5],
+  ['5.2',  'Período de respuesta a preguntas del tribunal',115, 119, 'cap', 5],
+  ['MF',   '★ HITO FINAL: Defensa del TFG',               120, 120, 'hito-final', 5],
+];
+
+// ── DATE HELPERS ──────────────────────────────────────────────────────────────
+const START = new Date(2026, 1, 23); // Feb 23 2026
+function dayToDate(d) {
+  const dt = new Date(START);
+  dt.setDate(dt.getDate() + d);
+  return ('0'+dt.getDate()).slice(-2) + '/' + ('0'+(dt.getMonth()+1)).slice(-2);
+}
+
+// ── COLORS ───────────────────────────────────────────────────────────────────
+const colors = {
+  pec:  ['','#00A1E0','#10B981','#F97316','#A855F7','#EF4444'],
+  dark: ['','#0D2B5E','#064E3B','#431407','#3B0764','#450A0A'],
+  sub:  ['','rgba(0,112,210,0.7)','rgba(16,185,129,0.7)','rgba(249,115,22,0.7)','rgba(168,85,247,0.7)','rgba(239,68,68,0.7)'],
+};
+
+// ── WEEK/MONTH REFERENCE ──────────────────────────────────────────────────────
+// Months starting day (relative to Feb 23)
+const months = [
+  { label: 'Feb', day: 0, color: '#38BDF8' },
+  { label: 'Mar', day: 6, color: '#34D399' },
+  { label: 'Abr', day: 37, color: '#FB923C' },
+  { label: 'May', day: 67, color: '#C084FC' },
+  { label: 'Jun', day: 98, color: '#F87171' },
+];
+// Mondays (week starts)
+const mondays = [0,7,14,21,28,35,42,49,56,63,70,77,84,91,98,105,112,119];
+const mondayDates = ['23/02','02/03','09/03','16/03','23/03','30/03',
+                     '06/04','13/04','20/04','27/04','04/05','11/05',
+                     '18/05','25/05','01/06','08/06','15/06','22/06'];
+
+// ── BUILD HTML ───────────────────────────────────────────────────────────────
+const gantt = document.getElementById('gantt');
+
+// ── HEADER ROW ──
+const hdrRow = document.createElement('div');
+hdrRow.className = 'row r-header';
+hdrRow.style.minHeight = '46px';
+
+hdrRow.innerHTML = `
+  <div class="info" style="padding:0 12px">
+    <span style="font-size:8.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">ID</span>
+    <span style="font-size:8.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-left:8px">Tarea / Entregable</span>
+  </div>
+  <div class="dt" style="font-size:8px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted)">Inicio</div>
+  <div class="dt" style="font-size:8px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted)">Fin</div>
+  <div class="tl tl-header" id="tl-header" style="padding:0 4px"></div>
+`;
+gantt.appendChild(hdrRow);
+
+const tlHdr = document.getElementById('tl-header');
+
+// Month labels
+months.forEach((m, i) => {
+  const nextDay = i < months.length-1 ? months[i+1].day : 121;
+  const span = document.createElement('div');
+  span.className = 'month-label';
+  span.style.left = p(m.day);
+  span.style.width = w(m.day, nextDay-1);
+  span.style.color = m.color;
+  span.style.paddingLeft = '4px';
+  span.textContent = m.label + ' 2026';
+  tlHdr.appendChild(span);
+
+  // month divider line (except first)
+  if (i > 0) {
+    const line = document.createElement('div');
+    line.className = 'month-line';
+    line.style.left = p(m.day);
+    line.style.background = m.color;
+    tlHdr.appendChild(line);
+  }
+});
+
+// Week tick labels
+mondays.forEach((day, i) => {
+  const tick = document.createElement('div');
+  tick.className = 'week-label';
+  tick.style.left = p(day);
+  tick.textContent = mondayDates[i];
+  tlHdr.appendChild(tick);
+});
+
+// ── TASK ROWS ──
+tasks.forEach(([id, name, startDay, endDay, type, pec]) => {
+  const row = document.createElement('div');
+
+  let rowClass = 'row ';
+  if (type === 'pec') rowClass += `r-pec${pec}`;
+  else if (type === 'cap') rowClass += `r-cap${pec}`;
+  else if (type === 'sub') rowClass += 'r-sub';
+  else if (type === 'hito') rowClass += 'r-hito';
+  else rowClass += 'r-hito-final';
+  row.className = rowClass;
+
+  const leftPad = type === 'sub' ? '20px' : '4px';
+
+  row.innerHTML = `
+    <div class="info" style="padding-left: ${type==='sub'?'16px':'10px'}">
+      <span class="tid">${id}</span>
+      <span class="tname">${name}</span>
+    </div>
+    <div class="dt">${dayToDate(startDay)}</div>
+    <div class="dt">${dayToDate(endDay)}</div>
+    <div class="tl" id="tl-${id.replace('.','').replace('.','')}" style="position:relative"></div>
+  `;
+  gantt.appendChild(row);
+
+  // Get timeline div
+  const safeid = id.replace(/\./g,'x');
+  const tlDiv = row.querySelector('.tl');
+
+  // Week ticks (subtle)
+  mondays.forEach(d => {
+    const tick = document.createElement('div');
+    tick.className = 'week-tick';
+    tick.style.left = p(d);
+    tlDiv.appendChild(tick);
+  });
+
+  // Month lines
+  months.forEach((m, i) => {
+    if (i > 0) {
+      const line = document.createElement('div');
+      line.style.cssText = `position:absolute;top:0;bottom:0;left:${p(m.day)};width:1px;background:rgba(255,255,255,0.06);pointer-events:none;z-index:2`;
+      tlDiv.appendChild(line);
+    }
+  });
+
+  if (type === 'hito' || type === 'hito-final') {
+    // Diamond or Star
+    const mark = document.createElement('div');
+    if (type === 'hito-final') {
+      // Gold star
+      mark.innerHTML = `<svg width="20" height="20" viewBox="0 0 20 20" style="filter:drop-shadow(0 0 6px rgba(245,158,11,0.8))">
+        <path d="M10 1l2.47 5.01L18 7.18l-4 3.9.94 5.5L10 14.1l-4.94 2.48.94-5.5-4-3.9 5.53-.17z" fill="#F59E0B" stroke="#FCD34D" stroke-width="0.5"/>
+      </svg>`;
+      mark.style.cssText = `position:absolute;top:50%;left:${p(startDay)};transform:translate(-50%,-50%);pointer-events:none;z-index:5`;
+    } else {
+      mark.style.cssText = `position:absolute;top:50%;left:${p(startDay)};transform:translate(-50%,-50%) rotate(45deg);width:13px;height:13px;background:${colors.pec[pec]};box-shadow:0 0 10px ${colors.pec[pec]}66;pointer-events:none;z-index:5`;
+    }
+    tlDiv.appendChild(mark);
+
+    // Date label
+    const lbl = document.createElement('div');
+    const leftPct = parseFloat(p(startDay));
+    const anchor = leftPct > 85 ? 'right:4px' : `left:calc(${p(startDay)} + 12px)`;
+    lbl.style.cssText = `position:absolute;top:50%;${anchor};transform:translateY(-50%);font-size:8px;font-weight:800;color:#FBBF24;font-family:'JetBrains Mono',monospace;white-space:nowrap;z-index:5`;
+    lbl.textContent = dayToDate(startDay) + '/26';
+    tlDiv.appendChild(lbl);
+
+  } else {
+    // Bar
+    const bar = document.createElement('div');
+    const barH = type === 'pec' ? 18 : type === 'cap' ? 13 : 8;
+    const leftPct = p(startDay);
+    const widthPct = w(startDay, endDay);
+
+    let bgColor;
+    if (type === 'pec') {
+      bgColor = `linear-gradient(90deg, ${colors.dark[pec]}, ${colors.pec[pec]})`;
+    } else if (type === 'cap') {
+      bgColor = `linear-gradient(90deg, ${colors.dark[pec]}, ${colors.pec[pec]}cc)`;
+    } else {
+      bgColor = `linear-gradient(90deg, ${colors.dark[pec]}, ${colors.sub[pec]})`;
+    }
+
+    const dur = endDay - startDay + 1;
+    const lblText = dur >= 5 ? dur + 'd' : '';
+
+    bar.className = 'bar';
+    bar.style.cssText = `left:${leftPct};width:${widthPct};height:${barH}px;background:${bgColor};border-radius:${type==='sub'?'3':'4'}px;box-shadow:0 1px 4px rgba(0,0,0,0.4)${type==='pec'?';box-shadow:0 0 10px '+colors.pec[pec]+'40':''}`;
+    if (lblText) {
+      const span = document.createElement('span');
+      span.className = 'bar-lbl';
+      span.textContent = lblText;
+      bar.appendChild(span);
+    }
+    tlDiv.appendChild(bar);
+  }
+});
+</script>
+
+</body>
+</html>

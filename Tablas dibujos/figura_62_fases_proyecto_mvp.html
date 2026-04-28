@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figura 6.2 — Plan de fases e implantación</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:#07090F;--bg-base:#0C1018;--border-xs:rgba(255,255,255,0.05);--border-sm:rgba(255,255,255,0.09);
+  --c-dis:#6B7CF6;
+  --c-mvp:#F59E0B;
+  --c-f2:#3B8BEB;
+  --c-f3:#06B6D4;
+  --c-f4:#10B981;
+  --c-f5:#E879F9;
+  --c-f6:#A78BFA;
+  --c-f7:#FB7185;
+  --c-tr:#94A3B8;
+  --text:#EEF2FF;--muted:#8896AC;--dim:#3D4A5C;
+  --ff-d:'Syne',sans-serif;--ff-b:'DM Sans',sans-serif;--ff-m:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg-deep);color:var(--text);font-family:var(--ff-b);min-height:100vh;}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(255,255,255,0.016) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.016) 1px,transparent 1px);
+  background-size:36px 36px;}
+.glow-orb{position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(130px);opacity:0.05;}
+.page{position:relative;z-index:1;padding:28px 36px 40px;max-width:1280px;margin:0 auto;}
+
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;}
+.hdr-left h1{font-family:var(--ff-d);font-size:22px;font-weight:800;letter-spacing:-.3px;margin-bottom:7px;}
+.hdr-left h1 em{font-style:normal;background:linear-gradient(120deg,#F59E0B 10%,#10B981 90%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hdr-left p{font-size:11.5px;color:var(--muted);max-width:700px;line-height:1.65;}
+.badges{display:flex;flex-direction:column;gap:5px;align-items:flex-end;}
+.badge{font-family:var(--ff-m);font-size:9px;letter-spacing:.5px;text-transform:uppercase;padding:3px 10px;border-radius:4px;}
+.b1{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:var(--c-mvp);}
+.b2{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:8px;}
+
+.card{background:var(--bg-base);border:1px solid var(--border-xs);border-radius:18px;padding:24px 22px 20px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(245,158,11,.55),rgba(16,185,129,.55),transparent);}
+
+.card-title{text-align:center;margin-bottom:14px;}
+.card-title h2{font-family:var(--ff-d);font-size:14px;font-weight:700;}
+.card-title p{font-family:var(--ff-m);font-size:9px;color:var(--muted);margin-top:4px;}
+
+/* SPRINT LEGEND */
+.sprint-legend{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:14px;padding:7px 14px;background:rgba(255,255,255,.02);border:1px solid var(--border-xs);border-radius:8px;flex-wrap:wrap;}
+.sl-item{display:flex;align-items:center;gap:5px;font-family:var(--ff-m);font-size:7.5px;color:#C4CDD8;}
+.sl-box{height:10px;border-radius:2px;}
+
+/* GANTT — 20 months → each = 5% */
+.gantt-wrap{overflow-x:auto;}
+.gantt{min-width:1000px;}
+
+.month-row{display:flex;margin-bottom:5px;margin-left:200px;}
+.month-cell{flex:1;text-align:center;font-family:var(--ff-m);font-size:7.5px;color:#8896AC;padding-bottom:4px;border-bottom:1px solid var(--border-xs);}
+.month-cell.hi{color:#F59E0B;font-weight:600;}
+
+.g-section-lbl{font-family:var(--ff-m);font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:#6B7CF6;margin:10px 0 5px;padding-left:200px;display:flex;align-items:center;gap:8px;}
+.g-section-lbl::after{content:'';flex:1;height:1px;background:rgba(107,124,246,.2);}
+
+.g-row{display:flex;align-items:center;margin-bottom:4px;min-height:38px;}
+.g-label{width:200px;flex-shrink:0;padding-right:12px;display:flex;flex-direction:column;gap:1px;}
+.gl-name{font-family:var(--ff-d);font-size:9px;font-weight:700;}
+.gl-sub{font-family:var(--ff-m);font-size:7px;color:#8896AC;}
+.gl-meta{font-family:var(--ff-m);font-size:6.5px;color:#6B7CF6;}
+
+.g-bars{flex:1;position:relative;display:flex;align-items:center;height:38px;}
+
+.bar{position:absolute;height:20px;border-radius:5px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:default;transition:all .2s;}
+.bar:hover{filter:brightness(1.15);transform:translateY(-50%) scaleY(1.08);z-index:5;}
+.bar-label{font-family:var(--ff-m);font-size:6.5px;font-weight:600;white-space:nowrap;padding:0 4px;color:white;opacity:.9;}
+.sprint-test{opacity:.5;}
+
+.milestone{position:absolute;top:50%;transform:translateY(-50%) rotate(45deg);width:12px;height:12px;border:2px solid white;z-index:6;cursor:default;transition:transform .2s;}
+.milestone:hover{transform:translateY(-50%) rotate(45deg) scale(1.3);}
+.gl-tag{position:absolute;top:1px;font-family:var(--ff-m);font-size:6px;font-weight:700;white-space:nowrap;z-index:7;}
+
+/* parallel rows helper */
+.g-row-parallel{display:flex;align-items:center;margin-bottom:2px;min-height:34px;}
+.g-row-parallel .g-label{width:200px;flex-shrink:0;padding-right:12px;display:flex;flex-direction:column;gap:1px;}
+.g-row-parallel .g-bars{flex:1;position:relative;display:flex;align-items:center;height:34px;}
+.g-row-parallel .bar{height:18px;}
+
+/* MVP big bar highlight */
+.mvp-highlight{
+  position:absolute;top:0;bottom:0;
+  background:rgba(245,158,11,.04);
+  border-left:1px dashed rgba(245,158,11,.25);
+  border-right:1px dashed rgba(245,158,11,.25);
+  border-radius:0;
+  z-index:0;
+}
+
+/* stats */
+.stats-row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.stat-card{flex:1;min-width:110px;background:rgba(255,255,255,.02);border:1px solid var(--border-xs);border-radius:8px;padding:9px 12px;}
+.stat-val{font-family:var(--ff-d);font-size:18px;font-weight:800;display:block;}
+.stat-lbl{font-family:var(--ff-m);font-size:7.5px;color:#8896AC;margin-top:2px;display:block;line-height:1.3;}
+
+/* legend */
+.legend{border-top:1px solid var(--border-xs);padding-top:12px;margin-top:14px;}
+.leg-title{font-family:var(--ff-m);font-size:7.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text);margin-bottom:7px;}
+.leg-row{display:flex;flex-wrap:wrap;gap:6px 16px;}
+.leg-item{display:flex;align-items:center;gap:5px;font-family:var(--ff-m);font-size:8px;color:#C4CDD8;}
+.leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+.par-badge{font-family:var(--ff-m);font-size:7px;padding:1px 6px;border-radius:3px;background:rgba(255,255,255,.06);border:1px solid var(--border-xs);color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:600px;height:600px;top:-200px;left:-100px;background:#F59E0B;"></div>
+<div class="glow-orb" style="width:500px;height:500px;bottom:-150px;right:-80px;background:#10B981;"></div>
+
+<div class="page">
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1>Figura 6.2 — <em>Plan de fases e implantación</em></h1>
+      <p>Planificación del proyecto de implantación Salesforce CRM con primer go-live en M7 (MVP). Fases F5 y F6 en paralelo para optimizar el tiempo total. F7 Seguridad y RGPD como capa transversal. 197 historias de usuario · 3.742 story points · 1.731 persona-días · ~20 meses.</p>
+    </div>
+    <div class="badges">
+      <span class="badge b1">MVP go-live M7 · F5‖F6 paralelas · SAFe/Scrum</span>
+      <span class="badge b2">Elaboración propia · TFG 2025 · Cap. 6.2 · Backlog v4</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <h2>Plan de fases — Implantación Salesforce CRM · Comercializadora Energética B2C</h2>
+      <p>Diseño (2m) → MVP go-live M7 → Fases post-MVP con go-live incremental → F5 ‖ F6 en paralelo → Transición Operación</p>
+    </div>
+
+    <div class="sprint-legend">
+      <span style="font-family:var(--ff-m);font-size:7.5px;color:var(--text);letter-spacing:.8px;text-transform:uppercase;">Sprint 4 semanas (3+1)</span>
+      <div class="sl-item"><div class="sl-box" style="width:42px;background:rgba(245,158,11,.65);"></div>Semanas 1–3 · Construcción</div>
+      <div class="sl-item"><div class="sl-box" style="width:14px;background:rgba(245,158,11,.3);"></div>Semana 4 · Pruebas integradas</div>
+      <div class="sl-item"><div class="sl-box" style="width:16px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:2px;"></div>UAT con negocio</div>
+      <div class="sl-item"><div style="width:9px;height:9px;background:transparent;border:2px solid white;transform:rotate(45deg);"></div>&nbsp;Go-live</div>
+      <div class="sl-item"><span class="par-badge">‖ paralelo</span>F5 y F6 ejecutadas en paralelo</div>
+    </div>
+
+    <div class="gantt-wrap"><div class="gantt">
+
+      <!-- MONTH HEADER — 20m, each=5% -->
+      <div class="month-row">
+        <div class="month-cell">M1</div><div class="month-cell">M2</div>
+        <div class="month-cell">M3</div><div class="month-cell">M4</div>
+        <div class="month-cell">M5</div><div class="month-cell">M6</div>
+        <div class="month-cell hi">M7 ★</div><div class="month-cell">M8</div>
+        <div class="month-cell">M9</div><div class="month-cell hi">M10 ★</div>
+        <div class="month-cell">M11</div><div class="month-cell">M12</div>
+        <div class="month-cell">M13</div><div class="month-cell hi">M14 ★</div>
+        <div class="month-cell">M15</div><div class="month-cell">M16</div>
+        <div class="month-cell hi">M17 ★</div><div class="month-cell hi">M18 ★</div>
+        <div class="month-cell">M19</div><div class="month-cell">M20</div>
+      </div>
+
+      <!-- ── DISEÑO ── -->
+      <div class="g-section-lbl">Diseño · Discovery</div>
+      <div class="g-row">
+        <div class="g-label">
+          <span class="gl-name" style="color:var(--c-dis)">Diseño / Discovery</span>
+          <span class="gl-sub">Workshops · Levantamiento req.</span>
+          <span class="gl-meta">2 meses · Equipo completo</span>
+        </div>
+        <div class="g-bars">
+          <div class="bar" style="left:0%;width:7.5%;background:rgba(107,124,246,.65);">
+            <span class="bar-label">Mes 1 — Req. completos</span>
+          </div>
+          <div class="bar" style="left:5%;width:5%;background:rgba(107,124,246,.3);"></div>
+        </div>
+      </div>
+
+      <!-- ── MVP ── -->
+      <div class="g-section-lbl">MVP — Primer go-live productivo · M7</div>
+
+      <!-- MVP row with highlight -->
+      <div class="g-row">
+        <div class="g-label">
+          <span class="gl-name" style="color:var(--c-mvp)">MVP · Fundación + Venta básica</span>
+          <span class="gl-sub">F1 completa + F2 básica + A3/C1</span>
+          <span class="gl-meta">5 sprints · 8 personas · M2→M7</span>
+        </div>
+        <div class="g-bars">
+          <!-- MVP highlight zone -->
+          <div class="mvp-highlight" style="left:5%;width:30%;"></div>
+          <!-- S1 M2 -->
+          <div class="bar" style="left:5%;width:3.75%;background:rgba(245,158,11,.8);z-index:2;"><span class="bar-label">S1</span></div>
+          <div class="bar sprint-test" style="left:8.75%;width:1.25%;background:rgba(245,158,11,.4);z-index:2;"></div>
+          <!-- S2 M3 -->
+          <div class="bar" style="left:10%;width:3.75%;background:rgba(245,158,11,.8);z-index:2;"><span class="bar-label">S2</span></div>
+          <div class="bar sprint-test" style="left:13.75%;width:1.25%;background:rgba(245,158,11,.4);z-index:2;"></div>
+          <!-- S3 M4 -->
+          <div class="bar" style="left:15%;width:3.75%;background:rgba(245,158,11,.8);z-index:2;"><span class="bar-label">S3</span></div>
+          <div class="bar sprint-test" style="left:18.75%;width:1.25%;background:rgba(245,158,11,.4);z-index:2;"></div>
+          <!-- S4 M5 -->
+          <div class="bar" style="left:20%;width:3.75%;background:rgba(245,158,11,.8);z-index:2;"><span class="bar-label">S4</span></div>
+          <div class="bar sprint-test" style="left:23.75%;width:1.25%;background:rgba(245,158,11,.4);z-index:2;"></div>
+          <!-- S5 M6 -->
+          <div class="bar" style="left:25%;width:3.75%;background:rgba(245,158,11,.8);z-index:2;"><span class="bar-label">S5</span></div>
+          <div class="bar sprint-test" style="left:28.75%;width:1.25%;background:rgba(245,158,11,.4);z-index:2;"></div>
+          <!-- UAT MVP M7 -->
+          <div class="bar" style="left:30%;width:2%;background:rgba(245,158,11,.22);border:1px solid rgba(245,158,11,.5);border-radius:3px;z-index:2;"><span class="bar-label" style="color:rgba(245,158,11,.9);font-size:5.5px;">UAT</span></div>
+          <!-- Go-live MVP -->
+          <div class="milestone" style="left:31.8%;background:var(--c-mvp);border-color:var(--c-mvp);z-index:3;"></div>
+          <div class="gl-tag" style="left:32.8%;color:var(--c-mvp);font-size:7px;font-weight:800;">★ Go-live MVP</div>
+        </div>
+      </div>
+
+      <!-- MVP content pills -->
+      <div class="g-row" style="min-height:22px;margin-bottom:8px;">
+        <div class="g-label"></div>
+        <div class="g-bars" style="height:22px;">
+          <div style="position:absolute;left:5%;display:flex;gap:5px;flex-wrap:wrap;align-items:center;">
+            <span style="font-family:var(--ff-m);font-size:6.5px;padding:2px 6px;border-radius:3px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:rgba(245,158,11,.8);">Modelo datos E&U Cloud</span>
+            <span style="font-family:var(--ff-m);font-size:6.5px;padding:2px 6px;border-radius:3px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:rgba(245,158,11,.8);">Seguridad base + SSO</span>
+            <span style="font-family:var(--ff-m);font-size:6.5px;padding:2px 6px;border-radius:3px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:rgba(245,158,11,.8);">Leads + Cualificación</span>
+            <span style="font-family:var(--ff-m);font-size:6.5px;padding:2px 6px;border-radius:3px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:rgba(245,158,11,.8);">Oferta CPQ básico</span>
+            <span style="font-family:var(--ff-m);font-size:6.5px;padding:2px 6px;border-radius:3px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:rgba(245,158,11,.8);">Alta A3 + Switching C1</span>
+            <span style="font-family:var(--ff-m);font-size:6.5px;padding:2px 6px;border-radius:3px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:rgba(245,158,11,.8);">Firma digital básica</span>
+            <span style="font-family:var(--ff-m);font-size:6.5px;padding:2px 6px;border-radius:3px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:rgba(245,158,11,.8);">Validación CUPS/SIPS</span>
+            <span style="font-family:var(--ff-m);font-size:6.5px;padding:2px 6px;border-radius:3px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:rgba(245,158,11,.8);">Contrato → SAP</span>
+            <span style="font-family:var(--ff-m);font-size:6.5px;padding:2px 6px;border-radius:3px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:rgba(245,158,11,.8);">Migración datos legacy</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── POST-MVP ── -->
+      <div class="g-section-lbl">Post-MVP · Fases con go-live incremental</div>
+
+      <!-- F2 POST-MVP M7-M10 · 3 sprints -->
+      <div class="g-row">
+        <div class="g-label">
+          <span class="gl-name" style="color:var(--c-f2)">F2 · Captación avanzada</span>
+          <span class="gl-sub">CPQ completo · F2F · Comparadores</span>
+          <span class="gl-meta">3 sprints · 7 personas · M7→M10</span>
+        </div>
+        <div class="g-bars">
+          <div class="bar" style="left:30%;width:3.75%;background:rgba(59,139,235,.75);"><span class="bar-label">S6</span></div>
+          <div class="bar sprint-test" style="left:33.75%;width:1.25%;background:rgba(59,139,235,.4);"></div>
+          <div class="bar" style="left:35%;width:3.75%;background:rgba(59,139,235,.75);"><span class="bar-label">S7</span></div>
+          <div class="bar sprint-test" style="left:38.75%;width:1.25%;background:rgba(59,139,235,.4);"></div>
+          <div class="bar" style="left:40%;width:3.75%;background:rgba(59,139,235,.75);"><span class="bar-label">S8</span></div>
+          <div class="bar sprint-test" style="left:43.75%;width:1.25%;background:rgba(59,139,235,.4);"></div>
+          <div class="bar" style="left:45%;width:2%;background:rgba(59,139,235,.2);border:1px solid rgba(59,139,235,.4);border-radius:3px;"><span class="bar-label" style="color:rgba(59,139,235,.9);font-size:5.5px;">UAT</span></div>
+          <div class="milestone" style="left:46.8%;background:var(--c-f2);border-color:var(--c-f2);"></div>
+          <div class="gl-tag" style="left:47.6%;color:var(--c-f2);">★ GL F2</div>
+        </div>
+      </div>
+
+      <!-- F3 POST-MVP M10-M14 · 3 sprints -->
+      <div class="g-row">
+        <div class="g-label">
+          <span class="gl-name" style="color:var(--c-f3)">F3 · Contratación avanzada</span>
+          <span class="gl-sub">C2 · M1 · Rechazos ATR · CLM</span>
+          <span class="gl-meta">3 sprints · 8 personas · M10→M14</span>
+        </div>
+        <div class="g-bars">
+          <div class="bar" style="left:45%;width:3.75%;background:rgba(6,182,212,.75);"><span class="bar-label">S9</span></div>
+          <div class="bar sprint-test" style="left:48.75%;width:1.25%;background:rgba(6,182,212,.4);"></div>
+          <div class="bar" style="left:50%;width:3.75%;background:rgba(6,182,212,.75);"><span class="bar-label">S10</span></div>
+          <div class="bar sprint-test" style="left:53.75%;width:1.25%;background:rgba(6,182,212,.4);"></div>
+          <div class="bar" style="left:55%;width:3.75%;background:rgba(6,182,212,.75);"><span class="bar-label">S11</span></div>
+          <div class="bar sprint-test" style="left:58.75%;width:1.25%;background:rgba(6,182,212,.4);"></div>
+          <div class="bar" style="left:60%;width:2%;background:rgba(6,182,212,.2);border:1px solid rgba(6,182,212,.4);border-radius:3px;"><span class="bar-label" style="color:rgba(6,182,212,.9);font-size:5.5px;">UAT</span></div>
+          <div class="milestone" style="left:61.8%;background:var(--c-f3);border-color:var(--c-f3);"></div>
+          <div class="gl-tag" style="left:62.6%;color:var(--c-f3);">★ GL F3</div>
+        </div>
+      </div>
+
+      <!-- F4 M12-M17 · 4 sprints (solapado con F3) -->
+      <div class="g-row">
+        <div class="g-label">
+          <span class="gl-name" style="color:var(--c-f4)">F4 · ATC, Canales y Postventa</span>
+          <span class="gl-sub">Omnicanal · Casos · Facturación CRM</span>
+          <span class="gl-meta">4 sprints · 9 personas · M12→M17</span>
+        </div>
+        <div class="g-bars">
+          <!-- starts M12 = 55% -->
+          <div class="bar" style="left:55%;width:3.75%;background:rgba(16,185,129,.75);"><span class="bar-label">S12</span></div>
+          <div class="bar sprint-test" style="left:58.75%;width:1.25%;background:rgba(16,185,129,.4);"></div>
+          <div class="bar" style="left:60%;width:3.75%;background:rgba(16,185,129,.75);"><span class="bar-label">S13</span></div>
+          <div class="bar sprint-test" style="left:63.75%;width:1.25%;background:rgba(16,185,129,.4);"></div>
+          <div class="bar" style="left:65%;width:3.75%;background:rgba(16,185,129,.75);"><span class="bar-label">S14</span></div>
+          <div class="bar sprint-test" style="left:68.75%;width:1.25%;background:rgba(16,185,129,.4);"></div>
+          <div class="bar" style="left:70%;width:3.75%;background:rgba(16,185,129,.75);"><span class="bar-label">S15</span></div>
+          <div class="bar sprint-test" style="left:73.75%;width:1.25%;background:rgba(16,185,129,.4);"></div>
+          <div class="bar" style="left:75%;width:2%;background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.4);border-radius:3px;"><span class="bar-label" style="color:rgba(16,185,129,.9);font-size:5.5px;">UAT</span></div>
+          <div class="milestone" style="left:76.8%;background:var(--c-f4);border-color:var(--c-f4);"></div>
+          <div class="gl-tag" style="left:77.6%;color:var(--c-f4);">★ GL F4</div>
+        </div>
+      </div>
+
+      <!-- ── F5 ‖ F6 PARALELAS ── -->
+      <div class="g-section-lbl">F5 ‖ F6 — Ejecución en paralelo · equipos independientes · M16→M18</div>
+
+      <!-- F5 Marketing Cloud -->
+      <div class="g-row-parallel">
+        <div class="g-label">
+          <span class="gl-name" style="color:var(--c-f5)">F5 · Marketing Cloud</span>
+          <span class="gl-sub">14 US · 304 SP · Journeys · Segmentación</span>
+          <span class="gl-meta">2 sprints · 5 personas</span>
+        </div>
+        <div class="g-bars">
+          <div class="bar" style="left:75%;width:3.75%;background:rgba(232,121,249,.75);"><span class="bar-label">S16</span></div>
+          <div class="bar sprint-test" style="left:78.75%;width:1.25%;background:rgba(232,121,249,.4);"></div>
+          <div class="bar" style="left:80%;width:3.75%;background:rgba(232,121,249,.75);"><span class="bar-label">S17</span></div>
+          <div class="bar sprint-test" style="left:83.75%;width:1.25%;background:rgba(232,121,249,.4);"></div>
+          <div class="bar" style="left:85%;width:2%;background:rgba(232,121,249,.2);border:1px solid rgba(232,121,249,.4);border-radius:3px;"><span class="bar-label" style="color:rgba(232,121,249,.9);font-size:5.5px;">UAT</span></div>
+          <div class="milestone" style="left:86.8%;background:var(--c-f5);border-color:var(--c-f5);"></div>
+          <div class="gl-tag" style="left:87.6%;color:var(--c-f5);">★ GL F5</div>
+          <!-- parallel indicator -->
+          <span style="position:absolute;left:75%;top:2px;font-family:var(--ff-m);font-size:6px;color:rgba(232,121,249,.6);">‖ paralelo con F6</span>
+        </div>
+      </div>
+
+      <!-- F6 Analytics IA -->
+      <div class="g-row-parallel" style="margin-bottom:8px;">
+        <div class="g-label">
+          <span class="gl-name" style="color:var(--c-f6)">F6 · Analytics e IA</span>
+          <span class="gl-sub">15 US · 275 SP · Dashboards · Churn · NBA</span>
+          <span class="gl-meta">2 sprints · 5 personas</span>
+        </div>
+        <div class="g-bars">
+          <div class="bar" style="left:75%;width:3.75%;background:rgba(167,139,250,.75);"><span class="bar-label">S16</span></div>
+          <div class="bar sprint-test" style="left:78.75%;width:1.25%;background:rgba(167,139,250,.4);"></div>
+          <div class="bar" style="left:80%;width:3.75%;background:rgba(167,139,250,.75);"><span class="bar-label">S17</span></div>
+          <div class="bar sprint-test" style="left:83.75%;width:1.25%;background:rgba(167,139,250,.4);"></div>
+          <div class="bar" style="left:85%;width:2%;background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.4);border-radius:3px;"><span class="bar-label" style="color:rgba(167,139,250,.9);font-size:5.5px;">UAT</span></div>
+          <div class="milestone" style="left:86.8%;background:var(--c-f6);border-color:var(--c-f6);"></div>
+          <div class="gl-tag" style="left:87.6%;color:var(--c-f6);">★ GL F6</div>
+          <span style="position:absolute;left:75%;top:2px;font-family:var(--ff-m);font-size:6px;color:rgba(167,139,250,.6);">‖ paralelo con F5</span>
+        </div>
+      </div>
+
+      <!-- ── TRANSICIÓN ── -->
+      <div class="g-section-lbl">Transición al equipo de Operación</div>
+      <div class="g-row">
+        <div class="g-label">
+          <span class="gl-name" style="color:var(--c-tr)">Transición y Hypercare</span>
+          <span class="gl-sub">KT · Documentación · Handover</span>
+          <span class="gl-meta">2 meses · M19→M20</span>
+        </div>
+        <div class="g-bars">
+          <div class="bar" style="left:88%;width:11%;background:rgba(148,163,184,.18);border:1px solid rgba(148,163,184,.3);border-radius:5px;">
+            <span class="bar-label" style="color:rgba(148,163,184,.85);">Knowledge Transfer · Hypercare · Handover Operación</span>
+          </div>
+          <div class="milestone" style="left:98.5%;background:var(--c-tr);border-color:white;"></div>
+        </div>
+      </div>
+
+      <!-- ── F7 TRANSVERSAL (al final) ── -->
+      <div class="g-section-lbl">F7 · Seguridad y RGPD · capa transversal durante toda la construcción</div>
+      <div class="g-row">
+        <div class="g-label">
+          <span class="gl-name" style="color:var(--c-f7)">F7 · Seguridad &amp; RGPD</span>
+          <span class="gl-sub">8 US · 288 SP · 130 p-días</span>
+          <span class="gl-meta">Transversal · 4 personas · M2→M18</span>
+        </div>
+        <div class="g-bars">
+          <div class="bar" style="left:5%;width:83%;background:rgba(251,113,133,.12);border:1px dashed rgba(251,113,133,.38);border-radius:5px;height:18px;">
+            <span class="bar-label" style="color:rgba(251,113,133,.8);">SSO · MFA · Perfiles y roles · Cifrado TLS 1.3 · RGPD · Derecho al olvido · Auditoría · Field-level security</span>
+          </div>
+        </div>
+      </div>
+
+    </div></div><!-- /gantt -->
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card"><span class="stat-val" style="color:var(--c-mvp);">M7</span><span class="stat-lbl">Primer go-live<br>(MVP productivo)</span></div>
+      <div class="stat-card"><span class="stat-val" style="color:#3B8BEB;">197</span><span class="stat-lbl">Historias de usuario<br>backlog v4</span></div>
+      <div class="stat-card"><span class="stat-val" style="color:#F59E0B;">3.742</span><span class="stat-lbl">Story Points<br>totales</span></div>
+      <div class="stat-card"><span class="stat-val" style="color:#10B981;">1.731</span><span class="stat-lbl">Persona-días<br>de esfuerzo</span></div>
+      <div class="stat-card"><span class="stat-val" style="color:#A78BFA;">17</span><span class="stat-lbl">Sprints de<br>construcción</span></div>
+      <div class="stat-card"><span class="stat-val" style="color:#E879F9;">6</span><span class="stat-lbl">Go-lives<br>incrementales</span></div>
+      <div class="stat-card"><span class="stat-val" style="color:white;">~20</span><span class="stat-lbl">Meses<br>duración total</span></div>
+    </div>
+
+    <!-- LEGEND -->
+    <div class="legend">
+      <div class="leg-title">Leyenda de fases</div>
+      <div class="leg-row">
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-dis)"></div>Diseño / Discovery</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-mvp)"></div>MVP · Fundación + Venta básica + A3/C1 (★ go-live M7)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-f2)"></div>F2 · Captación avanzada (★ go-live M10)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-f3)"></div>F3 · Contratación avanzada (★ go-live M14)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-f4)"></div>F4 · ATC, Canales y Postventa (★ go-live M17)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-f5)"></div>F5 · Marketing Cloud (★ go-live M18) ‖ paralela</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-f6)"></div>F6 · Analytics e IA (★ go-live M18) ‖ paralela</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-f7);opacity:.6;"></div>F7 · Seguridad y RGPD (transversal)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:var(--c-tr)"></div>Transición y Hypercare</div>
+        <div class="leg-item"><div style="width:9px;height:9px;border:2px solid white;transform:rotate(45deg);flex-shrink:0;"></div>&nbsp;★ Hito go-live</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa de Actores — Sector Energético Español</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sf:      #00A1E0;
+    --sf-dark: #0070D2;
+    --c1:      #3B82F6;  /* blue   — generación */
+    --c2:      #10B981;  /* green  — transporte */
+    --c3:      #F59E0B;  /* amber  — distribución */
+    --c4:      #F97316;  /* orange — comercialización */
+    --c4r:     #EF4444;  /* red    — FOCO TFG */
+    --c5:      #F87171;  /* rose   — consumidores */
+    --cnmc:    #A78BFA;  /* purple — CNMC */
+    --ref:     #6B7280;  /* gray   — referencia/vulnerable */
+    --bg:      #0B0F1A;
+    --bg2:     #111827;
+    --bg3:     #1C2333;
+    --border:  rgba(255,255,255,0.07);
+    --text:    #E5E7EB;
+    --muted:   #6B7280;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 36px 36px 48px;
+    min-width: 1220px;
+  }
+
+  /* ── HEADER ─────────────────────────────── */
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 24px; padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header h1 {
+    font-size: 19px; font-weight: 800;
+    background: linear-gradient(135deg, #E0F2FE 0%, #38BDF8 50%, #0EA5E9 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: -0.3px; margin-bottom: 5px;
+  }
+  .header p { font-size: 11px; color: var(--muted); max-width: 640px; line-height: 1.6; }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+  .badge { font-size: 9px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; }
+  .badge-blue { background: linear-gradient(135deg, var(--sf-dark), var(--sf)); color: #fff; }
+  .source-note { font-size: 9px; color: var(--muted); text-align: right; }
+
+  /* ── OUTER CARD ─────────────────────────── */
+  .diagram-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 24px 20px;
+  }
+  .diagram-card-title {
+    font-size: 13px; font-weight: 700; color: #fff;
+    text-align: center; margin-bottom: 3px;
+  }
+  .diagram-card-sub {
+    font-size: 9.5px; color: var(--muted); text-align: center;
+    margin-bottom: 22px; font-style: italic;
+  }
+
+  /* ── DIAGRAM WRAPPER ─────────────────────── */
+  .diagram-wrap {
+    position: relative;
+    width: 1120px;
+    height: 698px;
+    margin: 0 auto;
+  }
+
+  /* ── LAYER BACKGROUNDS ───────────────────── */
+  .lbg {
+    position: absolute;
+    border-radius: 8px;
+    border: 1px solid;
+  }
+  .lbg-label {
+    position: absolute;
+    top: 8px; left: 10px;
+    font-size: 8px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+    opacity: 0.8; white-space: nowrap;
+  }
+
+  /* ── ACTOR BOXES ─────────────────────────── */
+  .abox {
+    position: absolute;
+    border-radius: 8px;
+    border: 1.5px solid;
+    padding: 10px 13px;
+    text-align: center;
+    transition: transform 0.15s, box-shadow 0.15s;
+    cursor: default;
+  }
+  .abox:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    z-index: 10;
+  }
+  .abox-title {
+    font-size: 11.5px; font-weight: 800;
+    line-height: 1.3; margin-bottom: 4px;
+  }
+  .abox-sub {
+    font-size: 8.5px; color: #94A3B8; line-height: 1.5;
+  }
+
+  /* FOCO TFG special box */
+  .foco-box {
+    border-style: dashed !important;
+    border-width: 2px !important;
+  }
+  .foco-tag {
+    position: absolute;
+    top: -11px; left: 50%; transform: translateX(-50%);
+    font-size: 7.5px; font-weight: 800; letter-spacing: 0.8px;
+    text-transform: uppercase; padding: 2px 9px;
+    border-radius: 10px; white-space: nowrap;
+    background: var(--c4r); color: #fff;
+  }
+
+  /* SVG overlay */
+  .diagram-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 1120px; height: 698px;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  /* ── LEGEND ─────────────────────────────── */
+  .legend-wrap {
+    margin-top: 16px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 20px;
+  }
+  .legend-title {
+    font-size: 8.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--muted); margin-bottom: 10px;
+  }
+  .legend-grid { display: flex; flex-wrap: wrap; gap: 6px 24px; }
+  .legend-item { display: flex; align-items: center; gap: 9px; }
+  .leg-line { width: 28px; height: 2px; border-radius: 1px; flex-shrink: 0; }
+  .leg-dashed { width: 28px; flex-shrink: 0; }
+  .leg-label { font-size: 9.5px; color: var(--text); font-weight: 500; }
+
+  /* ── FOOTER ─────────────────────────────── */
+  .footer {
+    margin-top: 16px; padding-top: 14px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-note { font-size: 9px; color: var(--muted); }
+  .footer-brand { font-size: 9px; color: var(--muted); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <h1>Mapa de actores del sector energético español &nbsp;·&nbsp; Electricidad y Gas Natural</h1>
+    <p>Estructura del mercado minorista B2C: actores, roles y flujos principales por capa funcional.
+       Fuente: elaboración propia a partir de CNMC (2025).</p>
+  </div>
+  <div class="header-right">
+    <span class="badge badge-blue">Mercado B2C · España</span>
+    <span class="source-note">CNMC 2025 · Elaboración propia</span>
+  </div>
+</div>
+
+<!-- DIAGRAM CARD -->
+<div class="diagram-card">
+  <div class="diagram-card-title">Mapa de actores del sector energético español · Electricidad y Gas Natural</div>
+  <div class="diagram-card-sub">Figura X — Estructura del mercado minorista B2C: actores, roles y flujos principales &nbsp;(Fuente: elaboración propia a partir de CNMC, 2025)</div>
+
+  <div class="diagram-wrap">
+
+    <!-- ════════════════════════════════════ -->
+    <!-- LAYER BACKGROUNDS                   -->
+    <!-- ════════════════════════════════════ -->
+
+    <!-- CAPA 1: Generación y mercado mayorista -->
+    <div class="lbg" style="left:0;top:24px;width:862px;height:150px;background:rgba(20,40,80,0.45);border-color:rgba(59,130,246,0.22);">
+      <span class="lbg-label" style="color:var(--c1)">CAPA 1 — Generación y mercado mayorista</span>
+    </div>
+
+    <!-- CAPA 2: Transporte y operación -->
+    <div class="lbg" style="left:0;top:188px;width:862px;height:112px;background:rgba(8,38,24,0.5);border-color:rgba(16,185,129,0.2);">
+      <span class="lbg-label" style="color:var(--c2)">CAPA 2 — Transporte y operación del sistema</span>
+    </div>
+
+    <!-- CAPA 3: Distribución -->
+    <div class="lbg" style="left:0;top:314px;width:862px;height:112px;background:rgba(42,30,4,0.5);border-color:rgba(245,158,11,0.2);">
+      <span class="lbg-label" style="color:var(--c3)">CAPA 3 — Distribución (activos regulados)</span>
+    </div>
+
+    <!-- CAPA 4: Comercialización -->
+    <div class="lbg" style="left:0;top:440px;width:862px;height:112px;background:rgba(44,18,4,0.5);border-color:rgba(249,115,22,0.2);">
+      <span class="lbg-label" style="color:var(--c4)">CAPA 4 — Comercialización</span>
+    </div>
+
+    <!-- CAPA 5: Consumidores -->
+    <div class="lbg" style="left:0;top:566px;width:862px;height:112px;background:rgba(44,8,8,0.42);border-color:rgba(248,113,113,0.15);">
+      <span class="lbg-label" style="color:var(--c5)">CAPA 5 — Consumidores residenciales</span>
+    </div>
+
+    <!-- ════════════════════════════════════ -->
+    <!-- ACTOR BOXES                          -->
+    <!-- ════════════════════════════════════ -->
+
+    <!-- ── CAPA 1 ─────────────────────── -->
+    <div class="abox" style="left:44px;top:66px;width:188px;height:94px;background:rgba(20,42,85,0.65);border-color:var(--c1);">
+      <div class="abox-title" style="color:var(--c1)">Generadores Eléctricos</div>
+      <div class="abox-sub">Renovables, ciclo combinado,<br>nuclear…</div>
+    </div>
+
+    <div class="abox" style="left:300px;top:66px;width:188px;height:94px;background:rgba(20,42,85,0.65);border-color:var(--c1);">
+      <div class="abox-title" style="color:var(--c1)">Productores de Gas</div>
+      <div class="abox-sub">Importadores GNL<br>y gasoductos</div>
+    </div>
+
+    <div class="abox" style="left:555px;top:66px;width:200px;height:94px;background:rgba(20,42,85,0.65);border-color:var(--c1);">
+      <div class="abox-title" style="color:var(--c1)">OMIE / MIBGAS</div>
+      <div class="abox-sub">Mercados mayoristas<br>electricidad y gas</div>
+    </div>
+
+    <!-- ── CAPA 2 ─────────────────────── -->
+    <div class="abox" style="left:104px;top:220px;width:198px;height:84px;background:rgba(8,38,24,0.7);border-color:var(--c2);">
+      <div class="abox-title" style="color:var(--c2)">REE</div>
+      <div class="abox-sub">Red Eléctrica de España<br>Gestión red transporte eléctrico</div>
+    </div>
+
+    <div class="abox" style="left:478px;top:220px;width:188px;height:84px;background:rgba(8,38,24,0.7);border-color:var(--c2);">
+      <div class="abox-title" style="color:var(--c2)">Enagas</div>
+      <div class="abox-sub">Gestor red transporte<br>gas natural</div>
+    </div>
+
+    <!-- ── CAPA 3 ─────────────────────── -->
+    <div class="abox" style="left:104px;top:345px;width:214px;height:84px;background:rgba(42,30,4,0.7);border-color:var(--c3);">
+      <div class="abox-title" style="color:var(--c3)">Distribuidoras Eléctricas</div>
+      <div class="abox-sub">Iberdrola Dist., Endesa Dist.,<br>UFD, E·Distribución, Viesgo…</div>
+    </div>
+
+    <div class="abox" style="left:478px;top:345px;width:200px;height:84px;background:rgba(42,30,4,0.7);border-color:var(--c3);">
+      <div class="abox-title" style="color:var(--c3)">Distribuidoras Gas</div>
+      <div class="abox-sub">Nedgia (Naturgy),<br>Madrileña Red de Gas…</div>
+    </div>
+
+    <!-- ── CAPA 4 ─────────────────────── -->
+    <div class="abox foco-box" style="left:44px;top:472px;width:190px;height:78px;background:rgba(239,68,68,0.06);border-color:var(--c4r);">
+      <span class="foco-tag">★ FOCO TFG</span>
+      <div class="abox-title" style="color:var(--c4);margin-top:3px">Grandes Grupos</div>
+      <div class="abox-sub">Iberdrola, Endesa, Naturgy,<br>EDP, Repsol (84% cuota libre)</div>
+    </div>
+
+    <div class="abox foco-box" style="left:288px;top:469px;width:214px;height:84px;background:rgba(239,68,68,0.08);border-color:var(--c4r);position:absolute;">
+      <span class="foco-tag">★ FOCO TFG</span>
+      <div class="abox-title" style="color:#fff;margin-top:3px">Comercializadoras Independientes</div>
+      <div class="abox-sub">~530 operadores · diferenciación<br>en experiencia de cliente (CX)</div>
+    </div>
+
+    <div class="abox" style="left:558px;top:472px;width:198px;height:78px;background:rgba(28,32,48,0.7);border-color:var(--ref);">
+      <div class="abox-title" style="color:#CBD5E1">Comerc. de Referencia</div>
+      <div class="abox-sub">PVPC (electricidad)<br>TUR (gas) · Mercado regulado</div>
+    </div>
+
+    <!-- ── CAPA 5 ─────────────────────── -->
+    <div class="abox" style="left:44px;top:596px;width:196px;height:76px;background:rgba(44,8,8,0.65);border-color:var(--c5);">
+      <div class="abox-title" style="color:var(--c5)">Consumidor Libre</div>
+      <div class="abox-sub">~22,1M elec. | ~4,9M gas<br>Elige comercializadora</div>
+    </div>
+
+    <div class="abox" style="left:290px;top:596px;width:196px;height:76px;background:rgba(44,8,8,0.65);border-color:var(--c5);">
+      <div class="abox-title" style="color:var(--c5)">Consumidor Dual</div>
+      <div class="abox-sub">Contrata luz + gas<br>con el mismo proveedor</div>
+    </div>
+
+    <div class="abox" style="left:550px;top:596px;width:208px;height:76px;background:rgba(28,32,48,0.65);border-color:var(--ref);">
+      <div class="abox-title" style="color:#CBD5E1">Consumidor Vulnerable</div>
+      <div class="abox-sub">~8,4M elec. | ~3,1M gas<br>Mercado regulado PVPC/TUR</div>
+    </div>
+
+    <!-- ── CNMC (floating right) ──────── -->
+    <div class="abox" style="left:892px;top:296px;width:158px;height:100px;background:rgba(50,24,80,0.6);border-color:var(--cnmc);border-style:dashed;border-width:1.5px;">
+      <div class="abox-title" style="color:var(--cnmc)">CNMC</div>
+      <div class="abox-sub" style="margin-top:4px">Comisión Nacional de<br>Mercados y Competencia</div>
+    </div>
+
+    <!-- ════════════════════════════════════ -->
+    <!-- SVG ARROWS OVERLAY                   -->
+    <!-- ════════════════════════════════════ -->
+    <svg class="diagram-svg" viewBox="0 0 1120 698">
+      <defs>
+        <marker id="ab"  markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto"><path d="M0,0.5 L0,5.5 L7,3 z" fill="#3B82F6"/></marker>
+        <marker id="ask" markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto"><path d="M0,0.5 L0,5.5 L7,3 z" fill="#60A5FA"/></marker>
+        <marker id="ag"  markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto"><path d="M0,0.5 L0,5.5 L7,3 z" fill="#10B981"/></marker>
+        <marker id="aam" markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto"><path d="M0,0.5 L0,5.5 L7,3 z" fill="#F59E0B"/></marker>
+        <marker id="aor" markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto"><path d="M0,0.5 L0,5.5 L7,3 z" fill="#F97316"/></marker>
+        <marker id="ard" markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto"><path d="M0,0.5 L0,5.5 L7,3 z" fill="#EF4444"/></marker>
+        <marker id="agr" markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto"><path d="M0,0.5 L0,5.5 L7,3 z" fill="#9CA3AF"/></marker>
+        <marker id="apu" markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto"><path d="M0,0.5 L0,5.5 L7,3 z" fill="#A78BFA"/></marker>
+      </defs>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- 1. OFERTA ENERGÍA — blue horizontal     -->
+      <!-- Gen.Elec right (232,113) → Prod.Gas left (300,113) -->
+      <line x1="232" y1="113" x2="297" y2="113" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#ab)"/>
+      <!-- Prod.Gas right (488,113) → OMIE left (555,113) -->
+      <line x1="488" y1="113" x2="552" y2="113" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#ab)"/>
+      <!-- Labels -->
+      <rect x="218" y="94" width="90" height="13" rx="3" fill="rgba(11,15,26,0.85)"/>
+      <text x="263" y="104" font-family="Inter" font-size="8.5" fill="#93C5FD" text-anchor="middle" font-weight="600">oferta energía</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- 2. DESPACHO ELEC — sky curve            -->
+      <!-- Gen.Elec bottom-center (138,160) → REE top-center (203,220) -->
+      <path d="M138,160 C138,192 203,192 203,220" stroke="#60A5FA" stroke-width="1.5" fill="none" marker-end="url(#ask)"/>
+      <rect x="106" y="190" width="82" height="13" rx="3" fill="rgba(11,15,26,0.85)"/>
+      <text x="147" y="200" font-family="Inter" font-size="8" fill="#93C5FD" text-anchor="middle" font-weight="600">despacho elec.</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- 3. DESPACHO GAS — sky curve             -->
+      <!-- OMIE bottom-center (655,160) → Enagas top-center (572,220) -->
+      <path d="M655,160 C655,192 572,192 572,220" stroke="#60A5FA" stroke-width="1.5" fill="none" marker-end="url(#ask)"/>
+      <rect x="590" y="190" width="76" height="13" rx="3" fill="rgba(11,15,26,0.85)"/>
+      <text x="628" y="200" font-family="Inter" font-size="8" fill="#93C5FD" text-anchor="middle" font-weight="600">despacho gas</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- 4. REE ↔ Enagas datos/protocolos dashed -->
+      <!-- REE right (302,262) → Enagas left (478,262) -->
+      <line x1="302" y1="262" x2="475" y2="262" stroke="#10B981" stroke-width="1.3" stroke-dasharray="5,3" fill="none" marker-end="url(#ag)"/>
+      <rect x="332" y="251" width="106" height="13" rx="3" fill="rgba(11,15,26,0.85)"/>
+      <text x="385" y="261" font-family="Inter" font-size="8" fill="#6EE7B7" text-anchor="middle" font-weight="600">datos / protocolos</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- 5. REE → Dist.Elec (green)              -->
+      <!-- REE bottom (203,304) → Dist.Elec top (211,345) -->
+      <line x1="203" y1="304" x2="211" y2="342" stroke="#10B981" stroke-width="1.5" marker-end="url(#ag)"/>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- 6. Enagas → Dist.Gas (green)            -->
+      <!-- Enagas bottom (572,304) → Dist.Gas top (578,345) -->
+      <line x1="572" y1="304" x2="578" y2="342" stroke="#10B981" stroke-width="1.5" marker-end="url(#ag)"/>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- 7. ATR/cambio suministrador — amber      -->
+      <!-- Dist.Elec bottom-center (211,429) → Grandes Grupos top (139,472) -->
+      <path d="M211,429 C211,452 139,452 139,472" stroke="#F59E0B" stroke-width="1.5" fill="none" marker-end="url(#aam)"/>
+      <rect x="200" y="446" width="112" height="24" rx="3" fill="rgba(11,15,26,0.9)"/>
+      <text x="256" y="457" font-family="Inter" font-size="8" fill="#FCD34D" text-anchor="middle" font-weight="600">ATR / cambio</text>
+      <text x="256" y="467" font-family="Inter" font-size="8" fill="#FCD34D" text-anchor="middle" font-weight="600">suministrador</text>
+
+      <!-- Dist.Elec right (318,387) to Comerc.Indep top (395,469) — dashed amber -->
+      <path d="M318,387 C380,387 395,432 395,469" stroke="#F59E0B" stroke-width="1.2" stroke-dasharray="4,3" fill="none" marker-end="url(#aam)"/>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- 8. contrato libre — orange              -->
+      <!-- Grandes Grupos bottom (139,550) → Cons.Libre top (142,596) -->
+      <line x1="139" y1="550" x2="142" y2="593" stroke="#F97316" stroke-width="1.5" marker-end="url(#aor)"/>
+      <rect x="72" y="565" width="62" height="24" rx="3" fill="rgba(11,15,26,0.9)"/>
+      <text x="103" y="576" font-family="Inter" font-size="8" fill="#FCA5A5" text-anchor="middle" font-weight="600">contrato</text>
+      <text x="103" y="586" font-family="Inter" font-size="8" fill="#FCA5A5" text-anchor="middle" font-weight="600">libre</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- 9. oferta dual — red                    -->
+      <!-- Comerc.Indep bottom (395,553) → Cons.Dual top (388,596) -->
+      <line x1="395" y1="553" x2="388" y2="593" stroke="#EF4444" stroke-width="1.5" marker-end="url(#ard)"/>
+      <rect x="335" y="567" width="64" height="13" rx="3" fill="rgba(11,15,26,0.9)"/>
+      <text x="367" y="577" font-family="Inter" font-size="8" fill="#FCA5A5" text-anchor="middle" font-weight="600">oferta dual</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- 10. PVPC / TUR — gray                   -->
+      <!-- Comerc.Ref bottom (657,550) → Cons.Vul top (654,596) -->
+      <line x1="657" y1="550" x2="654" y2="593" stroke="#9CA3AF" stroke-width="1.5" marker-end="url(#agr)"/>
+      <rect x="604" y="565" width="60" height="13" rx="3" fill="rgba(11,15,26,0.9)"/>
+      <text x="634" y="575" font-family="Inter" font-size="8" fill="#9CA3AF" text-anchor="middle" font-weight="600">PVPC / TUR</text>
+
+      <!-- ═══════════════════════════════════════ -->
+      <!-- 11. CNMC supervisión — purple dashed    -->
+      <!-- CNMC left (892,346) → Dist.Gas right (678,387) -->
+      <path d="M892,346 C860,346 780,356 681,387" stroke="#A78BFA" stroke-width="1.3" stroke-dasharray="5,3" fill="none" marker-end="url(#apu)"/>
+      <rect x="754" y="341" width="72" height="13" rx="3" fill="rgba(11,15,26,0.88)"/>
+      <text x="790" y="351" font-family="Inter" font-size="8" fill="#C4B5FD" text-anchor="middle" font-weight="600">supervisión</text>
+
+      <!-- CNMC → Comerc.Ref area (second supervision) -->
+      <path d="M892,372 C865,410 815,500 759,511" stroke="#A78BFA" stroke-width="1.1" stroke-dasharray="4,3" fill="none" marker-end="url(#apu)" opacity="0.55"/>
+
+      <!-- CNMC long supervision arc toward Capa 1 -->
+      <path d="M971,296 C971,205 880,140 757,113" stroke="#A78BFA" stroke-width="1" stroke-dasharray="4,4" fill="none" marker-end="url(#apu)" opacity="0.35"/>
+
+    </svg>
+
+  </div><!-- end diagram-wrap -->
+</div><!-- end diagram-card -->
+
+<!-- LEGEND -->
+<div class="legend-wrap">
+  <div class="legend-title">Leyenda de flujos</div>
+  <div class="legend-grid">
+    <div class="legend-item">
+      <div class="leg-line" style="background:#3B82F6;"></div>
+      <span class="leg-label">Flujo físico de energía (generación → mayorista)</span>
+    </div>
+    <div class="legend-item">
+      <div class="leg-line" style="background:#60A5FA;"></div>
+      <span class="leg-label">Señal de precio / despacho (mayorista → transporte)</span>
+    </div>
+    <div class="legend-item">
+      <div class="leg-line" style="background:#10B981;"></div>
+      <span class="leg-label">Intercambio de datos y protocolos ATR (transporte ↔ distribución)</span>
+    </div>
+    <div class="legend-item">
+      <div class="leg-line" style="background:#F59E0B;"></div>
+      <span class="leg-label">Mensajería ATR / cambio de suministrador (distribución → comercializadora)</span>
+    </div>
+    <div class="legend-item">
+      <div class="leg-line" style="background:#F97316;"></div>
+      <span class="leg-label">Relación comercial libre con el cliente (comercializadora → consumidor)</span>
+    </div>
+    <div class="legend-item">
+      <svg width="28" height="10" style="flex-shrink:0"><line x1="0" y1="5" x2="28" y2="5" stroke="#A78BFA" stroke-width="1.5" stroke-dasharray="4,3"/></svg>
+      <span class="leg-label">Supervisión regulatoria CNMC</span>
+    </div>
+    <div class="legend-item">
+      <div style="width:18px;height:18px;border:1.5px dashed var(--c4r);border-radius:3px;flex-shrink:0;background:rgba(239,68,68,0.08);"></div>
+      <span class="leg-label">★ FOCO TFG — Comercializadoras Independientes (alcance principal)</span>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span class="footer-note">TFG · CRM Comercializadora Energética B2C · UOC 2025–2026 · Tutor: Santiago A. Bruno Pérez</span>
+  <span class="footer-brand">Pablo · Datos CNMC 2025 · Elaboración propia</span>
+</div>
+
+</body>
+</html>

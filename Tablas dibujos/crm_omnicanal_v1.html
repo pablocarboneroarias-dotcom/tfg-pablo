@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Canales de entrada al CRM — Comercializadora Energética B2C</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:     #060D1A;
+    --bg2:    #0D1B2E;
+    --bg3:    #112035;
+    --border: rgba(255,255,255,0.07);
+    --text:   #E2EAF4;
+    --muted:  #4B6A8A;
+
+    /* Channel palette */
+    --c1: #38BDF8;  /* Email */
+    --c2: #34D399;  /* SMS */
+    --c3: #4ADE80;  /* WhatsApp */
+    --c4: #A78BFA;  /* Landing Page */
+    --c5: #F472B6;  /* Portal */
+    --c6: #FB923C;  /* App Móvil */
+    --c7: #60A5FA;  /* Web */
+    --c8: #FBBF24;  /* Chat en vivo */
+    --c9: #F87171;  /* Redes Sociales */
+    --c10:#C084FC;  /* Llamadas VoIP */
+    --c11:#2DD4BF;  /* Bots / IA */
+
+    /* CRM */
+    --sf: #00A1E0;
+    --sf-dark: #0070D2;
+  }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 40px 36px 52px;
+    min-width: 1100px;
+  }
+
+  /* ── HEADER ─────────────────────────────────────── */
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .header .eyebrow {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--sf); margin-bottom: 10px;
+  }
+  .header h1 {
+    font-size: 24px; font-weight: 800;
+    color: #fff; letter-spacing: -0.4px;
+  }
+  .header h1 span {
+    background: linear-gradient(120deg, var(--sf), #38BDF8);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .header p {
+    font-size: 12px; color: var(--muted); margin-top: 8px;
+    max-width: 580px; margin-left: auto; margin-right: auto; line-height: 1.6;
+  }
+
+  /* ── SECTION LABEL ───────────────────────────────── */
+  .section-label {
+    font-size: 9.5px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted);
+    text-align: center; margin-bottom: 16px;
+  }
+
+  /* ── CHANNELS GRID ───────────────────────────────── */
+  .channels-grid {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    gap: 10px;
+    margin-bottom: 0;
+    position: relative;
+  }
+
+  .channel-card {
+    background: var(--bg2);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 20px 10px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+  .channel-card:hover {
+    transform: translateY(-4px);
+  }
+
+  /* Glow top border */
+  .channel-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 14px 14px 0 0;
+  }
+
+  /* Subtle glow bg */
+  .channel-card::before {
+    content: '';
+    position: absolute;
+    top: -30px; left: 50%;
+    transform: translateX(-50%);
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    filter: blur(30px);
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  /* Individual channel colors */
+  .ch1::after  { background: var(--c1); }  .ch1::before  { background: var(--c1); }
+  .ch2::after  { background: var(--c2); }  .ch2::before  { background: var(--c2); }
+  .ch3::after  { background: var(--c3); }  .ch3::before  { background: var(--c3); }
+  .ch4::after  { background: var(--c4); }  .ch4::before  { background: var(--c4); }
+  .ch5::after  { background: var(--c5); }  .ch5::before  { background: var(--c5); }
+  .ch6::after  { background: var(--c6); }  .ch6::before  { background: var(--c6); }
+  .ch7::after  { background: var(--c7); }  .ch7::before  { background: var(--c7); }
+  .ch8::after  { background: var(--c8); }  .ch8::before  { background: var(--c8); }
+  .ch9::after  { background: var(--c9); }  .ch9::before  { background: var(--c9); }
+  .ch10::after { background: var(--c10); } .ch10::before { background: var(--c10); }
+  .ch11::after { background: var(--c11); } .ch11::before { background: var(--c11); }
+
+  .ch-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 1;
+  }
+  .bg1  { background: rgba(56,189,248,0.12);  box-shadow: 0 0 0 1px rgba(56,189,248,0.2); }
+  .bg2  { background: rgba(52,211,153,0.12);  box-shadow: 0 0 0 1px rgba(52,211,153,0.2); }
+  .bg3  { background: rgba(74,222,128,0.12);  box-shadow: 0 0 0 1px rgba(74,222,128,0.2); }
+  .bg4  { background: rgba(167,139,250,0.12); box-shadow: 0 0 0 1px rgba(167,139,250,0.2);}
+  .bg5  { background: rgba(244,114,182,0.12); box-shadow: 0 0 0 1px rgba(244,114,182,0.2);}
+  .bg6  { background: rgba(251,146,60,0.12);  box-shadow: 0 0 0 1px rgba(251,146,60,0.2); }
+  .bg7  { background: rgba(96,165,250,0.12);  box-shadow: 0 0 0 1px rgba(96,165,250,0.2); }
+  .bg8  { background: rgba(251,191,36,0.12);  box-shadow: 0 0 0 1px rgba(251,191,36,0.2); }
+  .bg9  { background: rgba(248,113,113,0.12); box-shadow: 0 0 0 1px rgba(248,113,113,0.2);}
+  .bg10 { background: rgba(192,132,252,0.12); box-shadow: 0 0 0 1px rgba(192,132,252,0.2);}
+  .bg11 { background: rgba(45,212,191,0.12);  box-shadow: 0 0 0 1px rgba(45,212,191,0.2); }
+
+  .ch-name {
+    font-size: 10px; font-weight: 700;
+    text-align: center; line-height: 1.3;
+    position: relative; z-index: 1;
+  }
+  .ch1  .ch-name { color: var(--c1); }
+  .ch2  .ch-name { color: var(--c2); }
+  .ch3  .ch-name { color: var(--c3); }
+  .ch4  .ch-name { color: var(--c4); }
+  .ch5  .ch-name { color: var(--c5); }
+  .ch6  .ch-name { color: var(--c6); }
+  .ch7  .ch-name { color: var(--c7); }
+  .ch8  .ch-name { color: var(--c8); }
+  .ch9  .ch-name { color: var(--c9); }
+  .ch10 .ch-name { color: var(--c10); }
+  .ch11 .ch-name { color: var(--c11); }
+
+  .ch-type {
+    font-size: 8px; color: var(--muted); font-weight: 500;
+    text-align: center; line-height: 1.3;
+    position: relative; z-index: 1;
+  }
+
+  /* ── ARROW CONNECTOR ─────────────────────────────── */
+  .connector {
+    position: relative;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+  }
+  .connector-line {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%; transform: translateX(-50%);
+    width: 1px;
+    background: linear-gradient(180deg, rgba(0,161,224,0.6), rgba(0,161,224,0.1));
+  }
+  /* Many arrows from channels to CRM */
+  .arrows-row {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    gap: 10px;
+    height: 40px;
+    position: relative;
+  }
+  .arrow-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    position: relative;
+  }
+  .arrow-line::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 8px;
+    left: 50%; transform: translateX(-50%);
+    width: 1.5px;
+  }
+  .arrow-line::after {
+    content: '';
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    margin-bottom: 0;
+  }
+  /* Per-arrow colors */
+  .a1::before  { background: linear-gradient(180deg, var(--c1), rgba(56,189,248,0.3)); }
+  .a1::after   { border-top: 7px solid var(--c1); }
+  .a2::before  { background: linear-gradient(180deg, var(--c2), rgba(52,211,153,0.3)); }
+  .a2::after   { border-top: 7px solid var(--c2); }
+  .a3::before  { background: linear-gradient(180deg, var(--c3), rgba(74,222,128,0.3)); }
+  .a3::after   { border-top: 7px solid var(--c3); }
+  .a4::before  { background: linear-gradient(180deg, var(--c4), rgba(167,139,250,0.3)); }
+  .a4::after   { border-top: 7px solid var(--c4); }
+  .a5::before  { background: linear-gradient(180deg, var(--c5), rgba(244,114,182,0.3)); }
+  .a5::after   { border-top: 7px solid var(--c5); }
+  .a6::before  { background: linear-gradient(180deg, var(--c6), rgba(251,146,60,0.3)); }
+  .a6::after   { border-top: 7px solid var(--c6); }
+  .a7::before  { background: linear-gradient(180deg, var(--c7), rgba(96,165,250,0.3)); }
+  .a7::after   { border-top: 7px solid var(--c7); }
+  .a8::before  { background: linear-gradient(180deg, var(--c8), rgba(251,191,36,0.3)); }
+  .a8::after   { border-top: 7px solid var(--c8); }
+  .a9::before  { background: linear-gradient(180deg, var(--c9), rgba(248,113,113,0.3)); }
+  .a9::after   { border-top: 7px solid var(--c9); }
+  .a10::before { background: linear-gradient(180deg, var(--c10), rgba(192,132,252,0.3)); }
+  .a10::after  { border-top: 7px solid var(--c10); }
+  .a11::before { background: linear-gradient(180deg, var(--c11), rgba(45,212,191,0.3)); }
+  .a11::after  { border-top: 7px solid var(--c11); }
+
+  /* ── CRM PLATFORM BLOCK ──────────────────────────── */
+  .crm-block {
+    background: linear-gradient(135deg, #071628 0%, #0A2340 50%, #071628 100%);
+    border: 1px solid rgba(0,161,224,0.3);
+    border-radius: 18px;
+    padding: 28px 36px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(0,112,210,0.15), inset 0 1px 0 rgba(0,161,224,0.15);
+  }
+
+  /* Glow effect */
+  .crm-block::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: 50%; transform: translateX(-50%);
+    width: 400px; height: 200px;
+    background: radial-gradient(ellipse, rgba(0,161,224,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Top accent line */
+  .crm-block::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 10%; right: 10%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--sf), var(--sf-dark), var(--sf), transparent);
+    border-radius: 2px;
+  }
+
+  .crm-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative; z-index: 1;
+  }
+
+  .crm-left {
+    display: flex; align-items: center; gap: 20px;
+  }
+  .crm-logo {
+    width: 64px; height: 64px; border-radius: 18px;
+    background: rgba(0,161,224,0.1);
+    border: 1px solid rgba(0,161,224,0.25);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .crm-title-block {}
+  .crm-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--sf); margin-bottom: 4px;
+  }
+  .crm-name {
+    font-size: 30px; font-weight: 800; color: #fff;
+    letter-spacing: -1px; line-height: 1;
+  }
+  .crm-name span {
+    background: linear-gradient(120deg, #fff 0%, var(--sf) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .crm-sub {
+    font-size: 11px; color: var(--muted); margin-top: 5px;
+  }
+
+  .crm-middle {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .crm-stat {
+    background: rgba(0,161,224,0.08);
+    border: 1px solid rgba(0,161,224,0.15);
+    border-radius: 10px;
+    padding: 8px 16px;
+    text-align: center;
+  }
+  .stat-val {
+    font-size: 20px; font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--sf);
+  }
+  .stat-lbl { font-size: 9px; color: var(--muted); margin-top: 2px; }
+
+  .crm-right {
+    display: flex; flex-direction: column; gap: 8px; align-items: flex-end;
+  }
+  .cloud-pill {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px; padding: 7px 14px;
+    min-width: 200px;
+  }
+  .pill-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .pill-text { font-size: 10.5px; font-weight: 600; }
+  .pill-tag  {
+    margin-left: auto; font-size: 8px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1px 6px; color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── CAPABILITIES ROW ────────────────────────────── */
+  .caps-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    position: relative; z-index: 1;
+  }
+  .cap-item {
+    display: flex; align-items: center; gap: 9px;
+  }
+  .cap-icon {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: rgba(0,161,224,0.08);
+    border: 1px solid rgba(0,161,224,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+  }
+  .cap-text {}
+  .cap-title { font-size: 10px; font-weight: 700; color: #94A3B8; }
+  .cap-sub   { font-size: 8.5px; color: var(--muted); margin-top: 1px; }
+
+  /* ── BOTTOM ROW: OUTPUTS ─────────────────────────── */
+  .outputs-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .output-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .out-icon {
+    width: 36px; height: 36px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .out-title { font-size: 11px; font-weight: 700; color: #CBD5E1; margin-bottom: 3px; }
+  .out-sub   { font-size: 9.5px; color: var(--muted); line-height: 1.4; }
+
+  /* ── FOOTER ──────────────────────────────────────── */
+  .footer {
+    margin-top: 24px; padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-note  { font-size: 9px; color: var(--muted); }
+  .footer-brand { font-size: 9px; color: var(--muted); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="eyebrow">Apartado 3.2.2 · Gestión Omnicanal</div>
+  <h1>Canales de entrada al <span>CRM</span> — Comercializadora Energética B2C</h1>
+  <p>Todos los canales de captación y atención al cliente convergen en una única plataforma de gestión. Salesforce CRM actúa como capa de orquestación central, garantizando la visión 360° del cliente y el contexto unificado en cada interacción.</p>
+</div>
+
+<!-- SECTION LABEL -->
+<div class="section-label">Canales de entrada · 11 puntos de contacto</div>
+
+<!-- CHANNELS GRID -->
+<div class="channels-grid">
+
+  <!-- 1. Email -->
+  <div class="channel-card ch1">
+    <div class="ch-icon bg1">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="5" width="18" height="14" rx="2.5" stroke="#38BDF8" stroke-width="1.7" fill="none"/>
+        <path d="M3 8l9 6 9-6" stroke="#38BDF8" stroke-width="1.7" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="ch-name">Email</div>
+    <div class="ch-type">Marketing Cloud<br>· Service Cloud</div>
+  </div>
+
+  <!-- 2. SMS -->
+  <div class="channel-card ch2">
+    <div class="ch-icon bg2">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <rect x="4" y="2" width="16" height="20" rx="3" stroke="#34D399" stroke-width="1.7" fill="none"/>
+        <circle cx="12" cy="18" r="1.2" fill="#34D399"/>
+        <path d="M9 7h6M9 10h4" stroke="#34D399" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="ch-name">SMS</div>
+    <div class="ch-type">Marketing Cloud<br>· Transaccional</div>
+  </div>
+
+  <!-- 3. WhatsApp -->
+  <div class="channel-card ch3">
+    <div class="ch-icon bg3">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2C6.48 2 2 6.48 2 12c0 1.9.53 3.67 1.44 5.18L2 22l4.96-1.41C8.38 21.49 10.14 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" stroke="#4ADE80" stroke-width="1.6" fill="none"/>
+        <path d="M8.5 9.5c.2-.5.8-1 1.5-.5l1 .7c.3.2.3.6.1.9l-.5.7c.4.8 1.6 2 2.4 2.4l.7-.5c.3-.2.7-.2.9.1l.7 1c.5.7 0 1.3-.5 1.5-2 .8-5-2-5.5-4.8-.1-.6-.1-1.2.2-1.5z" fill="#4ADE80"/>
+      </svg>
+    </div>
+    <div class="ch-name">WhatsApp</div>
+    <div class="ch-type">WhatsApp Business<br>· API Oficial</div>
+  </div>
+
+  <!-- 4. Landing Page -->
+  <div class="channel-card ch4">
+    <div class="ch-icon bg4">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="4" width="18" height="14" rx="2" stroke="#A78BFA" stroke-width="1.7" fill="none"/>
+        <path d="M3 8h18" stroke="#A78BFA" stroke-width="1.5"/>
+        <circle cx="6" cy="6" r="1" fill="#A78BFA"/>
+        <circle cx="9" cy="6" r="1" fill="#A78BFA"/>
+        <path d="M7 11h10M7 13.5h6" stroke="#A78BFA" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="ch-name">Landing<br>Page</div>
+    <div class="ch-type">Web-to-Lead<br>· Forms</div>
+  </div>
+
+  <!-- 5. Portal -->
+  <div class="channel-card ch5">
+    <div class="ch-icon bg5">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="#F472B6" stroke-width="1.7" fill="none"/>
+        <path d="M12 3c-2 3-3 6-3 9s1 6 3 9" stroke="#F472B6" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M12 3c2 3 3 6 3 9s-1 6-3 9" stroke="#F472B6" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M3 12h18" stroke="#F472B6" stroke-width="1.5"/>
+        <path d="M4 8h16M4 16h16" stroke="#F472B6" stroke-width="1.2" stroke-dasharray="2 2"/>
+      </svg>
+    </div>
+    <div class="ch-name">Portal<br>Autoservicio</div>
+    <div class="ch-type">Experience<br>Cloud B2C</div>
+  </div>
+
+  <!-- 6. App Móvil -->
+  <div class="channel-card ch6">
+    <div class="ch-icon bg6">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <rect x="6" y="2" width="12" height="20" rx="3" stroke="#FB923C" stroke-width="1.7" fill="none"/>
+        <circle cx="12" cy="18.5" r="1.2" fill="#FB923C"/>
+        <path d="M9 5h6" stroke="#FB923C" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M9 9h6M9 12h4" stroke="#FB923C" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="ch-name">App<br>Móvil</div>
+    <div class="ch-type">Salesforce Mobile<br>· Push notifications</div>
+  </div>
+
+  <!-- 7. Web -->
+  <div class="channel-card ch7">
+    <div class="ch-icon bg7">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L2 7l10 5 10-5-10-5z" stroke="#60A5FA" stroke-width="1.6" fill="none" stroke-linejoin="round"/>
+        <path d="M2 17l10 5 10-5" stroke="#60A5FA" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+        <path d="M2 12l10 5 10-5" stroke="#60A5FA" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+      </svg>
+    </div>
+    <div class="ch-name">Web</div>
+    <div class="ch-type">Comparadores<br>· Web corporativa</div>
+  </div>
+
+  <!-- 8. Chat en vivo -->
+  <div class="channel-card ch8">
+    <div class="ch-icon bg8">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M4 4h16v12H4z" rx="2" stroke="#FBBF24" stroke-width="1.7" fill="none"/>
+        <path d="M4 16l3 4" stroke="#FBBF24" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M8 9h8M8 12h5" stroke="#FBBF24" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="ch-name">Chat<br>en Vivo</div>
+    <div class="ch-type">Embedded Chat<br>· Live Agent</div>
+  </div>
+
+  <!-- 9. Redes Sociales -->
+  <div class="channel-card ch9">
+    <div class="ch-icon bg9">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <circle cx="18" cy="5" r="2.5" stroke="#F87171" stroke-width="1.6" fill="none"/>
+        <circle cx="6"  cy="12" r="2.5" stroke="#F87171" stroke-width="1.6" fill="none"/>
+        <circle cx="18" cy="19" r="2.5" stroke="#F87171" stroke-width="1.6" fill="none"/>
+        <path d="M8.3 10.7l7.4-4.4M8.3 13.3l7.4 4.4" stroke="#F87171" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="ch-name">Redes<br>Sociales</div>
+    <div class="ch-type">Social Studio<br>· Monitoring</div>
+  </div>
+
+  <!-- 10. Llamadas VoIP -->
+  <div class="channel-card ch10">
+    <div class="ch-icon bg10">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M6.5 4C7.5 4 9 5 10 6.5s.5 3-.5 3.5c-1 .5-1.5 1-1 2s3 5 4.5 5.5 2 .5 2.5-.5.5-2 2-1.5 3 2 3 3-.5 2-2 2C7 21 3 9 3 7s1.5-3 3.5-3z" stroke="#C084FC" stroke-width="1.7" fill="none"/>
+        <path d="M17 4c1.5 1.5 1.5 4 0 5.5" stroke="#C084FC" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M19.5 2c2.5 2.5 2.5 7 0 9.5" stroke="#C084FC" stroke-width="1.3" stroke-linecap="round" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="ch-name">Llamadas<br>VoIP</div>
+    <div class="ch-type">CTI Adapter<br>· Genesys / Amazon</div>
+  </div>
+
+  <!-- 11. Bots / IA -->
+  <div class="channel-card ch11">
+    <div class="ch-icon bg11">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <rect x="6" y="9" width="12" height="10" rx="3" stroke="#2DD4BF" stroke-width="1.7" fill="none"/>
+        <circle cx="9.5" cy="13.5" r="1.5" fill="#2DD4BF"/>
+        <circle cx="14.5" cy="13.5" r="1.5" fill="#2DD4BF"/>
+        <path d="M12 9V6" stroke="#2DD4BF" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="12" cy="5" r="1.5" stroke="#2DD4BF" stroke-width="1.5" fill="none"/>
+        <path d="M6 14H4M20 14h-2" stroke="#2DD4BF" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- signal -->
+        <path d="M17 5.5c1 1 1 2.5 0 3.5" stroke="#2DD4BF" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="ch-name">Bots /<br>Agentforce</div>
+    <div class="ch-type">Einstein Bots<br>· Agentforce AI</div>
+  </div>
+
+</div>
+
+<!-- ARROWS -->
+<div class="arrows-row">
+  <div class="arrow-line a1"></div>
+  <div class="arrow-line a2"></div>
+  <div class="arrow-line a3"></div>
+  <div class="arrow-line a4"></div>
+  <div class="arrow-line a5"></div>
+  <div class="arrow-line a6"></div>
+  <div class="arrow-line a7"></div>
+  <div class="arrow-line a8"></div>
+  <div class="arrow-line a9"></div>
+  <div class="arrow-line a10"></div>
+  <div class="arrow-line a11"></div>
+</div>
+
+<!-- CRM BLOCK -->
+<div class="crm-block">
+  <div class="crm-inner">
+
+    <!-- LEFT: Logo + name -->
+    <div class="crm-left">
+      <div class="crm-logo">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <!-- Cloud shape -->
+          <path d="M28 22a6 6 0 000-12 5.97 5.97 0 00-1.24.13A8 8 0 0010.6 16H10a6 6 0 000 12h18z" fill="url(#sfgrad)" opacity="0.9"/>
+          <!-- 360 text suggestion -->
+          <circle cx="18" cy="20" r="4" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+          <defs>
+            <linearGradient id="sfgrad" x1="8" y1="10" x2="30" y2="28" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#38BDF8"/>
+              <stop offset="100%" stop-color="#0070D2"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="crm-title-block">
+        <div class="crm-label">Salesforce Platform</div>
+        <div class="crm-name"><span>CRM</span></div>
+        <div class="crm-sub">Customer Relationship Management · Visión 360° del cliente</div>
+      </div>
+    </div>
+
+    <!-- MIDDLE: Stats -->
+    <div class="crm-middle">
+      <div class="crm-stat">
+        <div class="stat-val">11</div>
+        <div class="stat-lbl">canales unificados</div>
+      </div>
+      <div class="crm-stat">
+        <div class="stat-val">360°</div>
+        <div class="stat-lbl">visión del cliente</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Cloud pills -->
+    <div class="crm-right">
+      <div class="cloud-pill">
+        <div class="pill-dot" style="background:#00A1E0"></div>
+        <div class="pill-text" style="color:#60D4F5">Sales Cloud</div>
+        <div class="pill-tag">Captación · CPQ · ATR</div>
+      </div>
+      <div class="cloud-pill">
+        <div class="pill-dot" style="background:#07B78B"></div>
+        <div class="pill-text" style="color:#6EE7B7">Service Cloud</div>
+        <div class="pill-tag">ATC · Casos · SLA</div>
+      </div>
+      <div class="cloud-pill">
+        <div class="pill-dot" style="background:#F97316"></div>
+        <div class="pill-text" style="color:#FCA5A5">Marketing Cloud</div>
+        <div class="pill-tag">Journeys · Segm.</div>
+      </div>
+      <div class="cloud-pill">
+        <div class="pill-dot" style="background:#9333EA"></div>
+        <div class="pill-text" style="color:#C084FC">Einstein AI</div>
+        <div class="pill-tag">Churn · Scoring · NBA</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAPABILITIES ROW -->
+  <div class="caps-row">
+    <div class="cap-item">
+      <div class="cap-icon">🔄</div>
+      <div class="cap-text">
+        <div class="cap-title">Omni-Channel Routing</div>
+        <div class="cap-sub">Asignación inteligente por canal, carga y skills del agente</div>
+      </div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">👁️</div>
+      <div class="cap-text">
+        <div class="cap-title">Contexto unificado</div>
+        <div class="cap-sub">Screen pop 360° al inicio de cada interacción, sin consultas paralelas</div>
+      </div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">🛡️</div>
+      <div class="cap-text">
+        <div class="cap-title">Supresión RGPD</div>
+        <div class="cap-sub">Motor de consentimiento activo en todos los canales de salida</div>
+      </div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">📊</div>
+      <div class="cap-text">
+        <div class="cap-title">Analytics por canal</div>
+        <div class="cap-sub">Conversión, AHT, FCR y NPS desagregados por canal y agente</div>
+      </div>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">🤖</div>
+      <div class="cap-text">
+        <div class="cap-title">Agentforce AI</div>
+        <div class="cap-sub">Resolución autónoma de consultas frecuentes con supervisión humana</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OUTPUTS -->
+<div class="outputs-row">
+  <div class="output-card">
+    <div class="out-icon" style="background:rgba(0,161,224,0.1)">⚡</div>
+    <div>
+      <div class="out-title">Activación del suministro</div>
+      <div class="out-sub">Contratación y envío automático de mensaje ATR a distribuidora</div>
+    </div>
+  </div>
+  <div class="output-card">
+    <div class="out-icon" style="background:rgba(16,185,129,0.1)">📁</div>
+    <div>
+      <div class="out-title">Gestión del caso resuelto</div>
+      <div class="out-sub">Cierre del caso con encuesta NPS y activación del journey correspondiente</div>
+    </div>
+  </div>
+  <div class="output-card">
+    <div class="out-icon" style="background:rgba(249,115,22,0.1)">🎯</div>
+    <div>
+      <div class="out-title">Acción de retención / upsell</div>
+      <div class="out-sub">NBA de Einstein activa el journey de retención o propuesta de producto dual</div>
+    </div>
+  </div>
+  <div class="output-card">
+    <div class="out-icon" style="background:rgba(147,51,234,0.1)">🔗</div>
+    <div>
+      <div class="out-title">Sincronización SAP IS-U</div>
+      <div class="out-sub">Alta, modificación o baja propagada a SAP vía MuleSoft en tiempo real</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="footer-note">Figura X — Canales de entrada al CRM · Comercializadora Energética B2C · Fuente: Elaboración propia · TFG UOC 2026</span>
+  <span class="footer-brand">Salesforce CRM · Gestión Omnicanal · Mercado Residencial Español</span>
+</div>
+
+</body>
+</html>

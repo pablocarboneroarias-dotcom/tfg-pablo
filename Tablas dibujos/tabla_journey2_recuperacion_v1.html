@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journey 2 · Recuperación de oportunidades perdidas · Marketing Cloud · Comercializadora B2C</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:   #07090F;
+  --bg-base:   #0C1018;
+  --bg-card:   #101520;
+  --bg-hover:  #161D2C;
+  --border-xs: rgba(255,255,255,0.05);
+  --border-sm: rgba(255,255,255,0.09);
+
+  --text:  #EEF2FF;
+  --muted: #8896AC;
+  --dim:   #3D4A5C;
+  --ff-d: 'Syne', sans-serif;
+  --ff-b: 'DM Sans', sans-serif;
+  --ff-m: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg-deep); color: var(--text); font-family: var(--ff-b); min-height: 100vh; }
+
+.grid-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+.glow-orb { position: fixed; pointer-events: none; z-index: 0; border-radius: 50%; filter: blur(140px); opacity: 0.055; }
+.page { position: relative; z-index: 1; padding: 28px 32px 44px; max-width: 1060px; margin: 0 auto; }
+
+/* ── HEADER ── */
+.hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; animation: fadeUp .45s ease both; }
+.hdr-left h1 { font-family: var(--ff-d); font-size: 21px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 7px; }
+.hdr-left h1 em { font-style: normal; background: linear-gradient(120deg, #F97316 10%, #F59E0B 55%, #10B981 95%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hdr-left p { font-size: 11.5px; color: var(--muted); max-width: 660px; line-height: 1.65; }
+.badges { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+.badge { font-family: var(--ff-m); font-size: 9px; letter-spacing: .5px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; }
+.b-mc  { background: rgba(249,115,22,.1);  border:1px solid rgba(249,115,22,.3);  color:#F97316; }
+.b-dur { background: rgba(245,158,11,.1);  border:1px solid rgba(245,158,11,.3);  color:#F59E0B; }
+
+/* ── META BAR ── */
+.meta-bar { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; animation: fadeUp .5s .05s ease both; }
+.meta-item {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,.03); border: 1px solid var(--border-xs);
+  border-radius: 7px; padding: 6px 13px;
+}
+.meta-label { font-family: var(--ff-m); font-size: 8.5px; letter-spacing: .5px; text-transform: uppercase; color: var(--dim); }
+.meta-val   { font-family: var(--ff-m); font-size: 10px; font-weight: 600; }
+
+/* ── EXCLUSIONES BAR ── */
+.excl-bar {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+  flex-wrap: wrap; animation: fadeUp .5s .06s ease both;
+}
+.excl-label {
+  font-family: var(--ff-m); font-size: 9px; letter-spacing: .6px;
+  text-transform: uppercase; color: var(--dim); white-space: nowrap;
+}
+.excl-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--ff-m); font-size: 9.5px; padding: 3px 10px; border-radius: 5px;
+  background: rgba(251,113,133,.06); border: 1px solid rgba(251,113,133,.18);
+  color: #FCA5A5; white-space: nowrap;
+  text-decoration: line-through; text-decoration-color: rgba(251,113,133,.4);
+}
+.incl-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--ff-m); font-size: 9.5px; padding: 3px 10px; border-radius: 5px;
+  background: rgba(16,185,129,.07); border: 1px solid rgba(16,185,129,.2);
+  color: #6EE7B7; white-space: nowrap;
+}
+
+/* ── TIMELINE BAR ── */
+.timeline-wrap { margin-bottom: 20px; animation: fadeUp .5s .07s ease both; }
+.tl-header {
+  font-family: var(--ff-m); font-size: 8px; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--dim); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.tl-header::after { content: ''; flex: 1; height: 1px; background: var(--border-xs); }
+.tl-track {
+  position: relative; height: 28px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border-xs); border-radius: 8px; overflow: visible; margin-bottom: 8px;
+}
+.tl-fill {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 100%;
+  background: linear-gradient(90deg,
+    rgba(251,113,133,.28) 0%,
+    rgba(249,115,22,.22) 20%,
+    rgba(245,158,11,.18) 45%,
+    rgba(16,185,129,.15) 75%,
+    rgba(59,139,235,.1) 100%
+  );
+  border-radius: 8px;
+}
+.tl-markers { display: flex; justify-content: space-between; padding: 0 2px; }
+.tl-mark { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.tl-mark::before { content: ''; width: 1px; height: 8px; background: rgba(255,255,255,.12); }
+.tl-mark span { font-family: var(--ff-m); font-size: 8.5px; color: var(--muted); font-weight: 600; }
+
+/* ── TABLE WRAPPER ── */
+.table-wrap {
+  background: var(--bg-card); border: 1px solid var(--border-sm);
+  border-radius: 14px; overflow: hidden; animation: fadeUp .5s .1s ease both;
+  box-shadow: 0 0 0 1px var(--border-xs), 0 16px 48px rgba(0,0,0,.45);
+}
+table { width: 100%; border-collapse: collapse; }
+
+thead tr {
+  background: linear-gradient(90deg, rgba(251,113,133,.07) 0%, rgba(245,158,11,.06) 50%, rgba(16,185,129,.05) 100%);
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+th {
+  font-family: var(--ff-m); font-size: 9.5px; font-weight: 600;
+  letter-spacing: .8px; text-transform: uppercase; color: var(--muted);
+  padding: 13px 18px; text-align: left;
+}
+th.th-dia  { width: 76px; text-align: center; }
+th.th-can  { width: 110px; }
+th.th-cond { width: 240px; }
+
+/* ── ROWS ── */
+tbody tr { border-bottom: 1px solid var(--border-xs); transition: background .15s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg-hover); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,0.012); }
+tbody tr:nth-child(even):hover { background: var(--bg-hover); }
+td { padding: 13px 18px; font-size: 13px; line-height: 1.55; vertical-align: middle; }
+
+/* ── DÍA badge ── */
+td.dia-col { text-align: center; }
+.dia-badge {
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: var(--ff-m); font-weight: 700; width: 44px; min-height: 38px;
+  border-radius: 10px; padding: 4px 6px;
+}
+.dia-num  { font-size: 15px; line-height: 1; }
+.dia-unit { font-size: 7.5px; letter-spacing: .4px; text-transform: uppercase; opacity: .7; margin-top: 2px; }
+
+.d-0  { background: rgba(251,113,133,.12); border:1px solid rgba(251,113,133,.3); color:#FB7185; }
+.d-10 { background: rgba(249,115,22,.12);  border:1px solid rgba(249,115,22,.3);  color:#F97316; }
+.d-25 { background: rgba(245,158,11,.12);  border:1px solid rgba(245,158,11,.3);  color:#F59E0B; }
+.d-45 { background: rgba(16,185,129,.12);  border:1px solid rgba(16,185,129,.3);  color:#10B981; }
+.d-60 { background: rgba(59,139,235,.12);  border:1px solid rgba(59,139,235,.3);  color:#3B8BEB; }
+
+/* ── CANAL pill ── */
+.canal-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--ff-m); font-size: 10px; font-weight: 600;
+  padding: 4px 11px; border-radius: 20px; white-space: nowrap;
+}
+.c-email { background: rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.35);color:#A78BFA; }
+.c-sms   { background: rgba(6,182,212,.12);  border:1px solid rgba(6,182,212,.35);  color:#06B6D4; }
+.c-crm   { background: rgba(59,139,235,.12); border:1px solid rgba(59,139,235,.35); color:#3B8BEB; }
+
+/* ── CONTENIDO ── */
+td.contenido-col { color: var(--text); }
+td.contenido-col strong { color: #C7D2FE; font-weight: 500; }
+.asunto {
+  font-size: 12px; color: #E0E7FF; font-style: italic;
+  border-left: 2px solid rgba(255,255,255,.1);
+  padding-left: 8px; margin-bottom: 6px;
+}
+.chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+.chip { font-family: var(--ff-m); font-size: 9px; padding: 2px 8px; border-radius: 4px; }
+.ch-orange { background: rgba(249,115,22,.12); border:1px solid rgba(249,115,22,.28); color:#F97316; }
+.ch-amber  { background: rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.28); color:#F59E0B; }
+.ch-green  { background: rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.28); color:#10B981; }
+.ch-rose   { background: rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.28);color:#FB7185; }
+.ch-blue   { background: rgba(59,139,235,.12); border:1px solid rgba(59,139,235,.28); color:#3B8BEB; }
+.ch-violet { background: rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.28);color:#A78BFA; }
+.ch-cyan   { background: rgba(6,182,212,.12);  border:1px solid rgba(6,182,212,.28);  color:#06B6D4; }
+.ch-muted  { background: rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:var(--muted); }
+
+/* ── CONDICIÓN de salida ── */
+.cond-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--ff-m); font-size: 10px; font-weight: 600;
+  padding: 4px 11px; border-radius: 6px; border: 1px dashed; white-space: nowrap;
+}
+.cond-wait    { border-color: rgba(245,158,11,.4);   color:#F59E0B; background: rgba(245,158,11,.07); }
+.cond-convert { border-color: rgba(16,185,129,.4);   color:#10B981; background: rgba(16,185,129,.07); }
+.cond-longterm{ border-color: rgba(59,139,235,.4);   color:#3B8BEB; background: rgba(59,139,235,.07); }
+
+/* ── NOTA col ── */
+td.nota-col { color: var(--muted); font-size: 12px; line-height: 1.6; }
+td.nota-col strong { color: var(--text); font-weight: 500; }
+
+/* ── FOOTER ── */
+.footer-note {
+  margin-top: 14px; font-size: 11px; color: var(--dim); line-height: 1.7;
+  animation: fadeUp .5s .18s ease both; display: flex; gap: 20px; flex-wrap: wrap;
+}
+.fn-item { display: flex; align-items: center; gap: 6px; }
+.fn-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:600px;height:500px;top:-160px;left:-80px;background:#F97316;"></div>
+<div class="glow-orb" style="width:500px;height:400px;bottom:-80px;right:-60px;background:#10B981;"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1>Journey 2 — <em>Recuperación de oportunidades perdidas</em></h1>
+      <p>Secuencia automatizada para reactivar prospectos que rechazaron la oferta 
+         en el momento de la captación · Salesforce Marketing Cloud · 60 días</p>
+    </div>
+    <div class="badges">
+      <span class="badge b-mc">Marketing Cloud</span>
+      <span class="badge b-dur">60 días · 5 touchpoints</span>
+    </div>
+  </div>
+
+  <!-- META BAR -->
+  <div class="meta-bar">
+    <div class="meta-item">
+      <span class="meta-label">Trigger</span>
+      <span class="meta-val" style="color:#FB7185">Oportunidad "Cerrada Perdida"</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Objetivo</span>
+      <span class="meta-val" style="color:#F59E0B">Recuperar clientes que rechazaron en captación</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Duración</span>
+      <span class="meta-val" style="color:#06B6D4">60 días</span>
+    </div>
+  </div>
+
+  <!-- EXCLUSIONES / INCLUSIONES -->
+  <div class="excl-bar">
+    <span class="excl-label">Motivos incluidos</span>
+    <span class="incl-chip">✅ Precio</span>
+    <span class="incl-chip">✅ Producto</span>
+    <span class="incl-chip">✅ Momento</span>
+    <span class="excl-label" style="margin-left:12px;">Excluidos</span>
+    <span class="excl-chip">🚫 Fuera de cobertura</span>
+    <span class="excl-chip">🚫 Duplicado</span>
+    <span class="excl-chip">🚫 Fraude</span>
+  </div>
+
+  <!-- TIMELINE BAR -->
+  <div class="timeline-wrap">
+    <div class="tl-header">Línea temporal del journey</div>
+    <div class="tl-track"><div class="tl-fill"></div></div>
+    <div class="tl-markers">
+      <div class="tl-mark"><span>Día 0</span></div>
+      <div class="tl-mark"><span>Día 10</span></div>
+      <div class="tl-mark"><span>Día 25</span></div>
+      <div class="tl-mark"><span>Día 45</span></div>
+      <div class="tl-mark"><span>Día 60</span></div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="th-dia">Día</th>
+          <th class="th-can">Canal</th>
+          <th>Contenido</th>
+          <th class="th-cond">Condición de salida</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- DÍA 0 -->
+        <tr>
+          <td class="dia-col"><div class="dia-badge d-0"><span class="dia-num">0</span><span class="dia-unit">día</span></div></td>
+          <td><span class="canal-pill c-email">✉️ Email</span></td>
+          <td class="contenido-col">
+            <div class="asunto">"Entendemos que no era el momento. Cuando quieras, aquí seguimos."</div>
+            <div class="chips">
+              <span class="chip ch-rose">Tono empático · sin presión</span>
+            </div>
+          </td>
+          <td><span class="cond-pill cond-wait">⏳ Si hace clic → esperar</span></td>
+        </tr>
+
+        <!-- DÍA 10 -->
+        <tr>
+          <td class="dia-col"><div class="dia-badge d-10"><span class="dia-num">10</span><span class="dia-unit">días</span></div></td>
+          <td><span class="canal-pill c-email">✉️ Email</span></td>
+          <td class="contenido-col">
+            <div class="asunto">Nueva oferta ajustada según motivo de pérdida registrado en CRM</div>
+            <div class="chips">
+              <span class="chip ch-orange">Si precio → oferta más competitiva</span>
+              <span class="chip ch-violet">Si producto → tarifa alternativa</span>
+              <span class="chip ch-muted">Si momento → recordatorio suave</span>
+            </div>
+          </td>
+          <td><span class="cond-pill cond-convert">✅ Si convierte → salir del journey</span></td>
+        </tr>
+
+        <!-- DÍA 25 -->
+        <tr>
+          <td class="dia-col"><div class="dia-badge d-25"><span class="dia-num">25</span><span class="dia-unit">días</span></div></td>
+          <td><span class="canal-pill c-sms">💬 SMS</span></td>
+          <td class="contenido-col">
+            <div class="asunto">Recordatorio breve · enlace directo a oferta personalizada</div>
+            <div class="chips">
+              <span class="chip ch-cyan">Enlace de oferta personalizada</span>
+              <span class="chip ch-muted">Formato corto · alta legibilidad</span>
+            </div>
+          </td>
+          <td><span class="cond-pill cond-convert">✅ Si convierte → salir del journey</span></td>
+        </tr>
+
+        <!-- DÍA 45 -->
+        <tr>
+          <td class="dia-col"><div class="dia-badge d-45"><span class="dia-num">45</span><span class="dia-unit">días</span></div></td>
+          <td><span class="canal-pill c-email">✉️ Email</span></td>
+          <td class="contenido-col">
+            <div class="asunto">Oferta con incentivo adicional para nuevos contratos</div>
+            <div class="chips">
+              <span class="chip ch-green">Mes gratis</span>
+              <span class="chip ch-green">Descuento primer año</span>
+              <span class="chip ch-amber">Urgencia · oferta limitada</span>
+            </div>
+          </td>
+          <td><span class="cond-pill cond-convert">✅ Si convierte → salir del journey</span></td>
+        </tr>
+
+        <!-- DÍA 60 -->
+        <tr>
+          <td class="dia-col"><div class="dia-badge d-60"><span class="dia-num">60</span><span class="dia-unit">días</span></div></td>
+          <td><span class="canal-pill c-crm">⚙️ CRM</span></td>
+          <td class="contenido-col">
+            Cerrar journey · mover a segmento <strong>"Recuperación a largo plazo"</strong>
+            <div class="chips">
+              <span class="chip ch-blue">Reactivar en 6 meses</span>
+              <span class="chip ch-muted">Sin más contactos hasta nueva ventana</span>
+            </div>
+          </td>
+          <td><span class="cond-pill cond-longterm">🗓️ Reactivar en 6 meses</span></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-note">
+    <div class="fn-item"><div class="fn-dot" style="background:#A78BFA"></div><span>Email</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#06B6D4"></div><span>SMS</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#3B8BEB"></div><span>CRM (automatización)</span></div>
+    <div class="fn-item" style="margin-left:8px; padding-left:8px; border-left:1px solid var(--border-xs);">
+      <span style="color:var(--muted)">Motivos incluidos:</span>
+    </div>
+    <div class="fn-item"><div class="fn-dot" style="background:#10B981"></div><span>Precio · Producto · Momento</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#FB7185"></div><span>Excluidos: Cobertura · Duplicado · Fraude</span></div>
+    <div class="fn-item" style="margin-left:auto;">
+      <span style="color:var(--muted)">Fuente:</span>
+      <span>Elaboración propia · Salesforce Marketing Cloud · Journey Builder · Comercializadora B2C</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

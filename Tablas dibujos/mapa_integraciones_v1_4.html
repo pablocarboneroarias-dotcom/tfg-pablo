@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figura 5.2 — Mapa de integraciones CRM · Comercializadora Energética B2C</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:   #07090F;
+  --bg-base:   #0C1018;
+  --bg-card:   #101520;
+  --border-xs: rgba(255,255,255,0.05);
+  --border-sm: rgba(255,255,255,0.09);
+  --border-md: rgba(255,255,255,0.14);
+
+  /* Integration pattern colors */
+  --p-rest:   #3B8BEB;
+  --p-event:  #A78BFA;
+  --p-cdc:    #E879F9;
+  --p-batch:  #10B981;
+  --p-async:  #F59E0B;
+  --p-direct: #06B6D4;
+  --p-mixed:  #FB7185;
+
+  /* Zone colors */
+  --c-sf:    #3B8BEB;
+  --c-mule:  #F59E0B;
+  --c-sap:   #10B981;
+  --c-chan:  #6B7CF6;
+  --c-mrkt:  #FB7185;
+  --c-data:  #2DD4BF;
+  --c-reg:   #F97316;
+
+  --text:  #EEF2FF;
+  --muted: #8896AC;
+  --dim:   #3D4A5C;
+  --ff-d: 'Syne', sans-serif;
+  --ff-b: 'DM Sans', sans-serif;
+  --ff-m: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg-deep); color: var(--text); font-family: var(--ff-b); min-height: 100vh; }
+
+.grid-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+.glow-orb { position: fixed; pointer-events: none; z-index: 0; border-radius: 50%; filter: blur(140px); opacity: 0.055; }
+
+.page { position: relative; z-index: 1; padding: 28px 36px 40px; max-width: 1200px; margin: 0 auto; }
+
+/* HEADER */
+.hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; animation: fadeUp .45s ease both; }
+.hdr-left h1 { font-family: var(--ff-d); font-size: 22px; font-weight: 800; letter-spacing: -.3px; line-height: 1.2; margin-bottom: 7px; }
+.hdr-left h1 em { font-style: normal; background: linear-gradient(120deg, #F59E0B 10%, #3B8BEB 90%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hdr-left p { font-size: 11.5px; color: var(--muted); max-width: 640px; line-height: 1.65; }
+.badges { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+.badge { font-family: var(--ff-m); font-size: 9px; letter-spacing: .5px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; }
+.b1 { background: rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.25); color:var(--c-mule); }
+.b2 { background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); color:var(--muted); font-size:8px; }
+
+/* OUTER CARD */
+.card { background: var(--bg-base); border: 1px solid var(--border-xs); border-radius: 18px; padding: 24px 24px 20px; position: relative; overflow: hidden; animation: fadeUp .5s .08s ease both; }
+.card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(245,158,11,.5),rgba(59,139,235,.5),transparent); }
+
+.card-title { text-align:center; margin-bottom:18px; }
+.card-title h2 { font-family:var(--ff-d); font-size:14px; font-weight:700; }
+.card-title p  { font-family:var(--ff-m); font-size:9px; color:var(--muted); margin-top:4px; }
+
+/* ═══ DIAGRAM AREA ═══ */
+.diag { position:relative; width:100%; height:740px; }
+
+/* SVG overlay */
+#conn-svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible; z-index:1; }
+
+/* ─── HUB: Salesforce ─── */
+.hub-sf {
+  position:absolute; left:255px; width:490px; top:52px;
+  background:rgba(59,139,235,.07); border:1px solid rgba(59,139,235,.25);
+  border-radius:12px; padding:14px 18px;
+  z-index:3;
+}
+.hub-sf::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(59,139,235,.7),transparent); }
+.hub-name { font-family:var(--ff-d); font-size:13px; font-weight:800; color:var(--c-sf); display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.hub-dot { width:7px; height:7px; border-radius:50%; background:var(--c-sf); box-shadow:0 0 8px var(--c-sf); }
+.hub-sor { font-family:var(--ff-m); font-size:7.5px; color:rgba(59,139,235,.7); margin-left:auto; padding:2px 8px; border-radius:3px; background:rgba(59,139,235,.1); border:1px solid rgba(59,139,235,.2); }
+.hub-clouds { display:flex; gap:6px; }
+.hc { flex:1; border-radius:6px; padding:6px 8px; text-align:center; }
+.hc-mkt { background:rgba(249,115,22,.1); border:1px solid rgba(249,115,22,.2); }
+.hc-sales{ background:rgba(59,139,235,.1); border:1px solid rgba(59,139,235,.2); }
+.hc-svc  { background:rgba(6,182,212,.1);  border:1px solid rgba(6,182,212,.2); }
+.hc-eu   { background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2); }
+.hc span { font-family:var(--ff-m); font-size:7.5px; font-weight:600; display:block; }
+.hc-mkt  span { color:#F97316; }
+.hc-sales span { color:var(--c-sf); }
+.hc-svc  span { color:#06B6D4; }
+.hc-eu   span { color:#A78BFA; }
+.hc p { font-size:7.5px; color:var(--muted); margin-top:2px; }
+
+/* ─── HUB: MuleSoft ─── */
+.hub-mule {
+  position:absolute; left:285px; width:430px; top:370px;
+  background:rgba(245,158,11,.07); border:1px solid rgba(245,158,11,.28);
+  border-radius:10px; padding:12px 16px;
+  z-index:3;
+}
+.hub-mule::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(245,158,11,.7),transparent); animation:shimmer 2.5s infinite; }
+@keyframes shimmer { 0%,100%{opacity:.4} 50%{opacity:1} }
+.mule-name { font-family:var(--ff-d); font-size:12px; font-weight:800; color:var(--c-mule); display:flex; align-items:center; gap:7px; margin-bottom:6px; }
+.mule-dot { width:6px; height:6px; border-radius:50%; background:var(--c-mule); box-shadow:0 0 7px var(--c-mule); }
+.mule-desc { font-family:var(--ff-m); font-size:7px; color:rgba(245,158,11,.7); margin-left:auto; }
+.mule-caps { display:flex; gap:5px; flex-wrap:wrap; }
+.mcap { font-family:var(--ff-m); font-size:7.5px; padding:2px 7px; border-radius:3px; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.18); color:rgba(245,158,11,.85); }
+
+/* ─── SYSTEM CARDS ─── */
+.sc {
+  position:absolute; border-radius:9px; padding:9px 11px;
+  cursor:pointer; z-index:2; transition:transform .2s ease, box-shadow .2s ease;
+  width:175px;
+}
+.sc:hover { transform:scale(1.03); z-index:10; }
+.sc-left  { left:0; }
+.sc-right { right:0; }
+
+/* Card types */
+.sc-chan  { background:rgba(107,124,246,.08); border:1px solid rgba(107,124,246,.22); }
+.sc-chan:hover  { box-shadow:0 4px 20px rgba(107,124,246,.1); }
+.sc-reg   { background:rgba(249,115,22,.07); border:1px solid rgba(249,115,22,.2); }
+.sc-reg:hover   { box-shadow:0 4px 20px rgba(249,115,22,.08); }
+.sc-mrkt  { background:rgba(251,113,133,.07); border:1px solid rgba(251,113,133,.2); }
+.sc-mrkt:hover  { box-shadow:0 4px 20px rgba(251,113,133,.08); }
+.sc-data  { background:rgba(45,212,191,.07); border:1px solid rgba(45,212,191,.2); }
+.sc-data:hover  { box-shadow:0 4px 20px rgba(45,212,191,.08); }
+.sc-sap   { background:rgba(16,185,129,.08); border:1px solid rgba(16,185,129,.25); }
+.sc-sap:hover   { box-shadow:0 4px 20px rgba(16,185,129,.1); }
+
+.sc-title { font-family:var(--ff-d); font-size:10px; font-weight:700; display:block; margin-bottom:2px; }
+.sc-chan  .sc-title { color:#6B7CF6; }
+.sc-reg   .sc-title { color:#F97316; }
+.sc-mrkt  .sc-title { color:#FB7185; }
+.sc-data  .sc-title { color:#2DD4BF; }
+.sc-sap   .sc-title { color:#10B981; }
+
+.sc-sub { font-size:8px; color:var(--muted); display:block; margin-bottom:6px; line-height:1.35; }
+
+.sc-proto { display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+.proto-pill {
+  font-family:var(--ff-m); font-size:7px; font-weight:600; letter-spacing:.3px;
+  padding:2px 6px; border-radius:3px; display:inline-block;
+}
+.pp-rest   { background:rgba(59,139,235,.12);  border:1px solid rgba(59,139,235,.28);  color:var(--p-rest); }
+.pp-event  { background:rgba(167,139,250,.12); border:1px solid rgba(167,139,250,.28); color:var(--p-event); }
+.pp-cdc    { background:rgba(232,121,249,.12); border:1px solid rgba(232,121,249,.28); color:var(--p-cdc); }
+.pp-batch  { background:rgba(16,185,129,.12);  border:1px solid rgba(16,185,129,.28);  color:var(--p-batch); }
+.pp-async  { background:rgba(245,158,11,.12);  border:1px solid rgba(245,158,11,.28);  color:var(--p-async); }
+.pp-direct { background:rgba(6,182,212,.12);   border:1px solid rgba(6,182,212,.28);   color:var(--p-direct); }
+.pp-mixed  { background:rgba(251,113,133,.12); border:1px solid rgba(251,113,133,.28); color:var(--p-mixed); }
+
+.dir-pill {
+  font-family:var(--ff-m); font-size:9px; color:var(--dim); margin-left:auto;
+}
+
+/* Bottom cards */
+.sc-bottom {
+  background:rgba(45,212,191,.06); border:1px solid rgba(45,212,191,.18);
+  border-radius:8px; padding:8px 10px; flex:1;
+  cursor:pointer; transition:all .2s; position:relative; z-index:2;
+}
+.sc-bottom:hover { background:rgba(45,212,191,.12); transform:translateY(-2px); box-shadow:0 4px 16px rgba(45,212,191,.07); }
+.sc-bottom .sc-title { color:#2DD4BF; font-size:9px; }
+.sc-bottom .sc-sub { margin-bottom:4px; }
+
+.bottom-row { position:absolute; bottom:0; left:255px; right:200px; display:flex; gap:8px; }
+
+/* ── SECTION ZONE LABELS ── */
+.zone-lbl {
+  position:absolute; font-family:var(--ff-m); font-size:7.5px; letter-spacing:1px;
+  text-transform:uppercase; color:var(--dim);
+}
+
+/* LEGEND */
+.legend { border-top:1px solid var(--border-xs); padding-top:16px; margin-top:18px; }
+.leg-title { font-family:var(--ff-m); font-size:8px; letter-spacing:1.2px; text-transform:uppercase; color:var(--dim); margin-bottom:10px; }
+.leg-grid { display:flex; flex-wrap:wrap; gap:10px 18px; }
+.leg-item { display:flex; align-items:center; gap:6px; font-family:var(--ff-m); font-size:8.5px; color:var(--muted); }
+.leg-line { width:22px; height:2px; border-radius:1px; }
+.leg-dot2 { width:8px; height:8px; border-radius:2px; }
+
+/* TOOLTIP */
+.tip {
+  position:fixed; z-index:9999; pointer-events:none;
+  background:#131C2E; border:1px solid rgba(255,255,255,.14);
+  border-radius:10px; padding:11px 14px; max-width:240px;
+  box-shadow:0 12px 40px rgba(0,0,0,.65);
+  opacity:0; transition:opacity .15s; font-family:var(--ff-b);
+}
+.tip.show { opacity:1; }
+.tip-title { font-family:var(--ff-d); font-size:11px; font-weight:700; color:var(--text); margin-bottom:5px; }
+.tip-body  { font-size:9px; color:var(--muted); line-height:1.6; }
+.tip-proto { margin-top:6px; display:flex; flex-wrap:wrap; gap:4px; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:600px;height:600px;top:-200px;left:-100px;background:#F59E0B;"></div>
+<div class="glow-orb" style="width:500px;height:500px;bottom:-150px;right:-80px;background:#3B8BEB;"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1>Figura 5.2 — <em>Mapa de integraciones</em></h1>
+      <p>Visión completa del ecosistema de integraciones de la comercializadora energética B2C con Salesforce como sistema central. MuleSoft iPaaS como capa de desacoplamiento. Alcance: integraciones Salesforce ↔ sistemas externos (20 integraciones). Excluidas integraciones SAP-SAP sin participación de Salesforce.</p>
+    </div>
+    <div class="badges">
+      <span class="badge b1">MuleSoft iPaaS · API-led · 21 integraciones en alcance</span>
+      <span class="badge b2">Elaboración propia · TFG 2025 · Cap. 5.2</span>
+    </div>
+  </div>
+
+  <!-- CARD -->
+  <div class="card">
+
+    <div class="card-title">
+      <h2>Ecosistema de integraciones — Comercializadora Energética B2C</h2>
+      <p>Salesforce CRM · MuleSoft iPaaS (hub central) · SAP S/4HANA · Sistemas regulatorios, operacionales y de datos</p>
+    </div>
+
+    <!-- DIAGRAM -->
+    <div class="diag" id="diag">
+
+      <!-- SVG connections overlay -->
+      <svg id="conn-svg"></svg>
+
+      <!-- ZONE LABELS -->
+      <span class="zone-lbl" style="left:0;top:4px;color:#6B7CF6;">Canales &amp; Servicios</span>
+      <span class="zone-lbl" style="right:0;top:4px;color:#F97316;">Sistemas de mercado &amp; regulatorio</span>
+      <span class="zone-lbl" style="left:255px;bottom:75px;color:#2DD4BF;">Datos, almacenamiento &amp; colaboración</span>
+
+      <!-- ══ HUB: SALESFORCE ══ -->
+      <div class="hub-sf" id="hub-sf">
+        <div class="hub-name">
+          <div class="hub-dot"></div>
+          Salesforce CRM — Sistema de registro comercial
+          <span class="hub-sor">SoR · Relación cliente</span>
+        </div>
+        <div class="hub-clouds">
+          <div class="hc hc-mkt"><span>Marketing Cloud</span><p>Captación · Journeys</p></div>
+          <div class="hc hc-sales"><span>Sales Cloud</span><p>Preventa · Oferta</p></div>
+          <div class="hc hc-svc"><span>Service Cloud</span><p>ATC · Casos</p></div>
+          <div class="hc hc-eu"><span>E&amp;U Cloud</span><p>CUPS · Contratos</p></div>
+        </div>
+      </div>
+
+      <!-- ══ HUB: MULESOFT ══ -->
+      <div class="hub-mule" id="hub-mule">
+        <div class="mule-name">
+          <div class="mule-dot"></div>
+          MuleSoft — Plataforma de Integración iPaaS
+          <span class="mule-desc">API-led · Experience / Process / System APIs</span>
+        </div>
+        <div class="mule-caps">
+          <span class="mcap">API REST</span>
+          <span class="mcap">Platform Events</span>
+          <span class="mcap">Change Data Capture</span>
+          <span class="mcap">Batch / SFTP</span>
+          <span class="mcap">Request-Reply async</span>
+          <span class="mcap">EDIEL / CONTAX</span>
+        </div>
+      </div>
+
+      <!-- ══ SAP (top right, special large card) ══ -->
+      <div class="sc sc-sap sc-right" id="sc-sap" style="top:28px;width:185px;"
+        data-tt-title="SAP S/4HANA for Utilities"
+        data-tt-body="Sistema de registro de facturación, contratos y datos financieros. Intercambia con Salesforce vía MuleSoft: contratos activos, facturas emitidas, datos de consumo, curvas de carga y medidas horarias. Fuente de verdad financiera."
+        data-tt-protos="CDC,Batch,REST,IDoc/RFC">
+        <span class="sc-title">SAP S/4HANA for Utilities</span>
+        <span class="sc-sub">Contratos · Facturación IS-U<br>Medidas · FI/CO · Tesorería</span>
+        <div class="sc-proto">
+          <span class="proto-pill pp-cdc">CDC</span>
+          <span class="proto-pill pp-event">Events</span>
+          <span class="proto-pill pp-batch">Batch</span>
+          <span class="proto-pill pp-mixed">IDoc/RFC</span>
+          <span class="dir-pill">⇄</span>
+        </div>
+      </div>
+
+      <!-- ══ LEFT SYSTEMS ══ -->
+
+      <!-- Amazon Connect CTI -->
+      <div class="sc sc-chan sc-left" id="sc-cti" style="top:40px;"
+        data-tt-title="Amazon Connect CTI"
+        data-tt-body="Centro de llamadas integrado con Salesforce Service Cloud vía CTI Adapter. Identificación automática del cliente por CLI, apertura de ficha, grabación de llamadas y transcripción con IA. Integración directa con SF sin pasar por MuleSoft."
+        data-tt-protos="CTI Adapter SDK,Direct SF">
+        <span class="sc-title">Amazon Connect CTI</span>
+        <span class="sc-sub">Call center · Grabaciones<br>Transcripción IA · CLI</span>
+        <div class="sc-proto">
+          <span class="proto-pill pp-direct">CTI Adapter</span>
+          <span class="dir-pill">⇄</span>
+        </div>
+      </div>
+
+      <!-- WhatsApp Business -->
+      <div class="sc sc-chan sc-left" id="sc-wa" style="top:150px;"
+        data-tt-title="WhatsApp Business API"
+        data-tt-body="Canal conversacional bidireccional. Mensajes entrantes y salientes gestionados como casos en Service Cloud vía Platform Events. Notificaciones de estado, chatbot con escalado a agente humano."
+        data-tt-protos="WhatsApp Business API,Platform Events,SF Messaging">
+        <span class="sc-title">WhatsApp / Chat</span>
+        <span class="sc-sub">Messaging · Chatbot<br>Casos Service Cloud</span>
+        <div class="sc-proto">
+          <span class="proto-pill pp-event">Platform Events</span>
+          <span class="dir-pill">⇄</span>
+        </div>
+      </div>
+
+      <!-- Email/SMS (Marketing Cloud) -->
+      <div class="sc sc-chan sc-left" id="sc-email" style="top:260px;"
+        data-tt-title="Email / SMS"
+        data-tt-body="Canales de comunicación outbound gestionados por Marketing Cloud. Campañas de captación, notificaciones transaccionales de contrato, facturas y alertas, y comunicaciones regulatorias obligatorias por CNMC."
+        data-tt-protos="Marketing Cloud Engagement,SMTP,SMS API">
+        <span class="sc-title">Email / SMS</span>
+        <span class="sc-sub">Campañas · Transaccional<br>Regulatorio CNMC · OTP</span>
+        <div class="sc-proto">
+          <span class="proto-pill pp-direct">MC Engagement</span>
+          <span class="dir-pill">→</span>
+        </div>
+      </div>
+
+      <!-- DocuSign / Signaturit -->
+      <div class="sc sc-mrkt sc-left" id="sc-servi" style="top:370px;"
+        data-tt-title="DocuSign / Signaturit — Firma Digital eIDAS"
+        data-tt-body="Proveedor de firma electrónica avanzada conforme al Reglamento eIDAS (UE 910/2014). Integración nativa con Salesforce vía AppExchange (DocuSign eSignature for Salesforce o equivalente Signaturit). No transita por MuleSoft. El agente lanza el proceso de firma directamente desde el registro de contrato en Salesforce. Write-back automático del resultado al expediente."
+        data-tt-protos="Nativo AppExchange,eIDAS,Write-back automático">
+        <span class="sc-title">DocuSign / Signaturit</span>
+        <span class="sc-sub">Firma eIDAS · AppExchange<br>Write-back automático · eIDAS</span>
+        <div class="sc-proto">
+          <span class="proto-pill pp-direct">Nativo AppExchange</span>
+          <span class="dir-pill">⇄</span>
+        </div>
+      </div>
+
+      <!-- Comparadores/Agregadores -->
+      <div class="sc sc-chan sc-left" id="sc-comp" style="top:470px;"
+        data-tt-title="Comparadores / Agregadores"
+        data-tt-body="Integración con agregadores de tarifas energéticas (Rastreator, Kelisto, etc.). Leads cualificados entrantes vía API REST directamente al CRM con enriquecimiento de datos automático y asignación de scoring inicial."
+        data-tt-protos="REST API entrante,Leads API SF">
+        <span class="sc-title">Comparadores / APIs</span>
+        <span class="sc-sub">Rastreator · Kelisto<br>Leads · Scoring entrada</span>
+        <div class="sc-proto">
+          <span class="proto-pill pp-rest">REST inbound</span>
+          <span class="dir-pill">→</span>
+        </div>
+      </div>
+
+      <!-- Partner Community -->
+      <div class="sc sc-chan sc-left" id="sc-partner" style="top:575px;"
+        data-tt-title="Portal Partner / Distribuidores"
+        data-tt-body="Acceso a Salesforce Experience Cloud para la red de partners y agentes externos. Visibilidad limitada a su propia cartera, gestión de comisiones y actividad comercial. Integración nativa con SF sin middleware."
+        data-tt-protos="Experience Cloud,SF API">
+        <span class="sc-title">Portal Partner</span>
+        <span class="sc-sub">Agentes · Comisiones<br>Experience Cloud</span>
+        <div class="sc-proto">
+          <span class="proto-pill pp-direct">Experience Cloud</span>
+          <span class="dir-pill">⇄</span>
+        </div>
+      </div>
+
+      <!-- ══ RIGHT SYSTEMS ══ -->
+
+      <!-- SIPS REE -->
+      <div class="sc sc-reg sc-right" id="sc-sips" style="top:175px;"
+        data-tt-title="SIPS — Red Eléctrica de España"
+        data-tt-body="Sistema de Información de Puntos de Suministro. Consulta obligatoria en la contratación B2C para validar el CUPS: titular, distribuidora, potencia contratada y estado del punto de suministro. Integración síncrona con timeout de 2s."
+        data-tt-protos="REST síncrona,Respuesta &lt;2s">
+        <span class="sc-title">SIPS / REE</span>
+        <span class="sc-sub">Validación CUPS<br>Estado suministro</span>
+        <div class="sc-proto">
+          <span class="proto-pill pp-rest">REST sync</span>
+          <span class="dir-pill">→</span>
+        </div>
+      </div>
+
+      <!-- Distribuidoras ATR -->
+      <div class="sc sc-reg sc-right" id="sc-dist" style="top:295px;"
+        data-tt-title="Distribuidoras ATR"
+        data-tt-body="Interlocutor del proceso ATR (Acceso de Terceros a la Red). Intercambio de mensajes de switching F1/A1/B1, notificaciones de activación y desactivación del suministro y datos de medida. Tiempos de respuesta de días. Patrón Request-Reply asíncrono vía EDIEL/CONTAX."
+        data-tt-protos="EDIEL/CONTAX,XML,Request-Reply async">
+        <span class="sc-title">Distribuidoras ATR</span>
+        <span class="sc-sub">Switching F1/A1/B1<br>Activación · Medidas</span>
+        <div class="sc-proto">
+          <span class="proto-pill pp-async">Request-Reply</span>
+          <span class="proto-pill pp-mixed">EDIEL/CONTAX</span>
+          <span class="dir-pill">⇄</span>
+        </div>
+      </div>
+
+      <!-- Entidades Bancarias -->
+      <div class="sc sc-reg sc-right" id="sc-bank" style="top:415px;"
+        data-tt-title="Entidades Bancarias / SEPA"
+        data-tt-body="Validación del IBAN del cliente (ISO 13616) durante la contratación desde Salesforce. Verificación de la cuenta bancaria para domiciliación SEPA. El resultado se vincula al objeto PaymentMethod en Energy & Utilities Cloud."
+        data-tt-protos="REST API,ISO 13616,On-demand">
+        <span class="sc-title">Entidades Bancarias</span>
+        <span class="sc-sub">IBAN · SEPA mandates<br>Pagos online · Impagados</span>
+        <div class="sc-proto">
+          <span class="proto-pill pp-rest">REST</span>
+          <span class="proto-pill pp-mixed">ISO 20022</span>
+          <span class="dir-pill">⇄</span>
+        </div>
+      </div>
+
+      <!-- Informa / Experian -->
+      <div class="sc sc-reg sc-right" id="sc-info" style="top:515px;"
+        data-tt-title="Informa / Experian — Scoring"
+        data-tt-body="Scoring de riesgo crediticio del cliente potencial. Consultado durante la cualificación del lead para segmentos de mercado libre. Permite ajustar las condiciones de contratación según el perfil de riesgo. Integración síncrona."
+        data-tt-protos="REST síncrona,JSON">
+        <span class="sc-title">Informa / Experian</span>
+        <span class="sc-sub">Scoring riesgo crediticio<br>Cualificación mercado libre</span>
+        <div class="sc-proto">
+          <span class="proto-pill pp-rest">REST sync</span>
+          <span class="dir-pill">→</span>
+        </div>
+      </div>
+
+
+
+
+      <!-- CLM -->
+      <div class="sc sc-reg sc-right" id="sc-clm" style="top:615px;"
+        data-tt-title="CLM — Compositor y gestor de documentos"
+        data-tt-body="Sistema de Contract Lifecycle Management (CLM) para la generación, composición y gestión del ciclo de vida de documentos contractuales: contrato de suministro en PDF, condiciones particulares, anexos regulatorios y plantillas parametrizadas. Recibe los datos del CPQ vía MuleSoft y devuelve el documento generado a Salesforce para su envío a firma digital."
+        data-tt-protos="REST API,MuleSoft,PDF generation">
+        <span class="sc-title">CLM</span>
+        <span class="sc-sub">Composición documental<br>Contratos · Plantillas · PDF</span>
+        <div class="sc-proto">
+          <span class="proto-pill pp-rest">REST</span>
+          <span class="dir-pill">⇄</span>
+        </div>
+      </div>
+
+      <!-- ══ BOTTOM SYSTEMS ══ -->
+      <div class="bottom-row" id="bottom-row">
+
+        <div class="sc-bottom" id="sc-dl"
+          data-tt-title="Data Lake / Data Warehouse"
+          data-tt-body="Exportación batch de datos de interacciones CRM (casos, oportunidades, leads, actividad de marketing) desde Salesforce hacia el Data Lake corporativo. Base para análisis de comportamiento del cliente, entrenamiento de modelos de IA y auditoría de operaciones."
+          data-tt-protos="Batch nocturno,Parquet/CSV,S3">
+          <span class="sc-title">Data Lake / DWH</span>
+          <span class="sc-sub">Consumos · PVPC/OMIE · BI</span>
+          <div class="sc-proto"><span class="proto-pill pp-batch">Batch</span><span class="proto-pill pp-mixed">Parquet</span></div>
+        </div>
+
+        <div class="sc-bottom" id="sc-s3"
+          data-tt-title="Amazon S3"
+          data-tt-body="Almacenamiento de objetos en nube para archivos de gran volumen: backups documentales, curvas de carga en formato EDIEL, IDocs de SAP, exports CRM y logs de auditoría. Zona de aterrizaje para integraciones batch."
+          data-tt-protos="S3 API,SFTP,Batch">
+          <span class="sc-title">Amazon S3</span>
+          <span class="sc-sub">Batch files · IDocs · Logs</span>
+          <div class="sc-proto"><span class="proto-pill pp-batch">S3 API</span></div>
+        </div>
+
+        <div class="sc-bottom" id="sc-docmgr"
+          data-tt-title="Gestor Documental"
+          data-tt-body="Sistema de gestión documental para contratos firmados, documentación acreditativa, comunicaciones regulatorias y expedientes de reclamación. Integrado con Serviinform para custodia certificada."
+          data-tt-protos="REST,CMIS,Webhook">
+          <span class="sc-title">Gestor Documental</span>
+          <span class="sc-sub">Contratos · Expedientes</span>
+          <div class="sc-proto"><span class="proto-pill pp-rest">REST</span><span class="proto-pill pp-mixed">CMIS</span></div>
+        </div>
+
+        <div class="sc-bottom" id="sc-sp"
+          data-tt-title="SharePoint / Microsoft 365"
+          data-tt-body="Plataforma de colaboración interna del equipo comercial. Repositorio de plantillas, procedimientos operativos (PONs), documentación del proyecto y gestión del conocimiento. Integración vía Microsoft Graph API."
+          data-tt-protos="Microsoft Graph API,REST">
+          <span class="sc-title">SharePoint / M365</span>
+          <span class="sc-sub">Colaboración · Plantillas</span>
+          <div class="sc-proto"><span class="proto-pill pp-rest">Graph API</span></div>
+        </div>
+
+        <div class="sc-bottom" id="sc-gmaps"
+          data-tt-title="Google Maps API / Callejero INE"
+          data-tt-body="Geocodificación y normalización de direcciones de suministro. Validación contra el Callejero Postal del INE para verificar la dirección en el proceso de contratación. Consulta síncrona en tiempo real."
+          data-tt-protos="Google Maps API REST,INE REST">
+          <span class="sc-title">Google Maps / Callejero</span>
+          <span class="sc-sub">Geocodificación · INE</span>
+          <div class="sc-proto"><span class="proto-pill pp-rest">REST sync</span></div>
+        </div>
+
+      </div><!-- /bottom-row -->
+
+    </div><!-- /diag -->
+
+    <!-- LEGEND -->
+    <div class="legend">
+      <div class="leg-title">Patrones de integración</div>
+      <div class="leg-grid">
+        <div class="leg-item"><div class="leg-line" style="background:var(--p-rest)"></div>API REST síncrona — respuesta inmediata requerida</div>
+        <div class="leg-item"><div class="leg-line" style="background:var(--p-event)"></div>Platform Events — integración event-driven asíncrona</div>
+        <div class="leg-item"><div class="leg-line" style="background:var(--p-cdc)"></div>Change Data Capture — sincronización de cambios</div>
+        <div class="leg-item"><div class="leg-line" style="background:var(--p-batch)"></div>Batch nocturno — transferencia masiva programada</div>
+        <div class="leg-item"><div class="leg-line" style="background:var(--p-async)"></div>Request-Reply asíncrono — confirmación diferida (ATR)</div>
+        <div class="leg-item"><div class="leg-line" style="background:var(--p-direct)"></div>Integración directa SF — sin paso por MuleSoft</div>
+        <div class="leg-item"><div class="leg-line" style="background:var(--p-mixed)"></div>Protocolo propietario / mixto</div>
+        <div class="leg-item" style="margin-left:8px;"><span style="font-family:var(--ff-m);font-size:9px;color:var(--muted)">⇄ bidireccional &nbsp; → unidireccional saliente &nbsp; ← entrante</span></div>
+      </div>
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /page -->
+
+<!-- TOOLTIP -->
+<div class="tip" id="tip">
+  <div class="tip-title" id="tip-title"></div>
+  <div class="tip-body"  id="tip-body"></div>
+  <div class="tip-proto" id="tip-proto"></div>
+</div>
+
+<script>
+/* ── TOOLTIP ── */
+const tip   = document.getElementById('tip');
+const tipT  = document.getElementById('tip-title');
+const tipB  = document.getElementById('tip-body');
+const tipPr = document.getElementById('tip-proto');
+
+const patternColors = {
+  'CDC':'#E879F9','Events':'#A78BFA','Batch':'#10B981','REST':'#3B8BEB',
+  'IDoc/RFC':'#FB7185','CTI Adapter SDK':'#06B6D4','Direct SF':'#06B6D4',
+  'REST síncrona':'#3B8BEB','Respuesta <2s':'#3B8BEB','WhatsApp Business API':'#A78BFA',
+  'SF Messaging':'#06B6D4','Platform Events':'#A78BFA','MC Engagement':'#06B6D4',
+  'SMTP':'#3B8BEB','SMS API':'#3B8BEB','REST API':'#3B8BEB','Webhook callback':'#F59E0B',
+  'eIDAS':'#FB7185','REST inbound':'#3B8BEB','Leads API SF':'#3B8BEB',
+  'Experience Cloud':'#06B6D4','SF API':'#06B6D4','REST sync':'#3B8BEB',
+  'JSON':'#3B8BEB','Request-Reply':'#F59E0B','XML':'#FB7185','EDIEL/CONTAX':'#F59E0B',
+  'ISO 20022':'#FB7185','SEPA Direct Debit':'#FB7185','SFTP':'#10B981',
+  'XML fiscal':'#FB7185','Parquet/CSV':'#10B981','Batch nocturno':'#10B981',
+  'S3 API':'#10B981','REST':'#3B8BEB','CMIS':'#FB7185','Webhook':'#F59E0B',
+  'Microsoft Graph API':'#3B8BEB','Google Maps API REST':'#3B8BEB','INE REST':'#3B8BEB',
+  'IDoc/RFC':'#FB7185'
+};
+
+function positionTip(e) {
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  tip.style.left = (e.clientX + 16 + tw > vw ? e.clientX - tw - 16 : e.clientX + 16) + 'px';
+  tip.style.top  = (e.clientY + 16 + th > vh ? e.clientY - th - 16 : e.clientY + 16) + 'px';
+}
+
+document.querySelectorAll('[data-tt-title]').forEach(el => {
+  el.addEventListener('mouseenter', e => {
+    tipT.textContent = el.dataset.ttTitle;
+    tipB.textContent = el.dataset.ttBody;
+    tipPr.innerHTML = '';
+    const protos = (el.dataset.ttProtos || '').split(',');
+    protos.forEach(p => {
+      p = p.trim();
+      if (!p) return;
+      const span = document.createElement('span');
+      span.textContent = p;
+      span.style.cssText = `font-family:var(--ff-m);font-size:7.5px;padding:2px 7px;border-radius:3px;border:1px solid;color:${patternColors[p]||'#8896AC'};border-color:${patternColors[p]||'#8896AC'}55;background:${patternColors[p]||'#8896AC'}15`;
+      tipPr.appendChild(span);
+    });
+    tip.classList.add('show');
+    positionTip(e);
+  });
+  el.addEventListener('mousemove', positionTip);
+  el.addEventListener('mouseleave', () => tip.classList.remove('show'));
+});
+
+/* ── SVG CONNECTIONS ── */
+const PATTERN_COLORS = {
+  rest:   '#3B8BEB',
+  event:  '#A78BFA',
+  cdc:    '#E879F9',
+  batch:  '#10B981',
+  async:  '#F59E0B',
+  direct: '#06B6D4',
+  mixed:  '#FB7185',
+};
+
+// Connection definitions: [fromId, toId, pattern, animated, speed]
+const CONNS = [
+  // SF ↔ MuleSoft (main backbone)
+  ['hub-sf',   'hub-mule', 'cdc',   true,  1.8],
+
+  // Left → SF direct (no MuleSoft)
+  ['sc-cti',   'hub-sf',   'direct',true,  2.2],
+  ['sc-wa',    'hub-sf',   'event', true,  2.6],
+  ['sc-email', 'hub-sf',   'direct',false, 3.0],
+  ['sc-partner','hub-sf',  'direct',false, 3.4],
+  ['sc-comp',  'hub-sf',   'rest',  true,  3.1],
+  ['sc-servi', 'hub-sf',   'direct',true,  2.8],
+
+  // Right → MuleSoft
+  ['sc-sap',   'hub-mule', 'mixed', true,  1.6],
+  ['sc-sips',  'hub-mule', 'rest',  true,  2.4],
+  ['sc-dist',  'hub-mule', 'async', true,  2.0],
+  ['sc-bank',  'hub-mule', 'rest',  false, 3.2],
+  ['sc-info',  'hub-mule', 'rest',  false, 3.6],
+  ['sc-clm',   'hub-mule', 'rest',  true,  3.3],
+
+  // Bottom → MuleSoft
+  ['sc-dl',    'hub-mule', 'batch', true,  3.5],
+  ['sc-s3',    'hub-mule', 'batch', false, 4.2],
+  ['sc-docmgr','hub-mule', 'rest',  false, 3.8],
+  ['sc-sp',    'hub-sf',   'rest',  false, 4.5],
+  ['sc-gmaps', 'hub-mule', 'rest',  false, 4.1],
+];
+
+function getCenter(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const diag  = document.getElementById('diag');
+  const dr    = diag.getBoundingClientRect();
+  const er    = el.getBoundingClientRect();
+  return {
+    l: er.left - dr.left, r: er.right - dr.left,
+    t: er.top  - dr.top,  b: er.bottom - dr.top,
+    cx: (er.left + er.right) / 2 - dr.left,
+    cy: (er.top  + er.bottom) / 2 - dr.top,
+  };
+}
+
+function addPath(svg, d, color, dashed, animated, speed) {
+  // Static dashed
+  const base = document.createElementNS('http://www.w3.org/2000/svg','path');
+  base.setAttribute('d', d); base.setAttribute('fill','none');
+  base.setAttribute('stroke', color); base.setAttribute('stroke-width', '1');
+  base.setAttribute('stroke-dasharray', '4 6');
+  base.setAttribute('opacity', dashed ? '0.15' : '0.18');
+  svg.appendChild(base);
+
+  if (animated) {
+    const anim = document.createElementNS('http://www.w3.org/2000/svg','path');
+    anim.setAttribute('d', d); anim.setAttribute('fill','none');
+    anim.setAttribute('stroke', color); anim.setAttribute('stroke-width','2');
+    anim.setAttribute('stroke-dasharray','8 200');
+    anim.setAttribute('opacity','0.8');
+    const a = document.createElementNS('http://www.w3.org/2000/svg','animate');
+    a.setAttribute('attributeName','stroke-dashoffset');
+    a.setAttribute('from','0'); a.setAttribute('to','-208');
+    a.setAttribute('dur', speed + 's'); a.setAttribute('repeatCount','indefinite');
+    anim.appendChild(a);
+    svg.appendChild(anim);
+  }
+}
+
+function bezierPath(f, t) {
+  let x1, y1, x2, y2;
+  const dx = t.cx - f.cx, dy = t.cy - f.cy;
+  const absDx = Math.abs(dx), absDy = Math.abs(dy);
+
+  if (absDx > absDy * 1.2) {
+    // Horizontal dominant
+    if (f.r < t.l - 5) { x1=f.r; y1=f.cy; x2=t.l; y2=t.cy; }
+    else { x1=f.l; y1=f.cy; x2=t.r; y2=t.cy; }
+    const cp = Math.abs(x2-x1) * 0.42;
+    const sign = x2 > x1 ? 1 : -1;
+    return `M${x1},${y1} C${x1+sign*cp},${y1} ${x2-sign*cp},${y2} ${x2},${y2}`;
+  } else {
+    // Vertical dominant
+    if (f.b < t.t - 5) { x1=f.cx; y1=f.b; x2=t.cx; y2=t.t; }
+    else { x1=f.cx; y1=f.t; x2=t.cx; y2=t.b; }
+    const cp = Math.abs(y2-y1) * 0.42;
+    const sign = y2 > y1 ? 1 : -1;
+    return `M${x1},${y1} C${x1},${y1+sign*cp} ${x2},${y2-sign*cp} ${x2},${y2}`;
+  }
+}
+
+function drawConnections() {
+  const svg = document.getElementById('conn-svg');
+  const diag = document.getElementById('diag');
+  svg.setAttribute('width', diag.offsetWidth);
+  svg.setAttribute('height', diag.offsetHeight);
+  svg.innerHTML = '';
+
+  CONNS.forEach(([fromId, toId, pattern, animated, speed]) => {
+    const f = getCenter(fromId);
+    const t = getCenter(toId);
+    if (!f || !t) return;
+    const color = PATTERN_COLORS[pattern] || '#888';
+    const d = bezierPath(f, t);
+    addPath(svg, d, color, false, animated, speed || 2.5);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(drawConnections, 350);
+  window.addEventListener('resize', drawConnections);
+});
+</script>
+</body>
+</html>

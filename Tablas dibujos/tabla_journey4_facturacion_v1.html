@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journey 4 · Ciclo de facturación · Marketing Cloud · Comercializadora B2C</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:   #07090F;
+  --bg-base:   #0C1018;
+  --bg-card:   #101520;
+  --bg-hover:  #161D2C;
+  --border-xs: rgba(255,255,255,0.05);
+  --border-sm: rgba(255,255,255,0.09);
+
+  --text:  #EEF2FF;
+  --muted: #8896AC;
+  --dim:   #3D4A5C;
+  --ff-d: 'Syne', sans-serif;
+  --ff-b: 'DM Sans', sans-serif;
+  --ff-m: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg-deep); color: var(--text); font-family: var(--ff-b); min-height: 100vh; }
+
+.grid-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+.glow-orb { position: fixed; pointer-events: none; z-index: 0; border-radius: 50%; filter: blur(140px); opacity: 0.055; }
+.page { position: relative; z-index: 1; padding: 28px 32px 44px; max-width: 1060px; margin: 0 auto; }
+
+/* ── HEADER ── */
+.hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; animation: fadeUp .45s ease both; }
+.hdr-left h1 { font-family: var(--ff-d); font-size: 21px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 7px; }
+.hdr-left h1 em { font-style: normal; background: linear-gradient(120deg, #E11D48 10%, #F59E0B 55%, #3B8BEB 95%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hdr-left p { font-size: 11.5px; color: var(--muted); max-width: 660px; line-height: 1.65; }
+.badges { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+.badge { font-family: var(--ff-m); font-size: 9px; letter-spacing: .5px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; }
+.b-sap  { background: rgba(225,29,72,.1);   border:1px solid rgba(225,29,72,.3);   color:#E11D48; }
+.b-tx   { background: rgba(20,184,166,.1);  border:1px solid rgba(20,184,166,.3);  color:#14B8A6; }
+
+/* ── META BAR ── */
+.meta-bar { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; animation: fadeUp .5s .05s ease both; }
+.meta-item {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,.03); border: 1px solid var(--border-xs);
+  border-radius: 7px; padding: 6px 13px;
+}
+.meta-label { font-family: var(--ff-m); font-size: 8.5px; letter-spacing: .5px; text-transform: uppercase; color: var(--dim); }
+.meta-val   { font-family: var(--ff-m); font-size: 10px; font-weight: 600; }
+
+/* ── NOTA TRANSACCIONAL ── */
+.tx-note {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(20,184,166,.06); border: 1px solid rgba(20,184,166,.2);
+  border-radius: 8px; padding: 9px 14px; margin-bottom: 18px;
+  animation: fadeUp .5s .06s ease both;
+}
+.tx-note span { font-family: var(--ff-m); font-size: 10px; color: #99F6E4; line-height: 1.6; }
+.tx-note strong { color: #14B8A6; }
+
+/* ── TABLE WRAPPER ── */
+.table-wrap {
+  background: var(--bg-card); border: 1px solid var(--border-sm);
+  border-radius: 14px; overflow: hidden; animation: fadeUp .5s .1s ease both;
+  box-shadow: 0 0 0 1px var(--border-xs), 0 16px 48px rgba(0,0,0,.45);
+}
+table { width: 100%; border-collapse: collapse; }
+
+thead tr {
+  background: linear-gradient(90deg, rgba(225,29,72,.07) 0%, rgba(245,158,11,.05) 50%, rgba(59,139,235,.05) 100%);
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+th {
+  font-family: var(--ff-m); font-size: 9.5px; font-weight: 600;
+  letter-spacing: .8px; text-transform: uppercase; color: var(--muted);
+  padding: 13px 18px; text-align: left;
+}
+th.th-paso { width: 200px; }
+th.th-can  { width: 130px; }
+th.th-cond { width: 220px; }
+
+/* ── ROWS ── */
+tbody tr { border-bottom: 1px solid var(--border-xs); transition: background .15s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg-hover); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,0.012); }
+tbody tr:nth-child(even):hover { background: var(--bg-hover); }
+td { padding: 13px 18px; font-size: 13px; line-height: 1.55; vertical-align: middle; }
+
+/* ── PASO badge ── */
+td.paso-col { }
+.paso-event {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--ff-m); font-size: 10.5px; font-weight: 700;
+  padding: 6px 12px; border-radius: 8px; white-space: nowrap;
+}
+.pe-emit  { background: rgba(225,29,72,.11); border:1px solid rgba(225,29,72,.3);   color:#E11D48; }
+.pe-delay { background: rgba(245,158,11,.11);border:1px solid rgba(245,158,11,.3);  color:#F59E0B; }
+.pe-spike { background: rgba(249,115,22,.11);border:1px solid rgba(249,115,22,.3);  color:#F97316; }
+.pe-venc  { background: rgba(167,139,250,.11);border:1px solid rgba(167,139,250,.3);color:#A78BFA; }
+.pe-imp   { background: rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.3);color:#FB7185; }
+
+/* ── CANAL pill ── */
+.canal-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--ff-m); font-size: 10px; font-weight: 600;
+  padding: 4px 11px; border-radius: 20px; white-space: nowrap; margin-bottom: 3px;
+}
+.c-email { background: rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.35);color:#A78BFA; }
+.c-sms   { background: rgba(6,182,212,.12);  border:1px solid rgba(6,182,212,.35);  color:#06B6D4; }
+.c-crm   { background: rgba(59,139,235,.12); border:1px solid rgba(59,139,235,.35); color:#3B8BEB; }
+.c-both  { background: rgba(245,158,11,.10); border:1px solid rgba(245,158,11,.3);  color:#F59E0B; }
+.canal-stack { display: flex; flex-direction: column; gap: 4px; }
+
+/* ── CONTENIDO ── */
+td.contenido-col { color: var(--text); }
+td.contenido-col strong { color: #C7D2FE; font-weight: 500; }
+.asunto {
+  font-size: 12px; color: #E0E7FF; font-style: italic;
+  border-left: 2px solid rgba(255,255,255,.1);
+  padding-left: 8px; margin-bottom: 6px;
+}
+.chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+.chip { font-family: var(--ff-m); font-size: 9px; padding: 2px 8px; border-radius: 4px; }
+.ch-blue   { background: rgba(59,139,235,.12); border:1px solid rgba(59,139,235,.28); color:#3B8BEB; }
+.ch-teal   { background: rgba(20,184,166,.12); border:1px solid rgba(20,184,166,.28); color:#14B8A6; }
+.ch-green  { background: rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.28); color:#10B981; }
+.ch-rose   { background: rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.28);color:#FB7185; }
+.ch-amber  { background: rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.28); color:#F59E0B; }
+.ch-orange { background: rgba(249,115,22,.12); border:1px solid rgba(249,115,22,.28); color:#F97316; }
+.ch-red    { background: rgba(225,29,72,.12);  border:1px solid rgba(225,29,72,.28);  color:#E11D48; }
+.ch-violet { background: rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.28);color:#A78BFA; }
+.ch-cyan   { background: rgba(6,182,212,.12);  border:1px solid rgba(6,182,212,.28);  color:#06B6D4; }
+.ch-muted  { background: rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:var(--muted); }
+
+/* ── CONDICIÓN ── */
+td.cond-col { }
+.cond-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--ff-m); font-size: 10px; font-weight: 600;
+  padding: 4px 11px; border-radius: 6px; border: 1px dashed; line-height: 1.4;
+}
+.cond-always  { border-color: rgba(16,185,129,.4);   color:#10B981; background: rgba(16,185,129,.07); white-space:nowrap; }
+.cond-if      { border-color: rgba(245,158,11,.4);   color:#F59E0B; background: rgba(245,158,11,.07); }
+.cond-thresh  { border-color: rgba(249,115,22,.4);   color:#F97316; background: rgba(249,115,22,.07); }
+.cond-nodom   { border-color: rgba(167,139,250,.4);  color:#A78BFA; background: rgba(167,139,250,.07);}
+.cond-impago  { border-color: rgba(251,113,133,.4);  color:#FB7185; background: rgba(251,113,133,.07);}
+
+/* ── FOOTER ── */
+.footer-note {
+  margin-top: 14px; font-size: 11px; color: var(--dim); line-height: 1.7;
+  animation: fadeUp .5s .18s ease both; display: flex; gap: 20px; flex-wrap: wrap;
+}
+.fn-item { display: flex; align-items: center; gap: 6px; }
+.fn-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:600px;height:500px;top:-160px;left:-80px;background:#E11D48;"></div>
+<div class="glow-orb" style="width:500px;height:400px;bottom:-80px;right:-60px;background:#F59E0B;"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1>Journey 4 — <em>Ciclo de facturación</em></h1>
+      <p>Comunicaciones automatizadas vinculadas al ciclo de facturación de SAP · 
+         Notificación proactiva, alertas de consumo, recordatorios de pago y gestión de impago</p>
+    </div>
+    <div class="badges">
+      <span class="badge b-sap">SAP IS-U → CRM</span>
+      <span class="badge b-tx">Transaccional · sin consentimiento</span>
+    </div>
+  </div>
+
+  <!-- META BAR -->
+  <div class="meta-bar">
+    <div class="meta-item">
+      <span class="meta-label">Trigger</span>
+      <span class="meta-val" style="color:#E11D48">Emisión de factura en SAP → sincronización a CRM/MC</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Cadencia</span>
+      <span class="meta-val" style="color:#F59E0B">Mensual o bimestral</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Tipo</span>
+      <span class="meta-val" style="color:#14B8A6">Transaccional · no requiere consentimiento</span>
+    </div>
+  </div>
+
+  <!-- NOTA TRANSACCIONAL -->
+  <div class="tx-note">
+    <span>⚖️</span>
+    <span><strong>Nota legal:</strong> Las comunicaciones de este journey son de naturaleza transaccional (información contractual y de facturación). Al amparo del art. 21.2 LSSI-CE, no requieren consentimiento de marketing previo. Se excluyen sin embargo si el cliente ha ejercido su derecho de oposición a comunicaciones electrónicas.</span>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="th-paso">Evento / Momento</th>
+          <th class="th-can">Canal</th>
+          <th>Contenido</th>
+          <th class="th-cond">Condición de activación</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- EMISIÓN FACTURA -->
+        <tr>
+          <td>
+            <span class="paso-event pe-emit">🧾 Emisión de factura</span>
+          </td>
+          <td><span class="canal-pill c-email">✉️ Email</span></td>
+          <td class="contenido-col">
+            <div class="asunto">"Tu factura de [mes] ya está disponible"</div>
+            <div class="chips">
+              <span class="chip ch-red">Importe del período</span>
+              <span class="chip ch-blue">Enlace al área de cliente</span>
+            </div>
+          </td>
+          <td class="cond-col"><span class="cond-pill cond-always">✅ Siempre</span></td>
+        </tr>
+
+        <!-- +24h SIN ACCESO -->
+        <tr>
+          <td>
+            <span class="paso-event pe-delay">⏱ +24 h sin acceso</span>
+          </td>
+          <td><span class="canal-pill c-sms">💬 SMS</span></td>
+          <td class="contenido-col">
+            <div class="asunto">"Recuerda que tienes tu factura disponible en tu área de cliente"</div>
+            <div class="chips">
+              <span class="chip ch-muted">Recordatorio único</span>
+              <span class="chip ch-cyan">Enlace directo</span>
+            </div>
+          </td>
+          <td class="cond-col"><span class="cond-pill cond-if">⚠️ Solo si no ha accedido en 24 h</span></td>
+        </tr>
+
+        <!-- FACTURA > 20% -->
+        <tr>
+          <td>
+            <span class="paso-event pe-spike">📈 Factura &gt; 20% sobre media</span>
+          </td>
+          <td><span class="canal-pill c-email">✉️ Email</span></td>
+          <td class="contenido-col">
+            <div class="asunto">"Tu factura este mes es superior a tu media habitual. Te explicamos por qué."</div>
+            <div class="chips">
+              <span class="chip ch-orange">Desglose detallado del consumo</span>
+              <span class="chip ch-teal">Comparativa con meses anteriores</span>
+            </div>
+          </td>
+          <td class="cond-col"><span class="cond-pill cond-thresh">📊 Solo si supera el umbral del 20%</span></td>
+        </tr>
+
+        <!-- VENCIMIENTO PRÓXIMO -->
+        <tr>
+          <td>
+            <span class="paso-event pe-venc">📅 Vencimiento en 3 días</span>
+          </td>
+          <td>
+            <div class="canal-stack">
+              <span class="canal-pill c-email">✉️ Email</span>
+              <span class="canal-pill c-sms">💬 SMS</span>
+            </div>
+          </td>
+          <td class="contenido-col">
+            <div class="asunto">Recordatorio de pago próximo</div>
+            <div class="chips">
+              <span class="chip ch-violet">Fecha de vencimiento</span>
+              <span class="chip ch-amber">Importe pendiente</span>
+              <span class="chip ch-blue">Enlace de pago online</span>
+            </div>
+          </td>
+          <td class="cond-col"><span class="cond-pill cond-nodom">🏦 Solo si domiciliación no procesada</span></td>
+        </tr>
+
+        <!-- IMPAGO -->
+        <tr>
+          <td>
+            <span class="paso-event pe-imp">🚨 Impago detectado en SAP</span>
+          </td>
+          <td><span class="canal-pill c-crm">⚙️ CRM</span></td>
+          <td class="contenido-col">
+            Apertura automática de <strong>caso de impago</strong> + notificación multicanal al cliente
+            <div class="chips">
+              <span class="chip ch-rose">Caso automático en CRM</span>
+              <span class="chip ch-violet">Email + SMS al cliente</span>
+              <span class="chip ch-red">Bloquear comunicaciones comerciales hasta regularización</span>
+            </div>
+          </td>
+          <td class="cond-col"><span class="cond-pill cond-impago">🚫 Si impago &gt; 15 días</span></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-note">
+    <div class="fn-item"><div class="fn-dot" style="background:#A78BFA"></div><span>Email</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#06B6D4"></div><span>SMS</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#3B8BEB"></div><span>CRM (automatización)</span></div>
+    <div class="fn-item" style="margin-left:8px; padding-left:8px; border-left:1px solid var(--border-xs);">
+      <span style="color:var(--muted)">Activación:</span>
+    </div>
+    <div class="fn-item"><div class="fn-dot" style="background:#10B981"></div><span>Siempre</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#F59E0B"></div><span>Condicional por comportamiento</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#FB7185"></div><span>Condicional por impago</span></div>
+    <div class="fn-item" style="margin-left:auto;">
+      <span style="color:var(--muted)">Fuente:</span>
+      <span>Elaboración propia · Salesforce MC · SAP IS-U · LSSI-CE art. 21.2 · Comercializadora B2C</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

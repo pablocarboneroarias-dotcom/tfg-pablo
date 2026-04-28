@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figura 6.4.3 — Modelo RACI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-deep:#07090F;--bg-base:#0C1018;--bg-hover:#141B2A;
+  --border-xs:rgba(255,255,255,0.05);--border-sm:rgba(255,255,255,0.09);
+  /* RACI colors */
+  --r:#F59E0B;--a:#FB7185;--c:#3B8BEB;--i:#10B981;
+  /* Role group colors */
+  --c-pm:#F59E0B;--c-arch:#A78BFA;--c-func:#3B8BEB;--c-tech:#10B981;--c-cli:#FB7185;
+  --text:#EEF2FF;--muted:#8896AC;--dim:#4B5563;
+  --ff-d:'Syne',sans-serif;--ff-b:'DM Sans',sans-serif;--ff-m:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg-deep);color:var(--text);font-family:var(--ff-b);min-height:100vh;}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(255,255,255,0.016) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.016) 1px,transparent 1px);
+  background-size:36px 36px;}
+.glow-orb{position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(140px);opacity:0.045;}
+.page{position:relative;z-index:1;padding:28px 36px 40px;max-width:1400px;margin:0 auto;}
+
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;}
+.hdr h1{font-family:var(--ff-d);font-size:22px;font-weight:800;letter-spacing:-.3px;margin-bottom:7px;}
+.hdr h1 em{font-style:normal;background:linear-gradient(120deg,#F59E0B 10%,#FB7185 90%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hdr p{font-size:11px;color:var(--muted);max-width:680px;line-height:1.65;}
+.badges{display:flex;flex-direction:column;gap:5px;align-items:flex-end;}
+.badge{font-family:var(--ff-m);font-size:8.5px;letter-spacing:.5px;text-transform:uppercase;padding:3px 10px;border-radius:4px;}
+.b1{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#F59E0B;}
+.b2{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:7.5px;}
+
+.card{background:var(--bg-base);border:1px solid var(--border-xs);border-radius:18px;padding:20px 18px 18px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(245,158,11,.5),rgba(251,113,133,.5),transparent);}
+
+/* RACI PILLS */
+.raci-legend{display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap;}
+.rl-lbl{font-family:var(--ff-m);font-size:7.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);}
+.rp{font-family:var(--ff-m);font-size:9px;font-weight:800;width:22px;height:22px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+.rp-r{background:rgba(245,158,11,.25);border:1px solid rgba(245,158,11,.5);color:#F59E0B;}
+.rp-a{background:rgba(251,113,133,.25);border:1px solid rgba(251,113,133,.5);color:#FB7185;}
+.rp-c{background:rgba(59,139,235,.25);border:1px solid rgba(59,139,235,.5);color:#3B8BEB;}
+.rp-i{background:rgba(16,185,129,.25);border:1px solid rgba(16,185,129,.5);color:#10B981;}
+.rp-empty{background:rgba(255,255,255,.03);border:1px solid var(--border-xs);color:transparent;}
+.rl-item{display:flex;align-items:center;gap:5px;font-family:var(--ff-m);font-size:8px;color:var(--muted);}
+
+/* FILTER */
+.filter-bar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+.filter-lbl{font-family:var(--ff-m);font-size:7px;text-transform:uppercase;letter-spacing:.8px;color:var(--dim);}
+.fbtn{font-family:var(--ff-m);font-size:7.5px;padding:3px 10px;border-radius:5px;border:1px solid var(--border-sm);background:rgba(255,255,255,.03);color:var(--muted);cursor:pointer;transition:all .15s;}
+.fbtn:hover{background:rgba(255,255,255,.06);color:var(--text);}
+.fbtn.active{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.35);color:#F59E0B;}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;}
+table{border-collapse:collapse;min-width:1200px;width:100%;}
+
+/* Column headers */
+thead tr:first-child th{padding:0;}
+.col-group{font-family:var(--ff-m);font-size:7px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;text-align:center;padding:5px 3px;border-bottom:2px solid;}
+.cg-pm{color:var(--c-pm);border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.05);}
+.cg-arch{color:var(--c-arch);border-color:rgba(167,139,250,.5);background:rgba(167,139,250,.05);}
+.cg-func{color:var(--c-func);border-color:rgba(59,139,235,.5);background:rgba(59,139,235,.05);}
+.cg-tech{color:var(--c-tech);border-color:rgba(16,185,129,.5);background:rgba(16,185,129,.05);}
+.cg-cli{color:var(--c-cli);border-color:rgba(251,113,133,.5);background:rgba(251,113,133,.05);}
+
+thead tr:last-child th{
+  font-family:var(--ff-m);font-size:6.5px;font-weight:600;color:var(--dim);
+  padding:4px 3px 6px;text-align:center;white-space:nowrap;
+  writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);
+  height:90px;vertical-align:bottom;border-bottom:1px solid var(--border-sm);
+}
+.th-act{text-align:left!important;writing-mode:horizontal-tb!important;transform:none!important;height:auto!important;vertical-align:middle!important;padding:6px 10px!important;font-size:7px!important;letter-spacing:.6px!important;width:200px;color:var(--muted);}
+
+/* Group separator */
+tr.grp{background:rgba(255,255,255,.02);}
+tr.grp td{font-family:var(--ff-m);font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:6px 10px;border-top:1px solid var(--border-sm);border-bottom:1px solid var(--border-xs);}
+
+/* Data rows */
+tbody tr.data-row{border-bottom:1px solid var(--border-xs);transition:background .1s;}
+tbody tr.data-row:hover{background:var(--bg-hover);}
+tbody tr.data-row:last-child{border-bottom:none;}
+
+td.act-name{font-size:8.5px;color:#C4CDD8;padding:7px 10px;line-height:1.35;width:200px;vertical-align:middle;}
+td.act-name span{font-family:var(--ff-m);font-size:6.5px;color:var(--dim);display:block;margin-top:2px;}
+td.raci-cell{text-align:center;padding:4px 2px;vertical-align:middle;}
+.rp-sm{font-family:var(--ff-m);font-size:8px;font-weight:800;width:20px;height:20px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;}
+
+/* Section divider lines between col groups */
+.col-div{border-left:1px solid var(--border-sm)!important;}
+
+/* Legend bottom */
+.legend{border-top:1px solid var(--border-xs);padding-top:12px;margin-top:14px;}
+.leg-row{display:flex;flex-wrap:wrap;gap:8px 20px;}
+.leg-item{display:flex;align-items:center;gap:6px;font-family:var(--ff-m);font-size:8px;color:var(--muted);}
+.leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:500px;height:500px;top:-150px;left:-80px;background:#F59E0B;"></div>
+<div class="glow-orb" style="width:450px;height:450px;bottom:-100px;right:-60px;background:#FB7185;"></div>
+
+<div class="page">
+  <div class="hdr">
+    <div>
+      <h1>Figura 6.4.3 — <em>Modelo RACI del proyecto</em></h1>
+      <p>Matriz de responsabilidades del equipo implantador y del equipo cliente sobre las actividades principales del proyecto de implantación Salesforce CRM. Organizada por bloques funcionales con filtro interactivo por actividad.</p>
+    </div>
+    <div class="badges">
+      <span class="badge b1">12 perfiles implantador · 3 perfiles cliente · 6 bloques</span>
+      <span class="badge b2">Elaboración propia · TFG 2025 · Cap. 6.4.3</span>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <!-- RACI LEGEND -->
+    <div class="raci-legend">
+      <span class="rl-lbl">Clave RACI</span>
+      <div class="rl-item"><span class="rp rp-r">R</span> Responsible — ejecuta la actividad</div>
+      <div class="rl-item"><span class="rp rp-a">A</span> Accountable — aprueba y responde</div>
+      <div class="rl-item"><span class="rp rp-c">C</span> Consulted — aporta criterio/validación</div>
+      <div class="rl-item"><span class="rp rp-i">I</span> Informed — recibe comunicación</div>
+    </div>
+
+    <!-- FILTER -->
+    <div class="filter-bar">
+      <span class="filter-lbl">Filtrar bloque</span>
+      <button class="fbtn active" onclick="filterBlock('all',this)">Todos</button>
+      <button class="fbtn" onclick="filterBlock('gobierno',this)">Gobierno</button>
+      <button class="fbtn" onclick="filterBlock('arquitectura',this)">Arquitectura</button>
+      <button class="fbtn" onclick="filterBlock('funcional',this)">Funcional</button>
+      <button class="fbtn" onclick="filterBlock('tecnico',this)">Técnico</button>
+      <button class="fbtn" onclick="filterBlock('integraciones',this)">Integraciones</button>
+      <button class="fbtn" onclick="filterBlock('formacion',this)">Formación y cambio</button>
+    </div>
+
+    <div class="tbl-wrap">
+    <table>
+      <thead>
+        <!-- COL GROUP ROW -->
+        <tr>
+          <th class="th-act" rowspan="2" style="background:transparent;border:none;">Actividad</th>
+          <!-- PM -->
+          <th class="col-group cg-pm" colspan="1">PM</th>
+          <!-- ARQUITECTURA -->
+          <th class="col-group cg-arch col-div" colspan="2">Arquitectura</th>
+          <!-- FUNCIONAL -->
+          <th class="col-group cg-func col-div" colspan="4">Consultoría Funcional</th>
+          <!-- TÉCNICO -->
+          <th class="col-group cg-tech col-div" colspan="4">Equipo Técnico</th>
+          <!-- CLIENTE -->
+          <th class="col-group cg-cli col-div" colspan="3">Equipo Cliente</th>
+        </tr>
+        <!-- ROLE NAMES -->
+        <tr>
+          <th>PM / Scrum Master</th>
+          <th class="col-div">Arq. Solución</th>
+          <th>Arq. Técnico</th>
+          <th class="col-div">FC Sales / CPQ</th>
+          <th>FC Energía / ATR</th>
+          <th>FC Service / ATC</th>
+          <th>FC Mktg Cloud</th>
+          <th class="col-div">Dev Senior #1</th>
+          <th>Dev Senior #2</th>
+          <th>Dev F4→F7</th>
+          <th>Integraciones SF</th>
+          <th class="col-div">Sponsor / Dir. TI</th>
+          <th>Product Owner</th>
+          <th>Key Users</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- ── GOBIERNO ── -->
+        <tr class="grp" data-block="gobierno"><td colspan="15"><span style="color:#F59E0B;">Gobierno y gestión del proyecto</span></td></tr>
+
+        <tr class="data-row" data-block="gobierno">
+          <td class="act-name">Planificación y seguimiento del proyecto<span>Gantt, riesgos, reporting semanal</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"></td>
+        </tr>
+
+        <tr class="data-row" data-block="gobierno">
+          <td class="act-name">PI Planning por fase<span>Objetivos, dependencias, capacidad</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+        </tr>
+
+        <tr class="data-row" data-block="gobierno">
+          <td class="act-name">Gestión y priorización del backlog<span>Refinamiento, estimación, sprint planning</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+        </tr>
+
+        <tr class="data-row" data-block="gobierno">
+          <td class="act-name">Gestión de riesgos y escalado<span>Identificación, mitigación, resolución</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"></td>
+        </tr>
+
+        <tr class="data-row" data-block="gobierno">
+          <td class="act-name">Aceptación de entregables y go-live<span>Sign-off formal por fase</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+        </tr>
+
+        <!-- ── ARQUITECTURA ── -->
+        <tr class="grp" data-block="arquitectura"><td colspan="15"><span style="color:#A78BFA;">Arquitectura y diseño técnico</span></td></tr>
+
+        <tr class="data-row" data-block="arquitectura">
+          <td class="act-name">Diseño de arquitectura objetivo<span>Modelo datos, org design, seguridad</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"></td>
+        </tr>
+
+        <tr class="data-row" data-block="arquitectura">
+          <td class="act-name">Modelo de seguridad y perfiles<span>Roles, PSGs, sharing rules, FLS</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"></td>
+        </tr>
+
+        <tr class="data-row" data-block="arquitectura">
+          <td class="act-name">Pipeline CI/CD y gestión de entornos<span>DEV→INT→UAT→PRE→PRO</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"></td>
+        </tr>
+
+        <tr class="data-row" data-block="arquitectura">
+          <td class="act-name">Revisiones de arquitectura y code review<span>Estándares, governor limits, deuda técnica</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell"></td>
+        </tr>
+
+        <!-- ── FUNCIONAL ── -->
+        <tr class="grp" data-block="funcional"><td colspan="15"><span style="color:#3B8BEB;">Diseño funcional y configuración</span></td></tr>
+
+        <tr class="data-row" data-block="funcional">
+          <td class="act-name">Levantamiento y validación de requisitos<span>Workshops AS-IS, criterios de aceptación</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+        </tr>
+
+        <tr class="data-row" data-block="funcional">
+          <td class="act-name">Configuración Sales Cloud y CPQ<span>Leads, oportunidades, producto, precios</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-a">A</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+        </tr>
+
+        <tr class="data-row" data-block="funcional">
+          <td class="act-name">Configuración E&U Cloud y proceso ATR<span>CUPS, contratación, switching, distribuidoras</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-a">A</span></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+        </tr>
+
+        <tr class="data-row" data-block="funcional">
+          <td class="act-name">Configuración Service Cloud y ATC<span>Casos, SLAs, omnicanal, postventa</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-a">A</span></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+        </tr>
+
+        <tr class="data-row" data-block="funcional">
+          <td class="act-name">Configuración Marketing Cloud<span>Journeys, segmentación, consentimientos</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+        </tr>
+
+        <tr class="data-row" data-block="funcional">
+          <td class="act-name">UAT con negocio por fase<span>Validación funcional, criterios de aceptación</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+        </tr>
+
+        <!-- ── TÉCNICO ── -->
+        <tr class="grp" data-block="tecnico"><td colspan="15"><span style="color:#10B981;">Desarrollo técnico Salesforce</span></td></tr>
+
+        <tr class="data-row" data-block="tecnico">
+          <td class="act-name">Desarrollo Apex, LWC y Flows complejos<span>Lógica de negocio, automatizaciones</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell"></td>
+        </tr>
+
+        <tr class="data-row" data-block="tecnico">
+          <td class="act-name">Pruebas unitarias y de regresión<span>Cobertura Apex, test automatizados</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell"></td>
+        </tr>
+
+        <tr class="data-row" data-block="tecnico">
+          <td class="act-name">Implementación RGPD y seguridad avanzada<span>Derecho olvido, audit trail, retención</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"></td>
+        </tr>
+
+        <!-- ── INTEGRACIONES ── -->
+        <tr class="grp" data-block="integraciones"><td colspan="15"><span style="color:#06B6D4;">Integraciones y middleware</span></td></tr>
+
+        <tr class="data-row" data-block="integraciones">
+          <td class="act-name">Diseño de integraciones Salesforce<span>Platform Events, CDC, REST APIs, Connected Apps</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"></td>
+        </tr>
+
+        <tr class="data-row" data-block="integraciones">
+          <td class="act-name">Integración Salesforce ↔ SAP IS-U<span>BP replication, contrato, consulta facturas</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"></td>
+        </tr>
+
+        <tr class="data-row" data-block="integraciones">
+          <td class="act-name">Integración ATR y distribuidoras<span>EDIEL/XML, switching, mensajería CNMC</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"></td>
+        </tr>
+
+        <tr class="data-row" data-block="integraciones">
+          <td class="act-name">Migración de datos desde legacy<span>ETL, calidad de datos, carga y validación</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+        </tr>
+
+        <!-- ── FORMACIÓN ── -->
+        <tr class="grp" data-block="formacion"><td colspan="15"><span style="color:#E879F9;">Formación y gestión del cambio</span></td></tr>
+
+        <tr class="data-row" data-block="formacion">
+          <td class="act-name">Formación a formadores (Train-the-Trainer)<span>Key users · 40-60h por perfil</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+        </tr>
+
+        <tr class="data-row" data-block="formacion">
+          <td class="act-name">Formación a usuarios finales<span>Por área · 16-24h · previa a go-live</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td><td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+        </tr>
+
+        <tr class="data-row" data-block="formacion">
+          <td class="act-name">Formación técnica administradores<span>Equipo TI cliente · 80-120h</span></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-i">I</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+        </tr>
+
+        <tr class="data-row" data-block="formacion">
+          <td class="act-name">Comunicación del cambio organizativo<span>ADKAR · sponsor · embajadores internos</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"></td>
+          <td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"></td><td class="raci-cell"></td><td class="raci-cell"></td><td class="raci-cell"></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+        </tr>
+
+        <tr class="data-row" data-block="formacion">
+          <td class="act-name">Documentación técnica y handover<span>Runbooks, manuales, cierre del proyecto</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td><td class="raci-cell"></td><td class="raci-cell"><span class="rp-sm rp-r">R</span></td>
+          <td class="raci-cell col-div"><span class="rp-sm rp-a">A</span></td>
+          <td class="raci-cell"><span class="rp-sm rp-c">C</span></td>
+          <td class="raci-cell"></td>
+        </tr>
+
+      </tbody>
+    </table>
+    </div>
+
+    <!-- LEGEND -->
+    <div class="legend">
+      <div class="leg-row">
+        <div class="leg-item"><span class="rp rp-r" style="width:16px;height:16px;font-size:8px;">R</span>Responsible · ejecuta</div>
+        <div class="leg-item"><span class="rp rp-a" style="width:16px;height:16px;font-size:8px;">A</span>Accountable · aprueba y responde</div>
+        <div class="leg-item"><span class="rp rp-c" style="width:16px;height:16px;font-size:8px;">C</span>Consulted · aporta criterio</div>
+        <div class="leg-item"><span class="rp rp-i" style="width:16px;height:16px;font-size:8px;">I</span>Informed · recibe comunicación</div>
+        <div class="leg-item" style="margin-left:10px;"><div class="leg-dot" style="background:rgba(245,158,11,.4);border:1px solid rgba(245,158,11,.6);"></div>PM / Scrum Master</div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(167,139,250,.4);"></div>Arquitectura</div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(59,139,235,.4);"></div>Funcional</div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(16,185,129,.4);"></div>Técnico</div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(251,113,133,.4);"></div>Equipo cliente</div>
+        <div class="leg-item" style="margin-left:auto;font-family:var(--ff-m);font-size:7.5px;color:var(--dim);">Regla: cada actividad tiene exactamente un Accountable (A)</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function filterBlock(block, btn){
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('tr[data-block]').forEach(tr=>{
+    tr.style.display=(block==='all'||tr.dataset.block===block)?'':'none';
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journey 6 · Recuperación de clientes dados de baja · Marketing Cloud · Comercializadora B2C</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:   #07090F;
+  --bg-base:   #0C1018;
+  --bg-card:   #101520;
+  --bg-hover:  #161D2C;
+  --border-xs: rgba(255,255,255,0.05);
+  --border-sm: rgba(255,255,255,0.09);
+
+  --text:  #EEF2FF;
+  --muted: #8896AC;
+  --dim:   #3D4A5C;
+  --ff-d: 'Syne', sans-serif;
+  --ff-b: 'DM Sans', sans-serif;
+  --ff-m: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg-deep); color: var(--text); font-family: var(--ff-b); min-height: 100vh; }
+
+.grid-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+.glow-orb { position: fixed; pointer-events: none; z-index: 0; border-radius: 50%; filter: blur(140px); opacity: 0.055; }
+.page { position: relative; z-index: 1; padding: 28px 32px 44px; max-width: 1060px; margin: 0 auto; }
+
+/* ── HEADER ── */
+.hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; animation: fadeUp .45s ease both; }
+.hdr-left h1 { font-family: var(--ff-d); font-size: 21px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 7px; }
+.hdr-left h1 em { font-style: normal; background: linear-gradient(120deg, #94A3B8 10%, #3B8BEB 55%, #10B981 95%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hdr-left p { font-size: 11.5px; color: var(--muted); max-width: 660px; line-height: 1.65; }
+.badges { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+.badge { font-family: var(--ff-m); font-size: 9px; letter-spacing: .5px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; }
+.b-win { background: rgba(59,139,235,.1);  border:1px solid rgba(59,139,235,.3);  color:#3B8BEB; }
+.b-dur { background: rgba(148,163,184,.1); border:1px solid rgba(148,163,184,.3); color:#94A3B8; }
+
+/* ── META BAR ── */
+.meta-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; animation: fadeUp .5s .05s ease both; }
+.meta-item {
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,.03); border: 1px solid var(--border-xs);
+  border-radius: 7px; padding: 6px 13px;
+}
+.meta-label { font-family: var(--ff-m); font-size: 8.5px; letter-spacing: .5px; text-transform: uppercase; color: var(--dim); }
+.meta-val   { font-family: var(--ff-m); font-size: 10px; font-weight: 600; }
+
+/* ── EXCLUSIONES ── */
+.excl-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; animation: fadeUp .5s .06s ease both; }
+.excl-label { font-family: var(--ff-m); font-size: 9px; letter-spacing: .6px; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+.incl-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--ff-m); font-size: 9.5px; padding: 3px 10px; border-radius: 5px;
+  background: rgba(16,185,129,.07); border: 1px solid rgba(16,185,129,.2);
+  color: #6EE7B7; white-space: nowrap;
+}
+.excl-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--ff-m); font-size: 9.5px; padding: 3px 10px; border-radius: 5px;
+  background: rgba(251,113,133,.06); border: 1px solid rgba(251,113,133,.18);
+  color: #FCA5A5; white-space: nowrap;
+  text-decoration: line-through; text-decoration-color: rgba(251,113,133,.4);
+}
+
+/* ── TIMELINE BAR (12 meses) ── */
+.timeline-wrap { margin-bottom: 20px; animation: fadeUp .5s .07s ease both; }
+.tl-header {
+  font-family: var(--ff-m); font-size: 8px; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--dim); margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.tl-header::after { content: ''; flex: 1; height: 1px; background: var(--border-xs); }
+.tl-track {
+  position: relative; height: 28px;
+  background: rgba(255,255,255,.03); border: 1px solid var(--border-xs);
+  border-radius: 8px; margin-bottom: 8px;
+}
+.tl-fill {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 100%;
+  background: linear-gradient(90deg,
+    rgba(148,163,184,.15) 0%,
+    rgba(59,139,235,.18)  25%,
+    rgba(6,182,212,.16)   50%,
+    rgba(16,185,129,.20)  75%,
+    rgba(16,185,129,.12) 100%
+  );
+  border-radius: 8px;
+}
+/* month ticks */
+.tl-ticks {
+  display: flex; padding: 0 2px;
+}
+.tl-tick {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.tl-tick::before { content: ''; width: 1px; height: 6px; background: rgba(255,255,255,.07); }
+.tl-tick span { font-family: var(--ff-m); font-size: 7.5px; color: var(--dim); }
+.tl-tick.hi span { color: var(--muted); font-weight: 700; font-size: 8.5px; }
+
+/* ── TABLE WRAPPER ── */
+.table-wrap {
+  background: var(--bg-card); border: 1px solid var(--border-sm);
+  border-radius: 14px; overflow: hidden; animation: fadeUp .5s .1s ease both;
+  box-shadow: 0 0 0 1px var(--border-xs), 0 16px 48px rgba(0,0,0,.45);
+}
+table { width: 100%; border-collapse: collapse; }
+
+thead tr {
+  background: linear-gradient(90deg, rgba(148,163,184,.06) 0%, rgba(59,139,235,.06) 50%, rgba(16,185,129,.05) 100%);
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+th {
+  font-family: var(--ff-m); font-size: 9.5px; font-weight: 600;
+  letter-spacing: .8px; text-transform: uppercase; color: var(--muted);
+  padding: 13px 18px; text-align: left;
+}
+th.th-mes { width: 86px; text-align: center; }
+th.th-can { width: 120px; }
+
+/* ── ROWS ── */
+tbody tr { border-bottom: 1px solid var(--border-xs); transition: background .15s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg-hover); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,0.012); }
+tbody tr:nth-child(even):hover { background: var(--bg-hover); }
+td { padding: 14px 18px; font-size: 13px; line-height: 1.55; vertical-align: middle; }
+
+/* ── MES badge ── */
+td.mes-col { text-align: center; }
+.mes-badge {
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  font-family: var(--ff-m); font-weight: 700; width: 50px; min-height: 40px;
+  border-radius: 10px; padding: 5px 6px;
+}
+.mes-num  { font-size: 15px; line-height: 1; }
+.mes-unit { font-size: 7.5px; letter-spacing: .4px; text-transform: uppercase; opacity: .7; margin-top: 2px; }
+
+.m-3  { background: rgba(59,139,235,.12);  border:1px solid rgba(59,139,235,.3);  color:#3B8BEB; }
+.m-6  { background: rgba(6,182,212,.12);   border:1px solid rgba(6,182,212,.3);   color:#06B6D4; }
+.m-9  { background: rgba(16,185,129,.12);  border:1px solid rgba(16,185,129,.3);  color:#10B981; }
+.m-12 { background: rgba(148,163,184,.12); border:1px solid rgba(148,163,184,.3); color:#94A3B8; }
+
+/* ── CANAL pill ── */
+.canal-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--ff-m); font-size: 10px; font-weight: 600;
+  padding: 4px 11px; border-radius: 20px; white-space: nowrap;
+}
+.c-email { background: rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.35);color:#A78BFA; }
+.c-sms   { background: rgba(6,182,212,.12);  border:1px solid rgba(6,182,212,.35);  color:#06B6D4; }
+
+/* ── CONTENIDO ── */
+td.contenido-col { color: var(--text); }
+td.contenido-col strong { color: #C7D2FE; font-weight: 500; }
+.asunto {
+  font-size: 12px; color: #E0E7FF; font-style: italic;
+  border-left: 2px solid rgba(255,255,255,.1);
+  padding-left: 8px; margin-bottom: 6px;
+}
+.chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+.chip { font-family: var(--ff-m); font-size: 9px; padding: 2px 8px; border-radius: 4px; }
+.ch-blue   { background: rgba(59,139,235,.12); border:1px solid rgba(59,139,235,.28); color:#3B8BEB; }
+.ch-cyan   { background: rgba(6,182,212,.12);  border:1px solid rgba(6,182,212,.28);  color:#06B6D4; }
+.ch-green  { background: rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.28); color:#10B981; }
+.ch-amber  { background: rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.28); color:#F59E0B; }
+.ch-violet { background: rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.28);color:#A78BFA; }
+.ch-slate  { background: rgba(148,163,184,.1); border:1px solid rgba(148,163,184,.25);color:#94A3B8; }
+.ch-muted  { background: rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:var(--muted); }
+
+/* ── INTENSIDAD badge ── */
+.intens {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--ff-m); font-size: 8.5px; font-weight: 600;
+  padding: 2px 9px; border-radius: 4px; margin-left: 6px; vertical-align: middle;
+}
+.in-soft { background: rgba(148,163,184,.1); border:1px solid rgba(148,163,184,.25); color:#94A3B8; }
+.in-med  { background: rgba(59,139,235,.12); border:1px solid rgba(59,139,235,.28);  color:#3B8BEB; }
+.in-high { background: rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.28);  color:#10B981; }
+.in-max  { background: rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.28);  color:#F59E0B; }
+
+/* ── CIERRE DEFINITIVO ── */
+.archive-box {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: rgba(148,163,184,.06); border: 1px solid rgba(148,163,184,.2);
+  border-radius: 8px; padding: 10px 13px; margin-top: 8px;
+}
+.archive-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.archive-text { font-size: 12px; color: #CBD5E1; line-height: 1.55; }
+.archive-text strong { color: #94A3B8; font-weight: 600; }
+
+/* ── FOOTER ── */
+.footer-note {
+  margin-top: 14px; font-size: 11px; color: var(--dim); line-height: 1.7;
+  animation: fadeUp .5s .18s ease both; display: flex; gap: 20px; flex-wrap: wrap;
+}
+.fn-item { display: flex; align-items: center; gap: 6px; }
+.fn-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:600px;height:500px;top:-160px;left:-80px;background:#3B8BEB;"></div>
+<div class="glow-orb" style="width:500px;height:400px;bottom:-80px;right:-60px;background:#10B981;"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1>Journey 6 — <em>Recuperación de clientes dados de baja</em></h1>
+      <p>Reactivación a largo plazo de clientes perdidos · Touchpoints espaciados 
+         para no saturar · Horizonte de 3 a 12 meses · Cierre definitivo si no convierte</p>
+    </div>
+    <div class="badges">
+      <span class="badge b-win">Win-back · 12 meses</span>
+      <span class="badge b-dur">4 touchpoints espaciados</span>
+    </div>
+  </div>
+
+  <!-- META BAR -->
+  <div class="meta-bar">
+    <div class="meta-item">
+      <span class="meta-label">Trigger</span>
+      <span class="meta-val" style="color:#94A3B8">Contrato "Baja" · motivo recuperable</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Objetivo</span>
+      <span class="meta-val" style="color:#10B981">Recuperar en horizonte 3–12 meses</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Duración</span>
+      <span class="meta-val" style="color:#3B8BEB">12 meses</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Procedencia</span>
+      <span class="meta-val" style="color:#A78BFA">Journey 5 sin retención</span>
+    </div>
+  </div>
+
+  <!-- EXCLUSIONES / INCLUSIONES -->
+  <div class="excl-bar">
+    <span class="excl-label">Motivos incluidos</span>
+    <span class="incl-chip">✅ Precio</span>
+    <span class="incl-chip">✅ Producto</span>
+    <span class="incl-chip">✅ Competidor</span>
+    <span class="excl-label" style="margin-left:12px;">Excluidos</span>
+    <span class="excl-chip">🚫 Mudanza</span>
+    <span class="excl-chip">🚫 Fallecimiento</span>
+    <span class="excl-chip">🚫 Impago reiterado</span>
+  </div>
+
+  <!-- TIMELINE BAR (12 meses) -->
+  <div class="timeline-wrap">
+    <div class="tl-header">Línea temporal del journey · 12 meses</div>
+    <div class="tl-track"><div class="tl-fill"></div></div>
+    <div class="tl-ticks">
+      <div class="tl-tick"><span>M1</span></div>
+      <div class="tl-tick"><span>M2</span></div>
+      <div class="tl-tick hi"><span>M3</span></div>
+      <div class="tl-tick"><span>M4</span></div>
+      <div class="tl-tick"><span>M5</span></div>
+      <div class="tl-tick hi"><span>M6</span></div>
+      <div class="tl-tick"><span>M7</span></div>
+      <div class="tl-tick"><span>M8</span></div>
+      <div class="tl-tick hi"><span>M9</span></div>
+      <div class="tl-tick"><span>M10</span></div>
+      <div class="tl-tick"><span>M11</span></div>
+      <div class="tl-tick hi"><span>M12</span></div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="th-mes">Mes</th>
+          <th class="th-can">Canal</th>
+          <th>Contenido</th>
+          <th>Resultado si convierte</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- MES 3 -->
+        <tr>
+          <td class="mes-col">
+            <div class="mes-badge m-3">
+              <span class="mes-num">3</span>
+              <span class="mes-unit">meses</span>
+            </div>
+          </td>
+          <td><span class="canal-pill c-email">✉️ Email</span></td>
+          <td class="contenido-col">
+            <div class="asunto">"Te echamos de menos. El mercado ha cambiado, nuestra oferta también."</div>
+            <div class="chips">
+              <span class="chip ch-blue">Tono empático · sin presión</span>
+              <span class="chip ch-muted">Recordatorio de marca</span>
+              <span class="intens in-soft">Intensidad baja</span>
+            </div>
+          </td>
+          <td style="color:var(--muted); font-size:12.5px;">
+            Salir del journey · <strong style="color:#10B981;">reactivar contrato</strong>
+          </td>
+        </tr>
+
+        <!-- MES 6 -->
+        <tr>
+          <td class="mes-col">
+            <div class="mes-badge m-6">
+              <span class="mes-num">6</span>
+              <span class="mes-unit">meses</span>
+            </div>
+          </td>
+          <td><span class="canal-pill c-email">✉️ Email</span></td>
+          <td class="contenido-col">
+            <div class="asunto">Nueva oferta competitiva basada en tu perfil histórico de consumo</div>
+            <div class="chips">
+              <span class="chip ch-cyan">Personalización por datos históricos del CRM</span>
+              <span class="chip ch-violet">Comparativa vs. tarifa media del mercado</span>
+              <span class="intens in-med">Intensidad media</span>
+            </div>
+          </td>
+          <td style="color:var(--muted); font-size:12.5px;">
+            Salir del journey · <strong style="color:#10B981;">reactivar contrato</strong>
+          </td>
+        </tr>
+
+        <!-- MES 9 -->
+        <tr>
+          <td class="mes-col">
+            <div class="mes-badge m-9">
+              <span class="mes-num">9</span>
+              <span class="mes-unit">meses</span>
+            </div>
+          </td>
+          <td><span class="canal-pill c-sms">💬 SMS</span></td>
+          <td class="contenido-col">
+            <div class="asunto">Oferta con incentivo de reactivación</div>
+            <div class="chips">
+              <span class="chip ch-green">Mes gratis</span>
+              <span class="chip ch-green">Bonificación de reactivación</span>
+              <span class="chip ch-amber">Enlace directo a contratación online</span>
+              <span class="intens in-high">Intensidad alta</span>
+            </div>
+          </td>
+          <td style="color:var(--muted); font-size:12.5px;">
+            Salir del journey · <strong style="color:#10B981;">reactivar contrato</strong>
+          </td>
+        </tr>
+
+        <!-- MES 12 -->
+        <tr>
+          <td class="mes-col">
+            <div class="mes-badge m-12">
+              <span class="mes-num">12</span>
+              <span class="mes-unit">meses</span>
+            </div>
+          </td>
+          <td><span class="canal-pill c-email">✉️ Email</span></td>
+          <td class="contenido-col">
+            <div class="asunto">Último intento: la mejor oferta que podemos hacerte</div>
+            <div class="chips">
+              <span class="chip ch-amber">Oferta máxima disponible</span>
+              <span class="intens in-max">Intensidad máxima</span>
+            </div>
+            <div class="archive-box">
+              <span class="archive-icon">🗄️</span>
+              <span class="archive-text"><strong>Si no convierte:</strong> archivar definitivamente en CRM · segmento "Recuperación agotada" · sin más comunicaciones comerciales</span>
+            </div>
+          </td>
+          <td style="color:var(--muted); font-size:12.5px;">
+            Convierte → <strong style="color:#10B981;">reactivar contrato</strong><br>
+            <span style="font-size:11px;">No convierte → <strong style="color:#94A3B8;">archivo definitivo</strong></span>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-note">
+    <div class="fn-item"><div class="fn-dot" style="background:#A78BFA"></div><span>Email</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#06B6D4"></div><span>SMS</span></div>
+    <div class="fn-item" style="margin-left:8px; padding-left:8px; border-left:1px solid var(--border-xs);">
+      <span style="color:var(--muted)">Motivos incluidos:</span>
+    </div>
+    <div class="fn-item"><div class="fn-dot" style="background:#10B981"></div><span>Precio · Producto · Competidor</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#FB7185"></div><span>Excluidos: Mudanza · Fallecimiento · Impago</span></div>
+    <div class="fn-item" style="margin-left:auto;">
+      <span style="color:var(--muted)">Fuente:</span>
+      <span>Elaboración propia · Salesforce Marketing Cloud · Journey Builder · Comercializadora B2C</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

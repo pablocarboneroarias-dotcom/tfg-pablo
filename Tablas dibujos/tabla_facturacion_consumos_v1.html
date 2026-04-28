@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de la facturación y consumos · CRM Comercializadora B2C</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:   #07090F;
+  --bg-base:   #0C1018;
+  --bg-card:   #101520;
+  --bg-hover:  #161D2C;
+  --border-xs: rgba(255,255,255,0.05);
+  --border-sm: rgba(255,255,255,0.09);
+
+  --text:  #EEF2FF;
+  --muted: #8896AC;
+  --dim:   #3D4A5C;
+  --ff-d: 'Syne', sans-serif;
+  --ff-b: 'DM Sans', sans-serif;
+  --ff-m: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg-deep); color: var(--text); font-family: var(--ff-b); min-height: 100vh; }
+
+.grid-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+.glow-orb { position: fixed; pointer-events: none; z-index: 0; border-radius: 50%; filter: blur(140px); opacity: 0.055; }
+.page { position: relative; z-index: 1; padding: 28px 32px 44px; max-width: 1060px; margin: 0 auto; }
+
+/* ── HEADER ── */
+.hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; animation: fadeUp .45s ease both; }
+.hdr-left h1 { font-family: var(--ff-d); font-size: 21px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 7px; }
+.hdr-left h1 em { font-style: normal; background: linear-gradient(120deg, #E11D48 5%, #3B8BEB 55%, #10B981 95%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hdr-left p { font-size: 11.5px; color: var(--muted); max-width: 660px; line-height: 1.65; }
+.badges { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+.badge { font-family: var(--ff-m); font-size: 9px; letter-spacing: .5px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; }
+.b-sf  { background: rgba(59,139,235,.1);  border:1px solid rgba(59,139,235,.3);  color:#3B8BEB; }
+.b-blq { background: rgba(225,29,72,.1);   border:1px solid rgba(225,29,72,.3);   color:#E11D48; }
+
+/* ── DISPARADORES ── */
+.triggers-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  animation: fadeUp .5s .05s ease both;
+}
+.trig-label {
+  font-family: var(--ff-m);
+  font-size: 9px;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--dim);
+  white-space: nowrap;
+}
+.trig-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--ff-m);
+  font-size: 9.5px;
+  padding: 3px 10px;
+  border-radius: 5px;
+  background: rgba(225,29,72,.07);
+  border: 1px solid rgba(225,29,72,.2);
+  color: #FDA4AF;
+  white-space: nowrap;
+}
+
+/* ── LEGEND ── */
+.legend { display: flex; gap: 18px; margin-bottom: 18px; flex-wrap: wrap; animation: fadeUp .5s .07s ease both; }
+.leg-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--muted); }
+.leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── TABLE WRAPPER ── */
+.table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border-sm);
+  border-radius: 14px;
+  overflow: hidden;
+  animation: fadeUp .5s .1s ease both;
+  box-shadow: 0 0 0 1px var(--border-xs), 0 16px 48px rgba(0,0,0,.45);
+}
+table { width: 100%; border-collapse: collapse; }
+
+thead tr {
+  background: linear-gradient(90deg, rgba(225,29,72,.07) 0%, rgba(59,139,235,.06) 55%, rgba(16,185,129,.05) 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+th {
+  font-family: var(--ff-m);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 13px 18px;
+  text-align: left;
+}
+th.th-paso { width: 74px; text-align: center; }
+th.th-resp { width: 195px; }
+
+/* ── ROWS ── */
+tbody tr {
+  border-bottom: 1px solid var(--border-xs);
+  transition: background .15s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg-hover); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,0.012); }
+tbody tr:nth-child(even):hover { background: var(--bg-hover); }
+
+td { padding: 13px 18px; font-size: 13px; line-height: 1.55; vertical-align: middle; }
+
+/* ── PASO BADGE ── */
+td.paso-col { text-align: center; }
+.paso-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--ff-m);
+  font-size: 11px;
+  font-weight: 700;
+  width: 36px; height: 36px;
+  border-radius: 10px;
+}
+.p-sap   { background: rgba(225,29,72,.12);  border:1px solid rgba(225,29,72,.3);   color:#E11D48; }
+.p-cli   { background: rgba(6,182,212,.12);  border:1px solid rgba(6,182,212,.3);   color:#06B6D4; }
+.p-agent { background: rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.3);  color:#F59E0B; }
+.p-back  { background: rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3); color:#A78BFA; }
+.p-crm   { background: rgba(59,139,235,.12); border:1px solid rgba(59,139,235,.3);  color:#3B8BEB; }
+.p-warn  { background: rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.3); color:#FB7185; }
+
+/* ── RESPONSABLE PILL ── */
+.resp-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ff-m);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .3px;
+  padding: 4px 11px;
+  border-radius: 20px;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
+.rdot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.r-sap   { background: rgba(225,29,72,.12);  border:1px solid rgba(225,29,72,.35);  color:#E11D48; }
+.r-crm   { background: rgba(59,139,235,.12); border:1px solid rgba(59,139,235,.35); color:#3B8BEB; }
+.r-cli   { background: rgba(6,182,212,.12);  border:1px solid rgba(6,182,212,.35);  color:#06B6D4; }
+.r-agent { background: rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.35); color:#F59E0B; }
+.r-back  { background: rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.35);color:#A78BFA; }
+.resp-stack { display: flex; flex-direction: column; gap: 4px; }
+.resp-arrow { font-family: var(--ff-m); font-size: 8px; color: var(--dim); padding-left: 6px; }
+.resp-sep   { font-family: var(--ff-m); font-size: 8px; color: var(--dim); padding-left: 4px; }
+
+/* ── ACCION col ── */
+td.accion-col { color: var(--text); }
+td.accion-col strong { color: #C7D2FE; font-weight: 500; }
+
+/* ── CHIPS ── */
+.chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 7px; }
+.chip { font-family: var(--ff-m); font-size: 9px; padding: 2px 8px; border-radius: 4px; }
+.ch-blue   { background: rgba(59,139,235,.12); border:1px solid rgba(59,139,235,.28); color:#3B8BEB; }
+.ch-teal   { background: rgba(20,184,166,.12); border:1px solid rgba(20,184,166,.28); color:#14B8A6; }
+.ch-green  { background: rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.28); color:#10B981; }
+.ch-rose   { background: rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.28);color:#FB7185; }
+.ch-amber  { background: rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.28); color:#F59E0B; }
+.ch-red    { background: rgba(225,29,72,.12);  border:1px solid rgba(225,29,72,.28);  color:#E11D48; }
+.ch-violet { background: rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.28);color:#A78BFA; }
+.ch-cyan   { background: rgba(6,182,212,.12);  border:1px solid rgba(6,182,212,.28);  color:#06B6D4; }
+.ch-muted  { background: rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:var(--muted); }
+
+/* ── NOTA col ── */
+td.nota-col { color: var(--muted); font-size: 12px; line-height: 1.6; }
+td.nota-col strong { color: var(--text); font-weight: 500; }
+
+/* ── ALERTA CHURN ── */
+.churn-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(251,113,133,.07);
+  border: 1px solid rgba(251,113,133,.25);
+  border-radius: 8px;
+  padding: 10px 13px;
+  margin-top: 8px;
+}
+.churn-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.churn-text { font-size: 12px; color: #FCA5A5; line-height: 1.55; }
+.churn-text strong { color: #FB7185; font-weight: 600; }
+
+/* ── FOOTER ── */
+.footer-note {
+  margin-top: 14px;
+  font-size: 11px;
+  color: var(--dim);
+  line-height: 1.7;
+  animation: fadeUp .5s .18s ease both;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.fn-item { display: flex; align-items: center; gap: 6px; }
+.fn-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:600px;height:500px;top:-160px;left:-100px;background:#E11D48;"></div>
+<div class="glow-orb" style="width:500px;height:400px;bottom:-80px;right:-60px;background:#3B8BEB;"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1><em>Gestión de la facturación y consumos</em></h1>
+      <p>Sincronización de facturas SAP → CRM, gestión de reclamaciones de facturación, 
+         rectificativas y detección temprana de riesgo de churn por patrón de contacto</p>
+    </div>
+    <div class="badges">
+      <span class="badge b-sf">Salesforce CRM</span>
+      <span class="badge b-blq">Bloque C · Postventa</span>
+    </div>
+  </div>
+
+  <!-- DISPARADORES -->
+  <div class="triggers-bar">
+    <span class="trig-label">Disparadores</span>
+    <span class="trig-chip">🧾 Emisión de factura por SAP</span>
+    <span class="trig-chip">📣 Reclamación de factura</span>
+    <span class="trig-chip">📊 Consulta de consumo</span>
+    <span class="trig-chip">⚠️ Discrepancia detectada</span>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#E11D48"></div><span>SAP IS-U</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#06B6D4"></div><span>Cliente / App</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#F59E0B"></div><span>Agente</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#A78BFA"></div><span>Back-office</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#3B8BEB"></div><span>CRM (Sistema)</span></div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="th-paso">Paso</th>
+          <th class="th-resp">Responsable</th>
+          <th>Acción</th>
+          <th>Notas / Condición</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- 1 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-sap">1</div></td>
+          <td>
+            <div class="resp-stack">
+              <span class="resp-pill r-sap"><span class="rdot"></span>SAP IS-U</span>
+              <span class="resp-arrow">↓ middleware</span>
+              <span class="resp-pill r-crm"><span class="rdot"></span>CRM</span>
+            </div>
+          </td>
+          <td class="accion-col">SAP emite la factura y <strong>sincroniza al CRM</strong> vía middleware
+            <div class="chips">
+              <span class="chip ch-red">Generación en SAP IS-U</span>
+              <span class="chip ch-blue">Disponible en ficha CRM</span>
+              <span class="chip ch-muted">Sin cambio de sistema para el agente</span>
+            </div>
+          </td>
+          <td class="nota-col">El agente consulta las facturas directamente desde la ficha 360° del cliente en Salesforce, sin acceder a SAP</td>
+        </tr>
+
+        <!-- 2 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-cli">2</div></td>
+          <td>
+            <div class="resp-stack">
+              <span class="resp-pill r-cli"><span class="rdot"></span>Cliente / App</span>
+              <span class="resp-sep">+ CRM</span>
+            </div>
+          </td>
+          <td class="accion-col">El cliente accede a su factura desde el <strong>área de cliente o la app</strong>
+            <div class="chips">
+              <span class="chip ch-cyan">Portal web</span>
+              <span class="chip ch-cyan">App móvil</span>
+            </div>
+          </td>
+          <td class="nota-col">CRM registra el acceso automáticamente como interacción en el historial del cliente</td>
+        </tr>
+
+        <!-- 3 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-agent">3</div></td>
+          <td><span class="resp-pill r-agent"><span class="rdot"></span>Agente</span></td>
+          <td class="accion-col">Si el cliente reclama → abrir <strong>Caso de reclamación de facturación</strong>
+            <div class="chips">
+              <span class="chip ch-red">Consultar SAP</span>
+              <span class="chip ch-amber">Identificar discrepancia</span>
+            </div>
+          </td>
+          <td class="nota-col">Caso tipo <em>"Reclamación de facturación"</em> vinculado al contrato. La consulta SAP se realiza desde el panel del agente vía integración API.</td>
+        </tr>
+
+        <!-- 4 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-back">4</div></td>
+          <td>
+            <div class="resp-stack">
+              <span class="resp-pill r-agent"><span class="rdot"></span>Agente</span>
+              <span class="resp-sep">/ Back-office</span>
+              <span class="resp-pill r-back"><span class="rdot"></span>Back-office</span>
+            </div>
+          </td>
+          <td class="accion-col">Si procede rectificación → generar <strong>factura rectificativa en SAP</strong>
+            <div class="chips">
+              <span class="chip ch-red">Factura rectificativa en SAP</span>
+              <span class="chip ch-teal">Confirmar al cliente</span>
+              <span class="chip ch-green">Cerrar caso</span>
+            </div>
+          </td>
+          <td class="nota-col">La generación de la rectificativa se realiza en SAP IS-U y se sincroniza de vuelta al CRM vía middleware</td>
+        </tr>
+
+        <!-- 5 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-warn">5</div></td>
+          <td><span class="resp-pill r-crm"><span class="rdot"></span>CRM</span></td>
+          <td class="accion-col">Detectar <strong>patrón de riesgo de churn</strong> por reclamaciones recurrentes
+            <div class="churn-alert">
+              <span class="churn-icon">⚠️</span>
+              <span class="churn-text"><strong>Regla de detección:</strong> 3.º contacto del cliente en 90 días por el mismo motivo de facturación → marcar como cliente en riesgo · notificar al equipo de retención</span>
+            </div>
+          </td>
+          <td class="nota-col">Automatización mediante Salesforce Flow con análisis de frecuencia de casos. Activa tarea de retención proactiva en el perfil del cliente.</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-note">
+    <div class="fn-item"><div class="fn-dot" style="background:#E11D48"></div><span>SAP IS-U</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#06B6D4"></div><span>Cliente / App</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#F59E0B"></div><span>Agente</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#A78BFA"></div><span>Back-office</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#3B8BEB"></div><span>CRM (Sistema)</span></div>
+    <div class="fn-item" style="margin-left:auto;">
+      <span style="color:var(--muted)">Fuente:</span>
+      <span>Elaboración propia · Salesforce CRM · SAP IS-U · Comercializadora B2C</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

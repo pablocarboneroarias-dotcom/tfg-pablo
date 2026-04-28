@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figura 7.7 — Modelo de Soporte Post-Arranque y KT · ITIL 4</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:#07090F; --bg-base:#0C1018; --bg-card:#101520; --bg-hover:#161D2C;
+  --border-xs:rgba(255,255,255,0.05); --border-sm:rgba(255,255,255,0.09);
+  --c-hyper:#FB7185; --c-guard:#F59E0B; --c-stable:#10B981;
+  --c-itil:#3B8BEB; --c-kt:#E879F9; --c-dim:#A78BFA;
+  --text:#EEF2FF; --muted:#8896AC; --dim:#3D4A5C;
+  --ff-d:'Syne',sans-serif; --ff-b:'DM Sans',sans-serif; --ff-m:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg-deep);color:var(--text);font-family:var(--ff-b);min-height:100vh;}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(255,255,255,0.016) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,0.016) 1px,transparent 1px);
+  background-size:36px 36px;}
+.glow-orb{position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(130px);opacity:0.05;}
+.page{position:relative;z-index:1;padding:28px 36px 44px;max-width:1260px;margin:0 auto;}
+
+/* HEADER */
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;}
+.hdr-left h1{font-family:var(--ff-d);font-size:22px;font-weight:800;letter-spacing:-.3px;margin-bottom:7px;}
+.hdr-left h1 em{font-style:normal;background:linear-gradient(120deg,#FB7185 10%,#F59E0B 50%,#10B981 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hdr-left p{font-size:11.5px;color:var(--muted);max-width:700px;line-height:1.65;}
+.badges{display:flex;flex-direction:column;gap:5px;align-items:flex-end;}
+.badge{font-family:var(--ff-m);font-size:9px;letter-spacing:.5px;text-transform:uppercase;padding:3px 10px;border-radius:4px;}
+.b1{background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.25);color:#FB7185;}
+.b2{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--muted);font-size:8px;}
+
+/* ── KT SCENARIOS ─────────────────────────────────── */
+.scenarios-title{font-family:var(--ff-m);font-size:7.5px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--dim);margin-bottom:8px;}
+.scenarios{display:flex;flex-direction:column;gap:7px;margin-bottom:18px;}
+.scenario{display:flex;align-items:center;gap:0;border-radius:10px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);position:relative;}
+.scenario-id{width:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--ff-m);font-size:8px;font-weight:700;color:white;padding:10px 0;
+  background:rgba(255,255,255,.05);}
+.sc-node{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;
+  gap:2px;padding:9px 8px;}
+.sc-node .sn-icon{font-size:13px;}
+.sc-node .sn-title{font-family:var(--ff-d);font-size:8px;font-weight:700;text-align:center;}
+.sc-node .sn-sub{font-family:var(--ff-m);font-size:6.5px;color:var(--muted);text-align:center;line-height:1.4;}
+.sc-a1{background:rgba(251,113,133,.06);} .sc-a2{background:rgba(245,158,11,.06);}
+.sc-a3{background:rgba(16,185,129,.06);}  .sc-b1{background:rgba(167,139,250,.06);}
+.sc-b2{background:rgba(245,158,11,.06);}  .sc-b3{background:rgba(16,185,129,.06);}
+.sc-c1{background:rgba(251,113,133,.06);} .sc-c2{background:rgba(59,139,235,.06);}
+.sc-c3{background:rgba(16,185,129,.06);}
+.sc-arr{flex-shrink:0;display:flex;flex-direction:column;align-items:center;
+  padding:0 5px;gap:1px;background:rgba(255,255,255,.02);}
+.sc-arr .a-sym{font-size:14px;opacity:.4;}
+.sc-arr .a-lbl{font-family:var(--ff-m);font-size:6px;color:var(--c-kt);letter-spacing:.4px;text-transform:uppercase;}
+.sc-tag{position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  font-family:var(--ff-m);font-size:6.5px;padding:2px 8px;border-radius:3px;}
+.tag-a{background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.25);color:#FB7185;}
+.tag-b{background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.25); color:#F59E0B;}
+.tag-c{background:rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.25); color:#10B981;}
+
+/* ── KT ELEMENTS ─────────────────────────────────── */
+.kt-elements{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px;}
+.kt-el{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:7px;
+  background:rgba(232,121,249,.06);border:1px solid rgba(232,121,249,.18);
+  font-family:var(--ff-m);font-size:7.5px;color:#E879F9;}
+.kt-el .ke-icon{font-size:12px;}
+.kt-el span{color:var(--muted);}
+
+/* ── CARD ─────────────────────────────────────────── */
+.card{background:var(--bg-base);border:1px solid var(--border-xs);border-radius:18px;
+  padding:24px 24px 22px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(251,113,133,.5),rgba(245,158,11,.5),rgba(16,185,129,.5),transparent);}
+.card-title{font-family:var(--ff-m);font-size:7.5px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--dim);margin-bottom:14px;}
+
+/* TIMELINE AXIS */
+.tl-header{display:flex;margin-bottom:5px;padding-left:160px;}
+.tl-week{flex:1;text-align:center;font-family:var(--ff-m);font-size:7px;color:var(--dim);
+  padding-bottom:5px;border-bottom:1px solid var(--border-xs);}
+.tl-week.pre{color:#A78BFA;font-weight:600;}
+.tl-week.mark{color:#F59E0B;font-weight:600;}
+
+/* PHASE BAND */
+.phase-band{display:flex;margin-bottom:14px;padding-left:160px;height:34px;}
+.ph-seg{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;}
+.ph-seg:first-child{border-radius:8px 0 0 8px;}
+.ph-seg:last-child{border-radius:0 8px 8px 0;}
+.ph-seg .ph-name{font-family:var(--ff-d);font-size:9px;font-weight:700;color:white;}
+.ph-seg .ph-sub{font-family:var(--ff-m);font-size:6.5px;opacity:.7;color:white;}
+.ph-pre   {background:linear-gradient(135deg,rgba(167,139,250,.28),rgba(167,139,250,.13));border:1px solid rgba(167,139,250,.38);}
+.ph-hyper {background:linear-gradient(135deg,rgba(251,113,133,.30),rgba(251,113,133,.14));border:1px solid rgba(251,113,133,.38);}
+.ph-guard {background:linear-gradient(135deg,rgba(245,158,11,.26),rgba(245,158,11,.12)); border:1px solid rgba(245,158,11,.33);}
+.ph-stable{background:linear-gradient(135deg,rgba(16,185,129,.24),rgba(16,185,129,.10)); border:1px solid rgba(16,185,129,.33);}
+
+/* SECTION SEPARATOR */
+.tl-section{font-family:var(--ff-m);font-size:7px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--dim);margin:10px 0 6px;padding-left:160px;display:flex;align-items:center;gap:8px;}
+.tl-section::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.05);}
+.tl-divider{height:1px;background:var(--border-xs);margin:10px 0 10px 160px;}
+
+/* ROWS */
+.tl-row{display:flex;align-items:center;margin-bottom:7px;min-height:38px;}
+.tl-label{width:160px;flex-shrink:0;padding-right:14px;}
+.tl-label .lbl-title{font-family:var(--ff-d);font-size:9px;font-weight:700;color:var(--text);margin-bottom:2px;}
+.tl-label .lbl-sub{font-family:var(--ff-m);font-size:7px;color:var(--muted);}
+.tl-bars{flex:1;position:relative;height:38px;}
+
+/* BARS */
+.bar{position:absolute;top:50%;transform:translateY(-50%);height:21px;border-radius:5px;
+  display:flex;align-items:center;padding:0 7px;cursor:default;gap:5px;
+  transition:filter .18s,transform .18s;}
+.bar:hover{filter:brightness(1.2);transform:translateY(-50%) scaleY(1.1);z-index:5;}
+.bar span{font-family:var(--ff-m);font-size:6.5px;font-weight:600;color:white;white-space:nowrap;opacity:.9;}
+.bar-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+.b-pre   {background:rgba(167,139,250,.18);border:1px solid rgba(167,139,250,.45);}
+.b-hyper {background:rgba(251,113,133,.20);border:1px solid rgba(251,113,133,.50);}
+.b-guard {background:rgba(245,158,11,.18); border:1px solid rgba(245,158,11,.45);}
+.b-stable{background:rgba(16,185,129,.18); border:1px solid rgba(16,185,129,.45);}
+.b-full  {background:rgba(59,139,235,.16); border:1px solid rgba(59,139,235,.40);}
+.b-kt    {background:rgba(232,121,249,.16);border:1px dashed rgba(232,121,249,.55);}
+.b-ramp  {background:rgba(16,185,129,.09); border:1px dashed rgba(16,185,129,.35);}
+.b-off   {background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);}
+
+.dot-pre {background:#A78BFA;} .dot-hi{background:#FB7185;}
+.dot-md  {background:#F59E0B;} .dot-lo{background:#10B981;}
+.dot-bl  {background:#3B8BEB;} .dot-kt{background:#E879F9;}
+
+/* KT MARKER */
+.kt-marker{position:absolute;top:0;bottom:0;width:1px;
+  background:rgba(232,121,249,.3);border-left:1px dashed rgba(232,121,249,.5);z-index:3;}
+.kt-marker-label{position:absolute;top:-17px;left:4px;
+  font-family:var(--ff-m);font-size:6px;color:#E879F9;white-space:nowrap;font-weight:600;}
+
+/* ITIL */
+.itil-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--border-xs);}
+.itil-pill{display:flex;align-items:flex-start;gap:7px;padding:9px 12px;border-radius:8px;flex:1;min-width:160px;
+  background:rgba(59,139,235,.06);border:1px solid rgba(59,139,235,.18);}
+.itil-pill .ip-icon{font-size:13px;margin-top:1px;}
+.itil-pill .ip-title{font-family:var(--ff-d);font-size:8.5px;font-weight:700;color:#3B8BEB;margin-bottom:2px;}
+.itil-pill .ip-desc{font-family:var(--ff-b);font-size:7.5px;color:var(--muted);line-height:1.5;}
+.itil-pill.kt-pill{background:rgba(232,121,249,.06);border-color:rgba(232,121,249,.18);}
+.itil-pill.kt-pill .ip-title{color:#E879F9;}
+
+/* KPI */
+.kpi-box{margin-top:10px;padding:11px 15px;border-radius:10px;
+  background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);
+  display:flex;align-items:center;gap:11px;}
+.kpi-box .kpi-icon{font-size:16px;}
+.kpi-box .kt-title{font-family:var(--ff-d);font-size:8.5px;font-weight:700;color:#10B981;margin-bottom:2px;}
+.kpi-box .kt-desc{font-family:var(--ff-b);font-size:8px;color:var(--muted);line-height:1.55;}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px;padding-top:11px;border-top:1px solid var(--border-xs);}
+.leg-item{display:flex;align-items:center;gap:5px;font-family:var(--ff-m);font-size:7px;color:var(--muted);}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.leg-dashed{border:1px dashed rgba(232,121,249,.6);background:rgba(232,121,249,.1);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.page>*{animation:fadeUp .45s ease both;}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:500px;height:500px;top:-150px;right:-80px;background:#FB7185;"></div>
+<div class="glow-orb" style="width:400px;height:400px;bottom:-100px;left:-60px;background:#10B981;"></div>
+<div class="glow-orb" style="width:300px;height:300px;top:35%;left:35%;background:#E879F9;"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1>Figura 7.7 — <em>Modelo de Soporte Post-Arranque y KT</em></h1>
+      <p>Transición progresiva desde el go-live hasta el servicio autónomo del cliente. El modelo de Knowledge Transfer (KT) se adapta a tres escenarios según el contexto de partida de la organización, con los mismos artefactos de transferencia en todos los casos: documentación técnica, shadowing, runbooks y traspaso de accesos.</p>
+    </div>
+    <div class="badges">
+      <span class="badge b1">Capítulo 7.7 · ITIL 4</span>
+      <span class="badge b2">TFG · Salesforce CRM · Sector Energético</span>
+    </div>
+  </div>
+
+  <!-- KT SCENARIOS -->
+  <div class="scenarios-title">Escenarios de Knowledge Transfer aplicables</div>
+  <div class="scenarios">
+
+    <!-- Escenario A -->
+    <div class="scenario">
+      <div class="scenario-id" style="color:#FB7185;">A</div>
+      <div class="sc-node sc-a1">
+        <span class="sn-icon">🏗️</span>
+        <span class="sn-title" style="color:#FB7185;">Implantador</span>
+        <span class="sn-sub">Equipo proyecto CRM</span>
+      </div>
+      <div class="sc-arr"><span class="a-sym">→</span><span class="a-lbl">KT</span></div>
+      <div class="sc-node sc-a2">
+        <span class="sn-icon">🏢</span>
+        <span class="sn-title" style="color:#F59E0B;">Equipo TI Cliente</span>
+        <span class="sn-sub">Operación interna</span>
+      </div>
+      <div class="sc-tag tag-a">Primera implantación · sin sistema previo</div>
+    </div>
+
+    <!-- Escenario B -->
+    <div class="scenario">
+      <div class="scenario-id" style="color:#F59E0B;">B</div>
+      <div class="sc-node sc-b1">
+        <span class="sn-icon">🔄</span>
+        <span class="sn-title" style="color:#A78BFA;">Proveedor Saliente</span>
+        <span class="sn-sub">Sistema legacy anterior</span>
+      </div>
+      <div class="sc-arr"><span class="a-sym">→</span><span class="a-lbl">KT</span></div>
+      <div class="sc-node sc-b2">
+        <span class="sn-icon">🏗️</span>
+        <span class="sn-title" style="color:#F59E0B;">Implantador Entrante</span>
+        <span class="sn-sub">Equipo proyecto CRM</span>
+      </div>
+      <div class="sc-arr"><span class="a-sym">→</span><span class="a-lbl">KT</span></div>
+      <div class="sc-node sc-b3">
+        <span class="sn-icon">🏢</span>
+        <span class="sn-title" style="color:#10B981;">Equipo TI Cliente</span>
+        <span class="sn-sub">Operación interna</span>
+      </div>
+      <div class="sc-tag tag-b">Sustitución de sistema legacy</div>
+    </div>
+
+    <!-- Escenario C -->
+    <div class="scenario">
+      <div class="scenario-id" style="color:#10B981;">C</div>
+      <div class="sc-node sc-c1">
+        <span class="sn-icon">🏗️</span>
+        <span class="sn-title" style="color:#FB7185;">Implantador</span>
+        <span class="sn-sub">Equipo proyecto CRM</span>
+      </div>
+      <div class="sc-arr"><span class="a-sym">→</span><span class="a-lbl">KT Fase 1</span></div>
+      <div class="sc-node sc-c2">
+        <span class="sn-icon">⚙️</span>
+        <span class="sn-title" style="color:#3B8BEB;">Equipo AMS</span>
+        <span class="sn-sub">Soporte gestionado</span>
+      </div>
+      <div class="sc-arr"><span class="a-sym">→</span><span class="a-lbl">KT Fase 2</span></div>
+      <div class="sc-node sc-c3">
+        <span class="sn-icon">🏢</span>
+        <span class="sn-title" style="color:#10B981;">Equipo TI Cliente</span>
+        <span class="sn-sub">Operación interna</span>
+      </div>
+      <div class="sc-tag tag-c">Modelo mixto · AMS como capa intermedia</div>
+    </div>
+
+  </div>
+
+  <!-- KT ELEMENTS -->
+  <div class="kt-elements">
+    <div class="kt-el"><span class="ke-icon">📄</span><span>Documentación técnica · configuración, ADRs, modelo de datos</span></div>
+    <div class="kt-el"><span class="ke-icon">👁️</span><span>Shadowing · acompañamiento en producción</span></div>
+    <div class="kt-el"><span class="ke-icon">📋</span><span>Runbooks · procedimientos operativos</span></div>
+    <div class="kt-el"><span class="ke-icon">🔑</span><span>Traspaso de credenciales y accesos</span></div>
+  </div>
+
+  <!-- TIMELINE CARD -->
+  <div class="card">
+    <div class="card-title">Eje temporal · Pre go-live (–S2/–S1) + 12 semanas post arranque — Escenario C (referencia)</div>
+
+    <!-- WEEK AXIS -->
+    <div class="tl-header">
+      <div class="tl-week pre">–S2</div>
+      <div class="tl-week pre">–S1</div>
+      <div class="tl-week mark">S1</div>
+      <div class="tl-week mark">S2</div>
+      <div class="tl-week">S3</div>
+      <div class="tl-week">S4</div>
+      <div class="tl-week">S5</div>
+      <div class="tl-week">S6</div>
+      <div class="tl-week">S7</div>
+      <div class="tl-week">S8</div>
+      <div class="tl-week">S9</div>
+      <div class="tl-week">S10</div>
+      <div class="tl-week">S11</div>
+      <div class="tl-week">S12+</div>
+    </div>
+
+    <!-- PHASE BAND -->
+    <div class="phase-band">
+      <div class="ph-seg ph-pre"    style="flex:2;"><span class="ph-name">Pre go-live</span><span class="ph-sub">Preparación KT</span></div>
+      <div class="ph-seg ph-hyper"  style="flex:2;"><span class="ph-name">① Hypercare</span><span class="ph-sub">S1 – S2</span></div>
+      <div class="ph-seg ph-guard"  style="flex:6;"><span class="ph-name">② Guardia Reducida</span><span class="ph-sub">S3 – S8</span></div>
+      <div class="ph-seg ph-stable" style="flex:4;"><span class="ph-name">③ Servicio Estable</span><span class="ph-sub">S9+</span></div>
+    </div>
+
+    <!-- SOPORTE -->
+    <div class="tl-section">Soporte operativo</div>
+
+    <div class="tl-row">
+      <div class="tl-label"><div class="lbl-title">Implantador</div><div class="lbl-sub">Dedicación activa</div></div>
+      <div class="tl-bars" id="r1"></div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-label"><div class="lbl-title">Equipo AMS</div><div class="lbl-sub">Soporte primer nivel</div></div>
+      <div class="tl-bars" id="r2"></div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-label"><div class="lbl-title">Equipo TI Cliente</div><div class="lbl-sub">Autonomía operativa</div></div>
+      <div class="tl-bars" id="r3"></div>
+    </div>
+
+    <div class="tl-divider"></div>
+
+    <!-- SLAs -->
+    <div class="tl-section">SLA por nivel de incidencia</div>
+
+    <div class="tl-row">
+      <div class="tl-label"><div class="lbl-title">P1 / P2</div><div class="lbl-sub">Sin suministro · Económica</div></div>
+      <div class="tl-bars" id="r4"></div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-label"><div class="lbl-title">P3</div><div class="lbl-sub">Consultas generales</div></div>
+      <div class="tl-bars" id="r5"></div>
+    </div>
+
+    <div class="tl-divider"></div>
+
+    <!-- KT -->
+    <div class="tl-section">Knowledge Transfer · artefactos</div>
+
+    <div class="tl-row">
+      <div class="tl-label"><div class="lbl-title">KT → AMS</div><div class="lbl-sub">Documentación · Runbooks · Accesos · Shadowing</div></div>
+      <div class="tl-bars" id="r6"></div>
+    </div>
+    <div class="tl-row">
+      <div class="tl-label"><div class="lbl-title">KT → TI Cliente</div><div class="lbl-sub">Documentación · Runbooks · Accesos · Shadowing</div></div>
+      <div class="tl-bars" id="r7"></div>
+    </div>
+
+    <div class="tl-divider"></div>
+
+    <!-- CAMBIOS -->
+    <div class="tl-section">Gestión de cambios y evolución</div>
+
+    <div class="tl-row">
+      <div class="tl-label"><div class="lbl-title">Cambios / Evolución</div><div class="lbl-sub">Proceso gobierno ITIL 4</div></div>
+      <div class="tl-bars" id="r8"></div>
+    </div>
+
+    <!-- ITIL -->
+    <div class="itil-row">
+      <div class="itil-pill">
+        <span class="ip-icon">🔧</span>
+        <div><div class="ip-title">Gestión de Incidencias</div>
+        <div class="ip-desc">Restaurar el servicio en el menor tiempo posible conforme a los SLAs P1 (4h) / P2 (24h) / P3 (72h).</div></div>
+      </div>
+      <div class="itil-pill">
+        <span class="ip-icon">🔍</span>
+        <div><div class="ip-title">Gestión de Problemas</div>
+        <div class="ip-desc">Identificar causas raíz de incidencias recurrentes y resolverlas de forma definitiva.</div></div>
+      </div>
+      <div class="itil-pill">
+        <span class="ip-icon">🔄</span>
+        <div><div class="ip-title">Gestión de Cambios</div>
+        <div class="ip-desc">Canalizar peticiones de evolución a través del proceso de gobierno evitando cambios no controlados en producción.</div></div>
+      </div>
+      <div class="itil-pill kt-pill">
+        <span class="ip-icon">📚</span>
+        <div><div class="ip-title">Gestión del Conocimiento</div>
+        <div class="ip-desc">Mantener actualizados los ADRs, runbooks y FAQs como base de conocimiento operativa única.</div></div>
+      </div>
+    </div>
+
+    <!-- KPI -->
+    <div class="kpi-box">
+      <span class="kpi-icon">✅</span>
+      <div>
+        <div class="kt-title">Criterio de Cierre Operativo del Proyecto</div>
+        <div class="kt-desc">La transición se considera completada cuando el equipo TI del cliente resuelve de forma autónoma el <strong style="color:#10B981;">≥ 80% de los tickets</strong> durante <strong style="color:#10B981;">dos semanas consecutivas</strong> sin escalado al implantador, y el KT ha sido validado mediante una sesión de shadowing inverso en la que el cliente demuestra dominio operativo del sistema.</div>
+      </div>
+    </div>
+
+    <!-- LEGEND -->
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#A78BFA;"></div>Pre go-live · preparación KT</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#FB7185;"></div>Hypercare · presencia completa</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#F59E0B;"></div>Guardia reducida · P1/P2 horario oficina</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#10B981;"></div>Servicio estable · autonomía cliente</div>
+      <div class="leg-item"><div class="leg-dot leg-dashed"></div>KT activo · transferencia de conocimiento</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#3B8BEB;"></div>Cobertura plena ambas partes</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const W = 100/14;
+function pct(s,d){return{left:(s*W)+'%',width:(d*W)+'%'};}
+function bar(id,s,d,cls,dot,lbl){
+  const p=pct(s,d),el=document.createElement('div');
+  el.className='bar '+cls; el.style.left=p.left; el.style.width=p.width;
+  el.innerHTML=`<div class="bar-dot ${dot}"></div><span>${lbl}</span>`;
+  document.getElementById(id).appendChild(el);
+}
+function marker(id,col,lbl){
+  const c=document.getElementById(id),m=document.createElement('div');
+  m.className='kt-marker'; m.style.left=(col*W)+'%';
+  const l=document.createElement('div'); l.className='kt-marker-label'; l.textContent=lbl;
+  m.appendChild(l); c.appendChild(m);
+}
+
+// Soporte
+bar('r1',0,2,'b-pre',  'dot-pre','Preparación KT · doc. + runbooks + accesos');
+bar('r1',2,2,'b-hyper','dot-hi', 'Jornada completa · Consul. Func. + Arq. Técnico');
+bar('r1',4,6,'b-guard','dot-md', 'Guardia horario oficina · P1/P2');
+bar('r1',10,4,'b-off', 'dot-lo', 'Sin dedicación activa');
+
+bar('r2',2,2,'b-pre',  'dot-pre','Shadowing con implantador');
+bar('r2',4,6,'b-hyper','dot-hi', 'Soporte primer nivel · P1/P2/P3');
+bar('r2',10,4,'b-guard','dot-md','Soporte continuado');
+
+bar('r3',4,4,'b-pre',  'dot-pre','Formación + shadowing · KT Fase 2');
+bar('r3',8,2,'b-ramp', 'dot-md', 'Resolución supervisada P3');
+bar('r3',10,4,'b-stable','dot-lo','Autónomo · ≥80% tickets sin escalado');
+
+// SLAs
+bar('r4',2,2,'b-hyper','dot-hi','4h · Implantador');
+bar('r4',4,6,'b-guard','dot-md','4h · AMS + implantador en guardia');
+bar('r4',10,4,'b-stable','dot-lo','4h · AMS + TI cliente');
+
+bar('r5',2,2,'b-hyper','dot-hi','72h · Implantador');
+bar('r5',4,4,'b-guard','dot-md','72h · AMS');
+bar('r5',8,6,'b-stable','dot-lo','72h · TI cliente');
+
+// KT
+bar('r6',0,4,'b-kt','dot-kt','Documentación técnica · ADRs · Runbooks · Credenciales · Shadowing');
+bar('r6',4,2,'b-kt','dot-kt','Shadowing en producción · validación');
+bar('r6',6,8,'b-off','dot-lo','KT Fase 1 completado');
+marker('r6',4,'▶ KT Fase 1');
+
+bar('r7',0,4,'b-off','dot-lo','—');
+bar('r7',4,6,'b-kt', 'dot-kt','Documentación · Runbooks · Credenciales admin · Shadowing TI cliente');
+bar('r7',10,4,'b-off','dot-lo','KT Fase 2 completado');
+marker('r7',10,'▶ KT Fase 2');
+
+// Cambios
+bar('r8',0,4,'b-off', 'dot-hi','Bloqueada');
+bar('r8',4,10,'b-full','dot-bl','Peticiones de cambio vía proceso gobierno ITIL 4');
+</script>
+</body>
+</html>

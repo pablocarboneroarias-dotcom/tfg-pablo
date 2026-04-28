@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figura 4.3.1 — Estructura de entornos Salesforce</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:   #07090F;
+  --bg-base:   #0C1018;
+  --bg-card:   #101520;
+  --bg-hover:  #161D2C;
+  --border-xs: rgba(255,255,255,0.05);
+  --border-sm: rgba(255,255,255,0.09);
+  --border-md: rgba(255,255,255,0.14);
+
+  --col-dev:   #10B981;
+  --col-test:  #A78BFA;
+  --col-int:   #F59E0B;
+  --col-uat:   #3B8BEB;
+  --col-pre:   #FB7185;
+  --col-pro:   #22D3EE;
+
+  --text:  #EEF2FF;
+  --muted: #8896AC;
+  --dim:   #3D4A5C;
+
+  --ff-d: 'Syne', sans-serif;
+  --ff-b: 'DM Sans', sans-serif;
+  --ff-m: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: var(--ff-b);
+  min-height: 100vh;
+}
+
+.grid-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+.glow-orb {
+  position: fixed; pointer-events: none; z-index: 0;
+  border-radius: 50%; filter: blur(130px); opacity: 0.06;
+}
+
+.page {
+  position: relative; z-index: 1;
+  padding: 28px 36px 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ─── HEADER ─── */
+.hdr {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 26px;
+  animation: fadeUp .45s ease both;
+}
+.hdr-left h1 {
+  font-family: var(--ff-d);
+  font-size: 22px; font-weight: 800; letter-spacing: -.3px;
+  line-height: 1.2; margin-bottom: 7px;
+}
+.hdr-left h1 em {
+  font-style: normal;
+  background: linear-gradient(120deg, #10B981 10%, #3B8BEB 90%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hdr-left p { font-size: 11.5px; color: var(--muted); max-width: 600px; line-height: 1.65; }
+.badges { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+.badge {
+  font-family: var(--ff-m); font-size: 9px; letter-spacing: .5px;
+  text-transform: uppercase; padding: 3px 10px; border-radius: 4px;
+}
+.b-sf  { background: rgba(59,139,235,.1); border:1px solid rgba(59,139,235,.25); color:#3B8BEB; }
+.b-meta{ background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); color:var(--muted); font-size:8px; }
+
+/* ─── CARD WRAPPER ─── */
+.card {
+  background: var(--bg-base);
+  border: 1px solid var(--border-xs);
+  border-radius: 18px;
+  padding: 28px 28px 24px;
+  position: relative; overflow: hidden;
+  animation: fadeUp .5s .08s ease both;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(16,185,129,.5), rgba(59,139,235,.5), transparent);
+}
+
+/* ─── CARD TITLE ─── */
+.card-title { text-align: center; margin-bottom: 20px; }
+.card-title h2 { font-family: var(--ff-d); font-size: 14px; font-weight: 700; color: var(--text); }
+.card-title p  { font-family: var(--ff-m); font-size: 9.5px; color: var(--muted); margin-top: 5px; }
+
+/* ─── CI/CD LABEL ─── */
+.cicd-label {
+  text-align: center; margin-bottom: 16px;
+  font-family: var(--ff-m); font-size: 8px; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--dim);
+  display: flex; align-items: center; gap: 10px; justify-content: center;
+}
+.cicd-label::before, .cicd-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border-xs);
+}
+
+/* ─── PIPELINE ROW ─── */
+.pipeline {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 28px;
+}
+
+/* ─── ENV CARD ─── */
+.env {
+  flex: 1;
+  border-radius: 10px;
+  padding: 14px 10px 12px;
+  position: relative;
+  cursor: default;
+  transition: transform .2s ease, box-shadow .2s ease;
+  display: flex; flex-direction: column;
+}
+.env:hover { transform: translateY(-3px); }
+
+/* ─── ARROW between envs ─── */
+.arr {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; flex-shrink: 0; position: relative;
+}
+.arr::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  height: 1px;
+  transform: translateY(-50%);
+}
+.arr-chevron {
+  position: relative; z-index: 1;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px;
+  border: 1px solid;
+  flex-shrink: 0;
+}
+
+/* ENV colors */
+.env-dev  { background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.22); }
+.env-dev:hover  { box-shadow: 0 6px 24px rgba(16,185,129,.08); }
+.env-test { background: rgba(167,139,250,.08); border: 1px solid rgba(167,139,250,.22); }
+.env-test:hover { box-shadow: 0 6px 24px rgba(167,139,250,.08); }
+.env-int  { background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.25); }
+.env-int:hover  { box-shadow: 0 6px 24px rgba(245,158,11,.1); }
+.env-uat  { background: rgba(59,139,235,.08); border: 1px solid rgba(59,139,235,.22); }
+.env-uat:hover  { box-shadow: 0 6px 24px rgba(59,139,235,.08); }
+.env-pre  { background: rgba(251,113,133,.08); border: 1px solid rgba(251,113,133,.22); }
+.env-pre:hover  { box-shadow: 0 6px 24px rgba(251,113,133,.08); }
+.env-pro  { background: rgba(34,211,238,.08); border: 1px solid rgba(34,211,238,.25); }
+.env-pro:hover  { box-shadow: 0 6px 24px rgba(34,211,238,.1); }
+
+/* arr colors */
+.arr-dev  .arr-chevron { background: rgba(16,185,129,.1); border-color: rgba(16,185,129,.3); color: var(--col-dev); }
+.arr-dev::before  { background: rgba(16,185,129,.2); }
+.arr-test .arr-chevron { background: rgba(167,139,250,.1); border-color: rgba(167,139,250,.3); color: var(--col-test); }
+.arr-test::before { background: rgba(167,139,250,.2); }
+.arr-int  .arr-chevron { background: rgba(245,158,11,.1); border-color: rgba(245,158,11,.3); color: var(--col-int); }
+.arr-int::before  { background: rgba(245,158,11,.2); }
+.arr-uat  .arr-chevron { background: rgba(59,139,235,.1); border-color: rgba(59,139,235,.3); color: var(--col-uat); }
+.arr-uat::before  { background: rgba(59,139,235,.2); }
+.arr-pre  .arr-chevron { background: rgba(251,113,133,.1); border-color: rgba(251,113,133,.3); color: var(--col-pre); }
+.arr-pre::before  { background: rgba(251,113,133,.2); }
+
+/* ─── ENV INTERNALS ─── */
+.env-badge {
+  font-family: var(--ff-m); font-size: 17px; font-weight: 800;
+  letter-spacing: -.3px; display: block; margin-bottom: 4px;
+  font-family: var(--ff-d);
+}
+.env-dev  .env-badge { color: var(--col-dev); }
+.env-test .env-badge { color: var(--col-test); }
+.env-int  .env-badge { color: var(--col-int); }
+.env-uat  .env-badge { color: var(--col-uat); }
+.env-pre  .env-badge { color: var(--col-pre); }
+.env-pro  .env-badge { color: var(--col-pro); }
+
+.env-name {
+  font-size: 9px; color: var(--muted); display: block;
+  margin-bottom: 10px; line-height: 1.4;
+  font-family: var(--ff-b);
+}
+
+.env-separator {
+  height: 1px; background: var(--border-xs); margin-bottom: 10px;
+}
+
+.env-feats { list-style: none; display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
+.env-feats li {
+  font-size: 8.5px; color: var(--muted);
+  padding: 3px 5px;
+  background: rgba(255,255,255,.02);
+  border-radius: 3px;
+  border: 1px solid rgba(255,255,255,.04);
+  line-height: 1.35;
+}
+
+/* ─── SANDBOX TYPE TAG ─── */
+.sandbox-tag {
+  margin-top: auto; padding-top: 8px;
+}
+.sandbox-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--ff-m); font-size: 7.5px; font-weight: 600;
+  padding: 3px 7px; border-radius: 4px;
+  letter-spacing: .3px; line-height: 1;
+}
+.sp-dev-sb   { background: rgba(16,185,129,.1); border:1px solid rgba(16,185,129,.28); color:var(--col-dev); }
+.sp-dev-pro  { background: rgba(167,139,250,.1); border:1px solid rgba(167,139,250,.28); color:var(--col-test); }
+.sp-full     { background: rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.28); color:var(--col-int); }
+.sp-prod     { background: rgba(34,211,238,.1); border:1px solid rgba(34,211,238,.28); color:var(--col-pro); }
+
+/* ─── NEW badge ─── */
+.new-badge {
+  position: absolute; top: -1px; right: -1px;
+  font-family: var(--ff-m); font-size: 7px; letter-spacing: .5px;
+  text-transform: uppercase; padding: 2px 7px;
+  background: rgba(245,158,11,.15); color: var(--col-int);
+  border: 1px solid rgba(245,158,11,.3);
+  border-radius: 0 10px 0 6px;
+}
+
+/* ─── ROLLBACK BANNER ─── */
+.rollback {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border-xs);
+  border-radius: 8px; padding: 9px 14px;
+  margin-bottom: 22px;
+}
+.rollback-icon {
+  font-family: var(--ff-m); font-size: 9px; color: var(--muted);
+  flex-shrink: 0; opacity: .6;
+}
+.rollback-arrow {
+  display: flex; align-items: center; gap: 6px;
+  flex: 1;
+}
+.rollback-seg {
+  height: 1px; flex: 1;
+  background: repeating-linear-gradient(90deg,
+    rgba(255,255,255,.18) 0, rgba(255,255,255,.18) 4px,
+    transparent 4px, transparent 9px);
+}
+.rollback-node {
+  font-family: var(--ff-m); font-size: 7.5px; font-weight: 600;
+  padding: 2px 7px; border-radius: 3px;
+}
+.rollback-text {
+  font-family: var(--ff-m); font-size: 8px; color: var(--muted);
+  white-space: nowrap; flex-shrink: 0;
+}
+.rb-dev  { background: rgba(16,185,129,.1);  color:var(--col-dev);  border:1px solid rgba(16,185,129,.2); }
+.rb-test { background: rgba(167,139,250,.1); color:var(--col-test); border:1px solid rgba(167,139,250,.2); }
+.rb-int  { background: rgba(245,158,11,.1);  color:var(--col-int);  border:1px solid rgba(245,158,11,.2); }
+.rb-uat  { background: rgba(59,139,235,.1);  color:var(--col-uat);  border:1px solid rgba(59,139,235,.2); }
+.rb-pre  { background: rgba(251,113,133,.1); color:var(--col-pre);  border:1px solid rgba(251,113,133,.2); }
+.rb-pro  { background: rgba(34,211,238,.1);  color:var(--col-pro);  border:1px solid rgba(34,211,238,.2); }
+
+/* ─── LEGEND ─── */
+.legend-wrap {
+  border-top: 1px solid var(--border-xs);
+  padding-top: 18px;
+}
+.legend-title {
+  font-family: var(--ff-m); font-size: 8px; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--dim);
+  margin-bottom: 12px;
+}
+.legend-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+}
+.legend-item {
+  background: rgba(255,255,255,.02);
+  border: 1px solid var(--border-xs);
+  border-radius: 8px; padding: 10px 12px;
+}
+.legend-item-hdr {
+  display: flex; align-items: center; gap: 7px; margin-bottom: 6px;
+}
+.legend-dot { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
+.legend-type {
+  font-family: var(--ff-d); font-size: 10px; font-weight: 700; color: var(--text);
+}
+.legend-desc {
+  font-size: 8.5px; color: var(--muted); line-height: 1.5;
+}
+.legend-meta {
+  margin-top: 5px;
+  font-family: var(--ff-m); font-size: 7.5px; color: var(--dim);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.legend-meta span { display: flex; align-items: center; gap: 4px; }
+.legend-meta span::before { content: '·'; opacity: .5; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:500px;height:500px;top:-150px;left:-80px;background:#10B981;"></div>
+<div class="glow-orb" style="width:400px;height:400px;bottom:-100px;right:-60px;background:#3B8BEB;"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1>Figura 4.3.1 — <em>Estructura de la org y entornos</em></h1>
+      <p>Pipeline de entornos Salesforce para el ciclo de vida de la configuración y el desarrollo. Flujo unidireccional de promoción de cambios gestionado mediante Salesforce DX y pipelines CI/CD (GitHub Actions). Ningún cambio se despliega directamente en producción.</p>
+    </div>
+    <div class="badges">
+      <span class="badge b-sf">Salesforce DX · Single-org</span>
+      <span class="badge b-meta">Elaboración propia · TFG 2025 · Cap. 4.3.1</span>
+    </div>
+  </div>
+
+  <!-- MAIN CARD -->
+  <div class="card">
+
+    <div class="card-title">
+      <h2>Pipeline de entornos — ciclo de vida de la configuración</h2>
+      <p>Flujo de promoción: DEV → TEST → INT → UAT → PRE → PRO · Control de versiones Git + CI/CD automatizado</p>
+    </div>
+
+    <div class="cicd-label">Salesforce CLI · GitHub Actions · Salesforce DX</div>
+
+    <!-- PIPELINE -->
+    <div class="pipeline">
+
+      <!-- DEV -->
+      <div class="env env-dev">
+        <span class="env-badge">DEV</span>
+        <span class="env-name">Developer<br>Sandbox</span>
+        <div class="env-separator"></div>
+        <ul class="env-feats">
+          <li>Datos sintéticos</li>
+          <li>Aislado por dev</li>
+          <li>Scratch orgs</li>
+          <li>git commit + push</li>
+        </ul>
+        <div class="sandbox-tag">
+          <span class="sandbox-pill sp-dev-sb">Developer Sandbox</span>
+        </div>
+      </div>
+
+      <!-- ARROW DEV → TEST -->
+      <div class="arr arr-dev">
+        <div class="arr-chevron">›</div>
+      </div>
+
+      <!-- TEST -->
+      <div class="env env-test">
+        <span class="env-badge">TEST</span>
+        <span class="env-name">Integración<br>continua interna</span>
+        <div class="env-separator"></div>
+        <ul class="env-feats">
+          <li>Merge de ramas</li>
+          <li>Tests Apex ≥75%</li>
+          <li>PR automático</li>
+          <li>Validación metadatos</li>
+        </ul>
+        <div class="sandbox-tag">
+          <span class="sandbox-pill sp-dev-pro">Developer Pro</span>
+        </div>
+      </div>
+
+      <!-- ARROW TEST → INT -->
+      <div class="arr arr-test">
+        <div class="arr-chevron">›</div>
+      </div>
+
+      <!-- INT -->
+      <div class="env env-int">
+        <span class="env-badge">INT</span>
+        <span class="env-name">Integración<br>con terceros</span>
+        <div class="env-separator"></div>
+        <ul class="env-feats">
+          <li>MuleSoft sandbox</li>
+          <li>SAP S/4HANA test</li>
+          <li>ATR / SIPS test</li>
+          <li>Tests end-to-end</li>
+        </ul>
+        <div class="sandbox-tag">
+          <span class="sandbox-pill sp-full">Full Sandbox</span>
+        </div>
+      </div>
+
+      <!-- ARROW INT → UAT -->
+      <div class="arr arr-int">
+        <div class="arr-chevron">›</div>
+      </div>
+
+      <!-- UAT -->
+      <div class="env env-uat">
+        <span class="env-badge">UAT</span>
+        <span class="env-name">Aceptación<br>de usuario</span>
+        <div class="env-separator"></div>
+        <ul class="env-feats">
+          <li>Key users negocio</li>
+          <li>Datos anonimizados</li>
+          <li>Criterios aceptación</li>
+          <li>Sign-off formal</li>
+        </ul>
+        <div class="sandbox-tag">
+          <span class="sandbox-pill sp-full">Full Sandbox</span>
+        </div>
+      </div>
+
+      <!-- ARROW UAT → PRE -->
+      <div class="arr arr-uat">
+        <div class="arr-chevron">›</div>
+      </div>
+
+      <!-- PRE -->
+      <div class="env env-pre">
+        <span class="env-badge">PRE</span>
+        <span class="env-name">Preproducción<br>Staging</span>
+        <div class="env-separator"></div>
+        <ul class="env-feats">
+          <li>Réplica de PRO</li>
+          <li>Tests regresión</li>
+          <li>Ensayo despliegue</li>
+          <li>Verificación rollback</li>
+        </ul>
+        <div class="sandbox-tag">
+          <span class="sandbox-pill sp-full">Full Sandbox</span>
+        </div>
+      </div>
+
+      <!-- ARROW PRE → PRO -->
+      <div class="arr arr-pre">
+        <div class="arr-chevron">›</div>
+      </div>
+
+      <!-- PRO -->
+      <div class="env env-pro">
+        <span class="env-badge">PRO</span>
+        <span class="env-name">Producción<br>Real</span>
+        <div class="env-separator"></div>
+        <ul class="env-feats">
+          <li>Datos reales clientes</li>
+          <li>Ventana mantenimiento</li>
+          <li>Rollback documentado</li>
+          <li>Sin cambios directos</li>
+        </ul>
+        <div class="sandbox-tag">
+          <span class="sandbox-pill sp-prod">Producción</span>
+        </div>
+      </div>
+
+    </div><!-- /pipeline -->
+
+    <!-- ROLLBACK BANNER -->
+    <div class="rollback">
+      <span class="rollback-icon">↩ rollback</span>
+      <div class="rollback-arrow">
+        <span class="rollback-node rb-pro">PRO</span>
+        <div class="rollback-seg"></div>
+        <span class="rollback-node rb-pre">PRE</span>
+        <div class="rollback-seg"></div>
+        <span class="rollback-node rb-uat">UAT</span>
+        <div class="rollback-seg"></div>
+        <span class="rollback-node rb-int">INT</span>
+        <div class="rollback-seg"></div>
+        <span class="rollback-node rb-test">TEST</span>
+        <div class="rollback-seg"></div>
+        <span class="rollback-node rb-dev">DEV</span>
+      </div>
+      <span class="rollback-text">Rollback automatizado si falla la validación en cualquier entorno</span>
+    </div>
+
+    <!-- LEGEND -->
+    <div class="legend-wrap">
+      <div class="legend-title">Tipología de entornos Salesforce</div>
+      <div class="legend-grid">
+
+        <div class="legend-item">
+          <div class="legend-item-hdr">
+            <div class="legend-dot" style="background:var(--col-dev)"></div>
+            <span class="legend-type">Developer Sandbox</span>
+          </div>
+          <p class="legend-desc">Entorno mínimo de desarrollo individual. Incluye la configuración y metadatos de producción pero sin datos reales.</p>
+          <div class="legend-meta">
+            <span>200 MB datos · 5 MB archivos</span>
+            <span>Refresco: 1 día</span>
+            <span>Uso: DEV</span>
+          </div>
+        </div>
+
+        <div class="legend-item">
+          <div class="legend-item-hdr">
+            <div class="legend-dot" style="background:var(--col-test)"></div>
+            <span class="legend-type">Developer Pro</span>
+          </div>
+          <p class="legend-desc">Versión ampliada del Developer Sandbox. Mayor capacidad de datos para integración continua y ejecución de test suites completas.</p>
+          <div class="legend-meta">
+            <span>1 GB datos · 1 GB archivos</span>
+            <span>Refresco: 1 día</span>
+            <span>Uso: TEST</span>
+          </div>
+        </div>
+
+        <div class="legend-item">
+          <div class="legend-item-hdr">
+            <div class="legend-dot" style="background:var(--col-int)"></div>
+            <span class="legend-type">Full Sandbox</span>
+          </div>
+          <p class="legend-desc">Réplica completa de producción: misma configuración, mismos metadatos y copia íntegra de los datos reales anonimizados. El entorno más fiel a producción.</p>
+          <div class="legend-meta">
+            <span>100% datos prod.</span>
+            <span>Refresco: 29 días</span>
+            <span>Uso: INT, UAT, PRE</span>
+          </div>
+        </div>
+
+        <div class="legend-item">
+          <div class="legend-item-hdr">
+            <div class="legend-dot" style="background:var(--col-pro)"></div>
+            <span class="legend-type">Producción</span>
+          </div>
+          <p class="legend-desc">Entorno real de negocio con datos reales de clientes. Solo recibe cambios mediante despliegue formal en ventana de mantenimiento planificada y con rollback verificado.</p>
+          <div class="legend-meta">
+            <span>Datos reales</span>
+            <span>Sin refresco</span>
+            <span>Uso: PRO</span>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /legend -->
+
+  </div><!-- /card -->
+</div><!-- /page -->
+
+</body>
+</html>

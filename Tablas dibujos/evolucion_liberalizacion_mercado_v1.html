@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evolución Liberalización Mercado Eléctrico Español 1998–2024</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sf:      #00A1E0;
+    --sf-dark: #0070D2;
+    --elec:    #3B82F6;
+    --elec-dark: #1D4ED8;
+    --line:    #F97316;
+    --bg:      #0B0F1A;
+    --bg3:     #1C2333;
+    --border:  rgba(255,255,255,0.07);
+    --text:    #E5E7EB;
+    --muted:   #6B7280;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 40px 40px 52px;
+    min-width: 900px;
+  }
+
+  /* ── HEADER ─────────────────────────────── */
+  .header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 28px; padding-bottom: 22px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-left h1 {
+    font-size: 19px; font-weight: 800;
+    background: linear-gradient(135deg, #E0F2FE 0%, #38BDF8 50%, #0EA5E9 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: -0.4px; margin-bottom: 5px; line-height: 1.35;
+  }
+  .header-left p { font-size: 11.5px; color: var(--muted); max-width: 560px; line-height: 1.6; }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  .badge {
+    font-size: 9px; font-weight: 800; letter-spacing: 0.8px;
+    text-transform: uppercase; padding: 4px 12px; border-radius: 20px;
+  }
+  .badge-cnmc { background: linear-gradient(135deg, var(--sf-dark), var(--sf)); color: #fff; }
+  .source-note { font-size: 9px; color: var(--muted); text-align: right; }
+
+  /* ── SUMMARY PILLS ──────────────────────── */
+  .summary-row { display: flex; gap: 10px; margin-bottom: 26px; }
+  .summary-pill {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1;
+  }
+  .pill-value { font-size: 20px; font-weight: 900; font-family: 'JetBrains Mono', monospace; }
+  .pill-label {
+    font-size: 9px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.7px; text-align: center; line-height: 1.4;
+  }
+
+  /* ── CHART CARD ─────────────────────────── */
+  .chart-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 28px 22px;
+  }
+  .chart-title {
+    font-size: 14px; font-weight: 800; color: #fff;
+    text-align: center; margin-bottom: 4px; letter-spacing: -0.2px;
+  }
+  .chart-subtitle {
+    font-size: 11px; color: var(--muted); text-align: center;
+    margin-bottom: 22px;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex; justify-content: center; gap: 28px; margin-bottom: 18px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .legend-bar {
+    width: 16px; height: 14px; border-radius: 3px;
+    background: linear-gradient(135deg, var(--elec-dark), var(--elec));
+  }
+  .legend-line {
+    width: 22px; height: 3px; border-radius: 2px;
+    background: var(--line); position: relative;
+  }
+  .legend-line::after {
+    content: ''; position: absolute;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--line);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+  }
+  .legend-label { font-size: 10.5px; color: var(--text); font-weight: 500; }
+
+  .chart-wrap { position: relative; height: 420px; }
+
+  /* ── SOURCE ─────────────────────────────── */
+  .source-box {
+    margin-top: 14px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 8px; padding: 11px 16px;
+    font-size: 9.5px; color: var(--muted); line-height: 1.65;
+  }
+  .source-box strong { color: #94A3B8; font-weight: 600; }
+
+  /* ── FOOTER ─────────────────────────────── */
+  .footer {
+    margin-top: 18px; padding-top: 14px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-note { font-size: 9px; color: var(--muted); }
+  .footer-brand { font-size: 9px; color: var(--muted); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Evolución de la liberalización del mercado eléctrico<br>y crecimiento del número de comercializadoras</h1>
+    <p>Período 1998–2024. Doble eje: número de comercializadoras activas (barras) y 
+       cuota de mercado libre residencial en % (línea).</p>
+  </div>
+  <div class="header-right">
+    <span class="badge badge-cnmc">CNMC · PwC 2024</span>
+    <span class="source-note">Elaboración propia · datos interpolados hasta 2015</span>
+  </div>
+</div>
+
+<!-- PILLS -->
+<div class="summary-row">
+  <div class="summary-pill">
+    <span class="pill-value" style="color:var(--elec)">534</span>
+    <span class="pill-label">Comercializadoras activas 2024</span>
+  </div>
+  <div class="summary-pill">
+    <span class="pill-value" style="color:var(--line)">~73 %</span>
+    <span class="pill-label">Cuota mercado libre residencial</span>
+  </div>
+  <div class="summary-pill">
+    <span class="pill-value" style="color:#A78BFA">26 años</span>
+    <span class="pill-label">Proceso de liberalización</span>
+  </div>
+  <div class="summary-pill">
+    <span class="pill-value" style="color:#34D399">2009</span>
+    <span class="pill-label">Culminación liberalización residencial</span>
+  </div>
+  <div class="summary-pill">
+    <span class="pill-value" style="color:#FBBF24">2013</span>
+    <span class="pill-label">Ley 24/2013 nuevo marco regulatorio</span>
+  </div>
+</div>
+
+<!-- CHART CARD -->
+<div class="chart-card">
+  <div class="chart-title">Evolución de la liberalización del mercado eléctrico español y crecimiento del número de comercializadoras (1998–2024)</div>
+  <div class="chart-subtitle">Eje izquierdo: Nº de comercializadoras activas &nbsp;·&nbsp; Eje derecho: Cuota mercado libre residencial (%)</div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-bar"></div>
+      <span class="legend-label">Nº comercializadoras activas</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-line"></div>
+      <span class="legend-label">Cuota mercado libre residencial (%)</span>
+    </div>
+  </div>
+
+  <div class="chart-wrap">
+    <canvas id="myChart"></canvas>
+  </div>
+</div>
+
+<!-- FUENTE -->
+<div class="source-box">
+  <strong>Fuente:</strong> Elaboración propia a partir de CNMC (Informes de supervisión del mercado minorista, varios años) y PwC (2024).
+  <br><strong>Nota:</strong> Los datos de comercializadoras activas hasta 2015 son estimaciones interpoladas basadas en referencias documentadas.
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="footer-note">TFG · CRM Comercializadora Energética B2C · UOC 2025–2026</span>
+  <span class="footer-brand">Pablo · Datos CNMC / PwC 2024</span>
+</div>
+
+<script>
+const labels = [
+  '1998','1999','2000','2001','2002','2003','2004','2005','2006','2007',
+  '2008','2009','2010','2011','2012','2013','2014','2015','2016','2017',
+  '2018','2019','2020','2021','2022','2023','2024'
+];
+
+// Nº comercializadoras activas
+const barData = [
+  3, 4, 5, 6, 7, 10, 18, 30, 42, 55,
+  65, 90, 130, 133, 138, 142, 170, 200,
+  250, 285, 365, 400, 450, 470, 490, 510, 534
+];
+
+// Cuota mercado libre residencial (%)
+const lineData = [
+  0, 0, 0.5, 0.8, 1.0, 1.5, 2.0, 2.5, 4, 6,
+  10, 13, 18, 22, 29, 33, 37, 42,
+  49, 55, 61, 64, 67, 69, 71, 72, 73
+];
+
+// Hitos anotados
+const annotations = [
+  { x: '1998', label: 'Inicio liberalización', align: 'left' },
+  { x: '2003', label: 'Elección libre para\ntodos los consumidores', align: 'left' },
+  { x: '2009', label: 'Culminación\nliberalización residencial', align: 'left' },
+  { x: '2013', label: 'Ley 24/2013\nNuevo marco regulatorio', align: 'left' },
+];
+
+const ctx = document.getElementById('myChart').getContext('2d');
+
+// Gradient fill for bars
+const barGradient = ctx.createLinearGradient(0, 0, 0, 400);
+barGradient.addColorStop(0, 'rgba(59,130,246,0.85)');
+barGradient.addColorStop(1, 'rgba(29,78,216,0.55)');
+
+const chart = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels,
+    datasets: [
+      {
+        type: 'bar',
+        label: 'Nº comercializadoras activas',
+        data: barData,
+        backgroundColor: barGradient,
+        borderColor: 'rgba(96,165,250,0.6)',
+        borderWidth: 1,
+        borderRadius: 3,
+        yAxisID: 'y',
+        order: 2,
+      },
+      {
+        type: 'line',
+        label: 'Cuota mercado libre residencial (%)',
+        data: lineData,
+        borderColor: '#F97316',
+        backgroundColor: 'rgba(249,115,22,0.08)',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointBackgroundColor: '#F97316',
+        pointBorderColor: '#0B0F1A',
+        pointBorderWidth: 1.5,
+        tension: 0.4,
+        fill: true,
+        yAxisID: 'y2',
+        order: 1,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1C2333',
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 1,
+        titleColor: '#E5E7EB',
+        bodyColor: '#9CA3AF',
+        titleFont: { family: 'Inter', size: 12, weight: '700' },
+        bodyFont: { family: 'JetBrains Mono', size: 11 },
+        padding: 12,
+        callbacks: {
+          label: function(ctx) {
+            if (ctx.datasetIndex === 0) return ` Comercializadoras: ${ctx.raw}`;
+            return ` Cuota libre: ${ctx.raw} %`;
+          }
+        }
+      },
+
+      // Annotations via afterDraw plugin
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+        ticks: {
+          color: '#6B7280',
+          font: { family: 'JetBrains Mono', size: 10 },
+          maxRotation: 0,
+          callback: function(val, i) {
+            const yr = parseInt(labels[i]);
+            return yr % 5 === 0 || yr === 1998 || yr === 2024 ? labels[i] : '';
+          }
+        },
+        border: { color: 'rgba(255,255,255,0.08)' },
+      },
+      y: {
+        position: 'left',
+        grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false },
+        ticks: {
+          color: '#93C5FD',
+          font: { family: 'JetBrains Mono', size: 10 },
+          padding: 8,
+        },
+        border: { color: 'rgba(255,255,255,0.08)', dash: [4,4] },
+        title: {
+          display: true,
+          text: 'Nº de comercializadoras activas',
+          color: '#93C5FD',
+          font: { family: 'Inter', size: 10, weight: '600' },
+          padding: { bottom: 8 }
+        },
+        max: 600,
+      },
+      y2: {
+        position: 'right',
+        grid: { drawOnChartArea: false },
+        ticks: {
+          color: '#FB923C',
+          font: { family: 'JetBrains Mono', size: 10 },
+          padding: 8,
+          callback: v => v + ' %',
+        },
+        border: { color: 'rgba(249,115,22,0.3)', dash: [4,4] },
+        title: {
+          display: true,
+          text: 'Cuota mercado libre residencial (%)',
+          color: '#FB923C',
+          font: { family: 'Inter', size: 10, weight: '600' },
+          padding: { top: 8 }
+        },
+        min: 0, max: 100,
+      }
+    }
+  },
+
+  plugins: [{
+    id: 'milestones',
+    afterDraw(chart) {
+      const { ctx, scales: { x, y } } = chart;
+      const milestones = [
+        { year: '1998', label: ['Inicio', 'liberalización'],        dy: -20 },
+        { year: '2003', label: ['Elección libre para', 'todos los consumidores'], dy: 60 },
+        { year: '2009', label: ['Culminación', 'liberalización residencial'],     dy: 100 },
+        { year: '2013', label: ['Ley 24/2013', 'Nuevo marco regulatorio'],        dy: 140 },
+      ];
+
+      ctx.save();
+      milestones.forEach(m => {
+        const idx = labels.indexOf(m.year);
+        if (idx < 0) return;
+        const xPos = x.getPixelForValue(idx);
+        const yTop = y.top;
+        const yBot = y.bottom;
+
+        // Dashed vertical line
+        ctx.beginPath();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+        ctx.lineWidth = 1;
+        ctx.moveTo(xPos, yTop);
+        ctx.lineTo(xPos, yBot);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Label background
+        const labelY = yTop + m.dy + 8;
+        const lw = 120;
+        const lh = m.label.length * 14 + 8;
+        let lx = xPos + 6;
+        if (lx + lw > chart.width - 20) lx = xPos - lw - 6;
+
+        ctx.fillStyle = 'rgba(28,35,51,0.92)';
+        ctx.beginPath();
+        ctx.roundRect(lx, labelY, lw, lh, 4);
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+
+        // Label text
+        ctx.fillStyle = '#CBD5E1';
+        ctx.font = '9px Inter';
+        ctx.textAlign = 'left';
+        m.label.forEach((line, li) => {
+          ctx.fillText(line, lx + 7, labelY + 13 + li * 13);
+        });
+      });
+
+      // Final value label "534" on last bar
+      const lastIdx = labels.length - 1;
+      const xPos534 = x.getPixelForValue(lastIdx);
+      const yPos534 = y.getPixelForValue(534) - 8;
+      ctx.fillStyle = '#93C5FD';
+      ctx.font = 'bold 11px JetBrains Mono';
+      ctx.textAlign = 'center';
+      ctx.fillText('534', xPos534, yPos534);
+
+      ctx.restore();
+    }
+  }]
+});
+</script>
+</body>
+</html>

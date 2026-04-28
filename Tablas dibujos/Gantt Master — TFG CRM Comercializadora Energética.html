@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<!-- saved from url=(0055)file:///C:/Users/USUARIO/Downloads/gantt_master_v1.html -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gantt Master — TFG CRM Comercializadora Energética</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:    #060D1A; --bg2: #0D1B2E; --bg3: #0A1628;
+    --border: rgba(255,255,255,0.065);
+    --text:  #DDE6F0; --muted: #3D5A78; --muted2: #5B7A9D;
+
+    /* PEC palette */
+    --c1: #00A1E0; --c1d: #0070D2; --c1b: rgba(0,161,224,0.08); --c1bd: rgba(0,161,224,0.35);
+    --c2: #10B981; --c2d: #059669; --c2b: rgba(16,185,129,0.08); --c2bd: rgba(16,185,129,0.35);
+    --c3: #F97316; --c3d: #EA580C; --c3b: rgba(249,115,22,0.08); --c3bd: rgba(249,115,22,0.35);
+    --c4: #9333EA; --c4d: #7E22CE; --c4b: rgba(147,51,234,0.08); --c4bd: rgba(147,51,234,0.35);
+    --c5: #DC2626; --c5d: #991B1B; --c5b: rgba(220,38,38,0.08); --c5bd: rgba(220,38,38,0.35);
+    --gold: #F59E0B;
+
+    --N: 121; /* total days */
+    --lh-pec: 30px; --lh-cap: 25px; --lh-sub: 21px; --lh-hit: 25px;
+    --bh-pec: 14px; --bh-cap: 10px; --bh-sub: 7px;
+    --left: 272px; --dcol: 58px;
+  }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px 28px 44px;
+    min-width: 1580px;
+  }
+
+  /* ── HEADER ─────────────── */
+  .page-header { text-align: center; margin-bottom: 28px; }
+  .page-header .ey { font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted2); margin-bottom: 6px; }
+  .page-header h1 { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+  .page-header .sub { font-size: 11px; color: var(--muted2); margin-top: 5px; }
+  .page-header .sub b { color: #94A3B8; }
+
+  /* ── GANTT WRAPPER ───────── */
+  .gw { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+
+  /* ── HEADER COLUMNS ──────── */
+  .hrow {
+    display: flex; background: var(--bg3);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .h-left {
+    width: var(--left); flex-shrink: 0;
+    padding: 8px 12px;
+    border-right: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .h-left .hl { font-size: 8.5px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted2); }
+  .h-dcol {
+    width: var(--dcol); flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted);
+  }
+  .h-timeline {
+    flex: 1; position: relative; height: 48px; overflow: hidden;
+  }
+
+  /* Month bands */
+  .mband {
+    position: absolute; top: 0; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    overflow: hidden;
+  }
+  .mb-feb { background: rgba(0,161,224,0.10); color: #38BDF8; }
+  .mb-mar { background: rgba(16,185,129,0.10); color: #34D399; }
+  .mb-apr { background: rgba(249,115,22,0.10); color: #FB923C; }
+  .mb-may { background: rgba(147,51,234,0.10); color: #C084FC; }
+  .mb-jun { background: rgba(220,38,38,0.10); color: #F87171; }
+
+  /* Week ticks */
+  .wtick {
+    position: absolute; top: 22px; bottom: 0;
+    display: flex; flex-direction: column; align-items: center;
+    transform: translateX(-50%);
+  }
+  .wtick .wline { width: 1px; height: 8px; background: rgba(255,255,255,0.15); }
+  .wtick .wlbl {
+    font-size: 7px; color: var(--muted); font-family: 'JetBrains Mono', monospace;
+    font-weight: 600; white-space: nowrap; margin-top: 1px;
+  }
+  .wtick.ws .wlbl { color: var(--muted2); }
+
+  /* Grid vertical lines overlay — applied as bg on each timeline cell */
+  .tl-gridlines {
+    position: absolute; top: 22px; bottom: 0; left: 0; right: 0; pointer-events: none; z-index: 0;
+  }
+  .gl {
+    position: absolute; top: 0; bottom: 0; width: 1px;
+    background: rgba(255,255,255,0.04);
+  }
+  .gl.month { background: rgba(255,255,255,0.1); }
+
+  /* ── ROWS ────────────────── */
+  .grow {
+    display: flex; border-bottom: 1px solid var(--border);
+    transition: background 0.12s;
+  }
+  .grow:last-child { border-bottom: none; }
+  .grow:hover { background: rgba(255,255,255,0.015); }
+
+  .grow.pec-row  { --lh: var(--lh-pec); }
+  .grow.cap-row  { --lh: var(--lh-cap); }
+  .grow.sub-row  { --lh: var(--lh-sub); }
+  .grow.hit-row  { --lh: var(--lh-hit); }
+
+  /* PEC-level left borders */
+  .p1 { border-left: 3px solid var(--c1); }
+  .p2 { border-left: 3px solid var(--c2); }
+  .p3 { border-left: 3px solid var(--c3); }
+  .p4 { border-left: 3px solid var(--c4); }
+  .p5 { border-left: 3px solid var(--c5); }
+
+  /* PEC bg tints */
+  .pec-row.p1 { background: rgba(0,161,224,0.06); }
+  .pec-row.p2 { background: rgba(16,185,129,0.06); }
+  .pec-row.p3 { background: rgba(249,115,22,0.06); }
+  .pec-row.p4 { background: rgba(147,51,234,0.06); }
+  .pec-row.p5 { background: rgba(220,38,38,0.06); }
+
+  .cap-row.p1 { background: rgba(0,161,224,0.025); }
+  .cap-row.p2 { background: rgba(16,185,129,0.025); }
+  .cap-row.p3 { background: rgba(249,115,22,0.025); }
+  .cap-row.p4 { background: rgba(147,51,234,0.025); }
+  .cap-row.p5 { background: rgba(220,38,38,0.025); }
+
+  .hit-row.p1 { background: rgba(0,161,224,0.04); }
+  .hit-row.p2 { background: rgba(16,185,129,0.04); }
+  .hit-row.p3 { background: rgba(249,115,22,0.04); }
+  .hit-row.p4 { background: rgba(147,51,234,0.04); }
+  .hit-row.p5, .hit-row.pf { background: rgba(245,158,11,0.05); border-left: 3px solid var(--gold); }
+
+  /* Info cell */
+  .rc-info {
+    width: var(--left); flex-shrink: 0;
+    min-height: var(--lh);
+    border-right: 1px solid var(--border);
+    display: flex; align-items: center;
+    padding: 0 10px; gap: 8px;
+  }
+  .rc-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700; color: var(--muted2); flex-shrink: 0;
+    min-width: 24px;
+  }
+  .pec-row .rc-id { font-size: 11px; }
+  .cap-row .rc-id { font-size: 9px; }
+  .sub-row .rc-id { font-size: 8px; }
+  .hit-row .rc-id { font-size: 10px; }
+
+  .rc-name { font-size: 10px; font-weight: 600; color: var(--text); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pec-row .rc-name { font-size: 11.5px; font-weight: 800; color: #fff; }
+  .cap-row .rc-name { font-size: 10.5px; font-weight: 700; color: #CBD5E1; }
+  .sub-row .rc-name { font-size: 9.5px; font-weight: 500; color: #8899AA; padding-left: 8px; }
+  .hit-row .rc-name { font-size: 10.5px; font-weight: 800; }
+
+  .p1.hit-row .rc-id, .p1.hit-row .rc-name { color: var(--c1); }
+  .p2.hit-row .rc-id, .p2.hit-row .rc-name { color: var(--c2); }
+  .p3.hit-row .rc-id, .p3.hit-row .rc-name { color: var(--c3); }
+  .p4.hit-row .rc-id, .p4.hit-row .rc-name { color: var(--c4); }
+  .p5.hit-row .rc-id, .p5.hit-row .rc-name,
+  .pf.hit-row .rc-id, .pf.hit-row .rc-name  { color: var(--gold); }
+
+  .p1.pec-row .rc-id { color: var(--c1); }
+  .p2.pec-row .rc-id { color: var(--c2); }
+  .p3.pec-row .rc-id { color: var(--c3); }
+  .p4.pec-row .rc-id { color: var(--c4); }
+  .p5.pec-row .rc-id { color: var(--c5); }
+
+  /* Date cells */
+  .rc-date {
+    width: var(--dcol); flex-shrink: 0;
+    min-height: var(--lh);
+    border-right: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8.5px; font-weight: 600; color: var(--muted2);
+    font-family: 'JetBrains Mono', monospace; text-align: center;
+  }
+  .pec-row .rc-date { font-size: 9px; font-weight: 700; }
+  .p1.pec-row .rc-date { color: #38BDF8; }
+  .p2.pec-row .rc-date { color: #34D399; }
+  .p3.pec-row .rc-date { color: #FB923C; }
+  .p4.pec-row .rc-date { color: #C084FC; }
+  .p5.pec-row .rc-date { color: #F87171; }
+  .hit-row .rc-date    { color: var(--gold); font-weight: 800; }
+
+  /* Timeline cell */
+  .rc-tl {
+    flex: 1; position: relative; overflow: hidden;
+    min-height: var(--lh);
+  }
+
+  /* Bars */
+  .bar {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    border-radius: 4px; display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-weight: 700;
+    color: rgba(255,255,255,0.88); white-space: nowrap; pointer-events: none;
+    overflow: hidden;
+  }
+  .bpec { height: var(--bh-pec); font-size: 8px; border-radius: 5px; }
+  .bcap { height: var(--bh-cap); font-size: 7.5px; }
+  .bsub { height: var(--bh-sub); font-size: 0; border-radius: 2px; opacity: 0.85; }
+
+  /* Per-PEC bar colors */
+  .b1p { background: linear-gradient(90deg, #0D2B5E, #0070D2, #00A1E0); box-shadow: 0 0 10px rgba(0,161,224,0.18); }
+  .b1c { background: linear-gradient(90deg, #1E4D6B, #0284C7); }
+  .b1s { background: linear-gradient(90deg, #1E3A50, #38BDF8); }
+  .b2p { background: linear-gradient(90deg, #0B3D1E, #059669, #10B981); box-shadow: 0 0 10px rgba(16,185,129,0.16); }
+  .b2c { background: linear-gradient(90deg, #0E4A25, #0D9488); }
+  .b2s { background: linear-gradient(90deg, #0F3520, #6EE7B7); }
+  .b3p { background: linear-gradient(90deg, #431407, #C2410C, #F97316); box-shadow: 0 0 10px rgba(249,115,22,0.16); }
+  .b3c { background: linear-gradient(90deg, #431407, #EA580C); }
+  .b3s { background: linear-gradient(90deg, #431407, #FB923C); }
+  .b4p { background: linear-gradient(90deg, #3B0764, #7E22CE, #9333EA); box-shadow: 0 0 10px rgba(147,51,234,0.16); }
+  .b4c { background: linear-gradient(90deg, #3B0764, #9333EA); }
+  .b4s { background: linear-gradient(90deg, #4C1D95, #C084FC); }
+  .b5p { background: linear-gradient(90deg, #450A0A, #991B1B, #DC2626); box-shadow: 0 0 10px rgba(220,38,38,0.18); }
+  .b5c { background: linear-gradient(90deg, #450A0A, #DC2626); }
+  .b5s { background: linear-gradient(90deg, #7F1D1D, #FCA5A5); }
+  .brev{ background: linear-gradient(90deg, #1E1B4B, #6366F1); }
+
+  /* Diamond hito */
+  .diamond {
+    position: absolute; top: 50%; transform: translate(-50%, -50%) rotate(45deg);
+    width: 14px; height: 14px; pointer-events: none;
+  }
+  .d1 { background: var(--c1); box-shadow: 0 0 8px rgba(0,161,224,0.6); }
+  .d2 { background: var(--c2); box-shadow: 0 0 8px rgba(16,185,129,0.6); }
+  .d3 { background: var(--c3); box-shadow: 0 0 8px rgba(249,115,22,0.6); }
+  .d4 { background: var(--c4); box-shadow: 0 0 8px rgba(147,51,234,0.6); }
+  .d5 { background: var(--c5); box-shadow: 0 0 8px rgba(220,38,38,0.6); }
+  .star-svg { position: absolute; top: 50%; transform: translate(-50%, -50%); pointer-events: none; filter: drop-shadow(0 0 6px rgba(245,158,11,0.8)); }
+
+  /* ── LEGEND ──────────────── */
+  .legend-row {
+    display: flex; gap: 18px; padding: 14px 20px;
+    background: var(--bg3); border-top: 1px solid var(--border);
+    flex-wrap: wrap; align-items: center;
+  }
+  .leg { display: flex; align-items: center; gap: 7px; font-size: 9px; color: var(--muted2); font-weight: 600; }
+  .lb-swatch { height: 10px; border-radius: 3px; }
+
+  /* ── FOOTER ──────────────── */
+  .footer { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .footer-note { font-size: 8.5px; color: var(--muted); }
+  .footer-brand { font-size: 8.5px; color: var(--muted); font-weight: 600; }
+
+  /* PEC section dividers */
+  .pec-divider { height: 3px; }
+  .div1 { background: linear-gradient(90deg, var(--c1), transparent); }
+  .div2 { background: linear-gradient(90deg, var(--c2), transparent); }
+  .div3 { background: linear-gradient(90deg, var(--c3), transparent); }
+  .div4 { background: linear-gradient(90deg, var(--c4), transparent); }
+  .div5 { background: linear-gradient(90deg, var(--c5), transparent); }
+</style>
+</head>
+<body>
+
+<!--
+  MASTER CALENDAR MAP — N=121 days, day 0 = 23/02/26, day 120 = 23/06/26
+  Bar: left=calc(S/121*100%), width=calc(D/121*100%)
+  Month limits: Feb=0–5(6d), Mar=6–36(31d), Apr=37–66(30d), May=67–97(31d), Jun=98–120(23d)
+-->
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="ey">TFG · Propuesta de implantación CRM en comercializadora energética B2C · UOC 2026</div>
+  <h1>Línea de tiempo con hitos · Todas las PECs · Nombre de tarea · Fecha de inicio y fin</h1>
+  <div class="sub"><b>23 feb 2026</b> → <b>23 jun 2026</b> &nbsp;·&nbsp; 121 días naturales &nbsp;·&nbsp; 5 fases de entrega &nbsp;·&nbsp; 5 hitos</div>
+</div>
+
+<div class="gw">
+
+  <!-- ── HEADER ROW ── -->
+  <div class="hrow">
+    <div class="h-left">
+      <span class="hl" style="min-width:22px">ID</span>
+      <span class="hl">Tarea / Entregable</span>
+    </div>
+    <div class="h-dcol" style="font-size:7.5px">INICIO</div>
+    <div class="h-dcol" style="font-size:7.5px">FIN</div>
+    <div class="h-timeline">
+      <!-- Month bands -->
+      <!-- Feb: 0% → 6/121=4.96% -->
+      <div class="mband mb-feb" style="left:0%;width:4.96%">FEB</div>
+      <!-- Mar: 4.96% → 4.96+25.62=30.58% -->
+      <div class="mband mb-mar" style="left:4.96%;width:25.62%">MARZO 2026</div>
+      <!-- Apr: 30.58% → 30.58+24.79=55.37% -->
+      <div class="mband mb-apr" style="left:30.58%;width:24.79%">ABRIL</div>
+      <!-- May: 55.37% → 55.37+25.62=80.99% -->
+      <div class="mband mb-may" style="left:55.37%;width:25.62%">MAYO</div>
+      <!-- Jun: 80.99% → 100% -->
+      <div class="mband mb-jun" style="left:80.99%;width:19.01%">JUNIO</div>
+
+      <!-- Week ticks: every 7 days starting day 0 -->
+      <!-- day0=0%, day7=5.79%, day14=11.57%, day21=17.36%, day28=23.14%, day35=28.93% -->
+      <!-- day42=34.71%, day49=40.50%, day56=46.28%, day63=52.07%, day70=57.85% -->
+      <!-- day77=63.64%, day84=69.42%, day91=75.21%, day98=80.99%, day105=86.78% -->
+      <!-- day112=92.56%, day119=98.35% -->
+      <div class="wtick" style="left:0%">     <div class="wline"></div><div class="wlbl">23F</div></div>
+      <div class="wtick ws" style="left:5.79%">  <div class="wline"></div><div class="wlbl">02M</div></div>
+      <div class="wtick ws" style="left:11.57%"> <div class="wline"></div><div class="wlbl">09M</div></div>
+      <div class="wtick ws" style="left:17.36%"> <div class="wline"></div><div class="wlbl">16M</div></div>
+      <div class="wtick ws" style="left:23.14%"> <div class="wline"></div><div class="wlbl">23M</div></div>
+      <div class="wtick ws" style="left:28.93%"> <div class="wline"></div><div class="wlbl">30M</div></div>
+      <div class="wtick ws" style="left:34.71%"> <div class="wline"></div><div class="wlbl">06A</div></div>
+      <div class="wtick ws" style="left:40.50%"> <div class="wline"></div><div class="wlbl">13A</div></div>
+      <div class="wtick ws" style="left:46.28%"> <div class="wline"></div><div class="wlbl">20A</div></div>
+      <div class="wtick ws" style="left:52.07%"> <div class="wline"></div><div class="wlbl">27A</div></div>
+      <div class="wtick ws" style="left:57.85%"> <div class="wline"></div><div class="wlbl">04M</div></div>
+      <div class="wtick ws" style="left:63.64%"> <div class="wline"></div><div class="wlbl">11M</div></div>
+      <div class="wtick ws" style="left:69.42%"> <div class="wline"></div><div class="wlbl">18M</div></div>
+      <div class="wtick ws" style="left:75.21%"> <div class="wline"></div><div class="wlbl">25M</div></div>
+      <div class="wtick ws" style="left:80.99%"> <div class="wline"></div><div class="wlbl">01J</div></div>
+      <div class="wtick ws" style="left:86.78%"> <div class="wline"></div><div class="wlbl">08J</div></div>
+      <div class="wtick ws" style="left:92.56%"> <div class="wline"></div><div class="wlbl">15J</div></div>
+      <div class="wtick ws" style="left:98.35%"> <div class="wline"></div><div class="wlbl">22J</div></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!--  PEC 1  ·  23 feb – 8 mar 2026  ·  14 días     -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div class="pec-divider div1"></div>
+
+  <!-- 1 PEC1 -->
+  <div class="grow pec-row p1">
+    <div class="rc-info"><span class="rc-id">1</span><span class="rc-name">PEC1 — Plan de Trabajo</span></div>
+    <div class="rc-date">23/02</div><div class="rc-date">08/03</div>
+    <div class="rc-tl">
+      <div class="bar bpec b1p" style="left:calc(0/121*100% + 2px);width:calc(14/121*100% - 4px)">14d</div>
+    </div>
+  </div>
+  <!-- 1.1 -->
+  <div class="grow cap-row p1">
+    <div class="rc-info"><span class="rc-id">1.1</span><span class="rc-name">Cap. 1 — Introducción completa</span></div>
+    <div class="rc-date">23/02</div><div class="rc-date">08/03</div>
+    <div class="rc-tl">
+      <div class="bar bcap b1c" style="left:calc(0/121*100% + 2px);width:calc(14/121*100% - 4px)">14d</div>
+    </div>
+  </div>
+  <!-- 1.1a -->
+  <div class="grow sub-row p1">
+    <div class="rc-info"><span class="rc-id">1.1a</span><span class="rc-name">1.1–1.3 Contexto, objetivos e impactos</span></div>
+    <div class="rc-date">23/02</div><div class="rc-date">01/03</div>
+    <div class="rc-tl">
+      <div class="bar bsub b1s" style="left:calc(0/121*100% + 2px);width:calc(7/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 1.1b -->
+  <div class="grow sub-row p1">
+    <div class="rc-info"><span class="rc-id">1.1b</span><span class="rc-name">1.4–1.5 Enfoque y planificación del t…</span></div>
+    <div class="rc-date">02/03</div><div class="rc-date">06/03</div>
+    <div class="rc-tl">
+      <div class="bar bsub b1s" style="left:calc(7/121*100% + 2px);width:calc(5/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 1.1c -->
+  <div class="grow sub-row p1">
+    <div class="rc-info"><span class="rc-id">1.1c</span><span class="rc-name">1.6–1.8 Sumario, otros capítulos y d…</span></div>
+    <div class="rc-date">07/03</div><div class="rc-date">08/03</div>
+    <div class="rc-tl">
+      <div class="bar bsub b1s" style="left:calc(12/121*100% + 2px);width:calc(2/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- M1 -->
+  <div class="grow hit-row p1">
+    <div class="rc-info"><span class="rc-id">M1</span><span class="rc-name">♦ HITO: Entrega PEC1</span></div>
+    <div class="rc-date">08/03</div><div class="rc-date">08/03</div>
+    <div class="rc-tl">
+      <div class="diamond d1" style="left:calc(13.5/121*100%)"></div>
+      <span style="position:absolute;top:50%;left:calc(13.5/121*100% + 12px);transform:translateY(-50%);font-size:8px;font-weight:700;color:var(--c1);font-family:&#39;JetBrains Mono&#39;,monospace;white-space:nowrap">08/03</span>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!--  PEC 2  ·  9 mar – 8 abr 2026  ·  31 días      -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div class="pec-divider div2"></div>
+
+  <!-- 2 PEC2 -->
+  <div class="grow pec-row p2">
+    <div class="rc-info"><span class="rc-id">2</span><span class="rc-name">PEC2 — Desarrollo Parte 1</span></div>
+    <div class="rc-date">09/03</div><div class="rc-date">08/04</div>
+    <div class="rc-tl">
+      <div class="bar bpec b2p" style="left:calc(14/121*100% + 2px);width:calc(31/121*100% - 4px)">31d</div>
+    </div>
+  </div>
+  <!-- 2.1 -->
+  <div class="grow cap-row p2">
+    <div class="rc-info"><span class="rc-id">2.1</span><span class="rc-name">Cap. 2 — Contexto sectorial y situación</span></div>
+    <div class="rc-date">09/03</div><div class="rc-date">20/03</div>
+    <div class="rc-tl">
+      <div class="bar bcap b2c" style="left:calc(14/121*100% + 2px);width:calc(12/121*100% - 4px)">12d</div>
+    </div>
+  </div>
+  <!-- 2.1a -->
+  <div class="grow sub-row p2">
+    <div class="rc-info"><span class="rc-id">2.1a</span><span class="rc-name">2.1–2.2 Mercado energético y modelo o…</span></div>
+    <div class="rc-date">09/03</div><div class="rc-date">14/03</div>
+    <div class="rc-tl">
+      <div class="bar bsub b2s" style="left:calc(14/121*100% + 2px);width:calc(6/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 2.1b -->
+  <div class="grow sub-row p2">
+    <div class="rc-info"><span class="rc-id">2.1b</span><span class="rc-name">2.3–2.4 Diagnóstico y justificación d…</span></div>
+    <div class="rc-date">16/03</div><div class="rc-date">20/03</div>
+    <div class="rc-tl">
+      <div class="bar bsub b2s" style="left:calc(21/121*100% + 2px);width:calc(5/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 2.2 -->
+  <div class="grow cap-row p2">
+    <div class="rc-info"><span class="rc-id">2.2</span><span class="rc-name">Cap. 3 — Propuesta de solución: alca…</span></div>
+    <div class="rc-date">21/03</div><div class="rc-date">31/03</div>
+    <div class="rc-tl">
+      <div class="bar bcap b2c" style="left:calc(26/121*100% + 2px);width:calc(11/121*100% - 4px)">11d</div>
+    </div>
+  </div>
+  <!-- 2.2a -->
+  <div class="grow sub-row p2">
+    <div class="rc-info"><span class="rc-id">2.2a</span><span class="rc-name">3.1–3.3 Visión, alcance funcional y S…</span></div>
+    <div class="rc-date">23/03</div><div class="rc-date">26/03</div>
+    <div class="rc-tl">
+      <div class="bar bsub b2s" style="left:calc(28/121*100% + 2px);width:calc(4/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 2.2b -->
+  <div class="grow sub-row p2">
+    <div class="rc-info"><span class="rc-id">2.2b</span><span class="rc-name">3.4–3.5 Requisitos NFR y modelo de d…</span></div>
+    <div class="rc-date">27/03</div><div class="rc-date">31/03</div>
+    <div class="rc-tl">
+      <div class="bar bsub b2s" style="left:calc(32/121*100% + 2px);width:calc(5/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 2.3 -->
+  <div class="grow cap-row p2">
+    <div class="rc-info"><span class="rc-id">2.3</span><span class="rc-name">Cap. 4 — Arquitectura objetivo</span></div>
+    <div class="rc-date">01/04</div><div class="rc-date">08/04</div>
+    <div class="rc-tl">
+      <div class="bar bcap b2c" style="left:calc(37/121*100% + 2px);width:calc(8/121*100% - 4px)">8d</div>
+    </div>
+  </div>
+  <!-- 2.3a -->
+  <div class="grow sub-row p2">
+    <div class="rc-info"><span class="rc-id">2.3a</span><span class="rc-name">4.1–4.3 Principios, arquitectura y or…</span></div>
+    <div class="rc-date">01/04</div><div class="rc-date">05/04</div>
+    <div class="rc-tl">
+      <div class="bar bsub b2s" style="left:calc(37/121*100% + 2px);width:calc(5/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 2.3b -->
+  <div class="grow sub-row p2">
+    <div class="rc-info"><span class="rc-id">2.3b</span><span class="rc-name">4.4–4.5 Módulos funcionales y gobern…</span></div>
+    <div class="rc-date">06/04</div><div class="rc-date">08/04</div>
+    <div class="rc-tl">
+      <div class="bar bsub b2s" style="left:calc(42/121*100% + 2px);width:calc(3/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- M2 -->
+  <div class="grow hit-row p2">
+    <div class="rc-info"><span class="rc-id">M2</span><span class="rc-name">♦ HITO: Entrega PEC2</span></div>
+    <div class="rc-date">08/04</div><div class="rc-date">08/04</div>
+    <div class="rc-tl">
+      <div class="diamond d2" style="left:calc(44.5/121*100%)"></div>
+      <span style="position:absolute;top:50%;left:calc(44.5/121*100% + 12px);transform:translateY(-50%);font-size:8px;font-weight:700;color:var(--c2);font-family:&#39;JetBrains Mono&#39;,monospace;white-space:nowrap">08/04</span>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!--  PEC 3  ·  9 abr – 10 may 2026  ·  32 días     -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div class="pec-divider div3"></div>
+
+  <!-- 3 PEC3 -->
+  <div class="grow pec-row p3">
+    <div class="rc-info"><span class="rc-id">3</span><span class="rc-name">PEC3 — Desarrollo Parte 2</span></div>
+    <div class="rc-date">09/04</div><div class="rc-date">10/05</div>
+    <div class="rc-tl">
+      <div class="bar bpec b3p" style="left:calc(45/121*100% + 2px);width:calc(32/121*100% - 4px)">32d</div>
+    </div>
+  </div>
+  <!-- 3.1 -->
+  <div class="grow cap-row p3">
+    <div class="rc-info"><span class="rc-id">3.1</span><span class="rc-name">Cap. 5 — Estrategia de integración</span></div>
+    <div class="rc-date">09/04</div><div class="rc-date">18/04</div>
+    <div class="rc-tl">
+      <div class="bar bcap b3c" style="left:calc(45/121*100% + 2px);width:calc(10/121*100% - 4px)">10d</div>
+    </div>
+  </div>
+  <!-- 3.1a -->
+  <div class="grow sub-row p3">
+    <div class="rc-info"><span class="rc-id">3.1a</span><span class="rc-name">5.1–5.3 Patrones, ecosistema y arquit…</span></div>
+    <div class="rc-date">09/04</div><div class="rc-date">14/04</div>
+    <div class="rc-tl">
+      <div class="bar bsub b3s" style="left:calc(45/121*100% + 2px);width:calc(6/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 3.1b -->
+  <div class="grow sub-row p3">
+    <div class="rc-info"><span class="rc-id">3.1b</span><span class="rc-name">5.4–5.5 Flujos críticos y seguridad d…</span></div>
+    <div class="rc-date">15/04</div><div class="rc-date">18/04</div>
+    <div class="rc-tl">
+      <div class="bar bsub b3s" style="left:calc(51/121*100% + 2px);width:calc(4/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 3.2 -->
+  <div class="grow cap-row p3">
+    <div class="rc-info"><span class="rc-id">3.2</span><span class="rc-name">Cap. 6 — Marco metodológico y equipo</span></div>
+    <div class="rc-date">20/04</div><div class="rc-date">26/04</div>
+    <div class="rc-tl">
+      <div class="bar bcap b3c" style="left:calc(56/121*100% + 2px);width:calc(7/121*100% - 4px)">7d</div>
+    </div>
+  </div>
+  <!-- 3.2a -->
+  <div class="grow sub-row p3">
+    <div class="rc-info"><span class="rc-id">3.2a</span><span class="rc-name">6.1–6.2 Metodología SAFe/Scrum aplic…</span></div>
+    <div class="rc-date">20/04</div><div class="rc-date">23/04</div>
+    <div class="rc-tl">
+      <div class="bar bsub b3s" style="left:calc(56/121*100% + 2px);width:calc(4/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 3.2b -->
+  <div class="grow sub-row p3">
+    <div class="rc-info"><span class="rc-id">3.2b</span><span class="rc-name">6.3–6.4 Gestión del cambio ADKAR y e…</span></div>
+    <div class="rc-date">24/04</div><div class="rc-date">26/04</div>
+    <div class="rc-tl">
+      <div class="bar bsub b3s" style="left:calc(60/121*100% + 2px);width:calc(3/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 3.3 -->
+  <div class="grow cap-row p3">
+    <div class="rc-info"><span class="rc-id">3.3</span><span class="rc-name">Cap. 7 — Modelo de gobierno del proy…</span></div>
+    <div class="rc-date">27/04</div><div class="rc-date">02/05</div>
+    <div class="rc-tl">
+      <div class="bar bcap b3c" style="left:calc(63/121*100% + 2px);width:calc(6/121*100% - 4px)">6d</div>
+    </div>
+  </div>
+  <!-- 3.3a -->
+  <div class="grow sub-row p3">
+    <div class="rc-info"><span class="rc-id">3.3a</span><span class="rc-name">7.1–7.4 Comités, roles y Design Auth…</span></div>
+    <div class="rc-date">27/04</div><div class="rc-date">30/04</div>
+    <div class="rc-tl">
+      <div class="bar bsub b3s" style="left:calc(63/121*100% + 2px);width:calc(4/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 3.3b -->
+  <div class="grow sub-row p3">
+    <div class="rc-info"><span class="rc-id">3.3b</span><span class="rc-name">7.5–7.7 Riesgos, calidad y soporte IT…</span></div>
+    <div class="rc-date">01/05</div><div class="rc-date">02/05</div>
+    <div class="rc-tl">
+      <div class="bar bsub b3s" style="left:calc(67/121*100% + 2px);width:calc(2/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 3.4 -->
+  <div class="grow cap-row p3">
+    <div class="rc-info"><span class="rc-id">3.4</span><span class="rc-name">Cap. 8 — Planificación y estimación d…</span></div>
+    <div class="rc-date">03/05</div><div class="rc-date">07/05</div>
+    <div class="rc-tl">
+      <div class="bar bcap b3c" style="left:calc(69/121*100% + 2px);width:calc(5/121*100% - 4px)">5d</div>
+    </div>
+  </div>
+  <!-- 3.4a -->
+  <div class="grow sub-row p3">
+    <div class="rc-info"><span class="rc-id">3.4a</span><span class="rc-name">8.1–8.4 WBS, estimación por perfil y …</span></div>
+    <div class="rc-date">03/05</div><div class="rc-date">06/05</div>
+    <div class="rc-tl">
+      <div class="bar bsub b3s" style="left:calc(69/121*100% + 2px);width:calc(4/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 3.4b -->
+  <div class="grow sub-row p3">
+    <div class="rc-info"><span class="rc-id">3.4b</span><span class="rc-name">8.5–8.6 Camino crítico y asunciones</span></div>
+    <div class="rc-date">07/05</div><div class="rc-date">07/05</div>
+    <div class="rc-tl">
+      <div class="bar bsub b3s" style="left:calc(73/121*100% + 2px);width:calc(1/121*100%)"></div>
+    </div>
+  </div>
+  <!-- 3.5 -->
+  <div class="grow cap-row p3">
+    <div class="rc-info"><span class="rc-id">3.5</span><span class="rc-name">Cap. 9 — Inteligencia Artificial: ca…</span></div>
+    <div class="rc-date">08/05</div><div class="rc-date">10/05</div>
+    <div class="rc-tl">
+      <div class="bar bcap b3c" style="left:calc(74/121*100% + 2px);width:calc(3/121*100% - 4px)">3d</div>
+    </div>
+  </div>
+  <!-- 3.5a -->
+  <div class="grow sub-row p3">
+    <div class="rc-info"><span class="rc-id">3.5a</span><span class="rc-name">9.1–9.5 Marco IA Einstein y 3 casos d…</span></div>
+    <div class="rc-date">08/05</div><div class="rc-date">09/05</div>
+    <div class="rc-tl">
+      <div class="bar bsub b3s" style="left:calc(74/121*100% + 2px);width:calc(2/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 3.5b -->
+  <div class="grow sub-row p3">
+    <div class="rc-info"><span class="rc-id">3.5b</span><span class="rc-name">9.6–9.7 Impacto metodológico y ética…</span></div>
+    <div class="rc-date">10/05</div><div class="rc-date">10/05</div>
+    <div class="rc-tl">
+      <div class="bar bsub b3s" style="left:calc(76/121*100% + 2px);width:calc(1/121*100%)"></div>
+    </div>
+  </div>
+  <!-- M3 -->
+  <div class="grow hit-row p3">
+    <div class="rc-info"><span class="rc-id">M3</span><span class="rc-name">♦ HITO: Entrega PEC3</span></div>
+    <div class="rc-date">10/05</div><div class="rc-date">10/05</div>
+    <div class="rc-tl">
+      <div class="diamond d3" style="left:calc(76.5/121*100%)"></div>
+      <span style="position:absolute;top:50%;left:calc(76.5/121*100% + 12px);transform:translateY(-50%);font-size:8px;font-weight:700;color:var(--c3);font-family:&#39;JetBrains Mono&#39;,monospace;white-space:nowrap">10/05</span>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!--  PEC 4  ·  11 may – 7 jun 2026  ·  28 días     -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div class="pec-divider div4"></div>
+
+  <!-- 4 PEC4 -->
+  <div class="grow pec-row p4">
+    <div class="rc-info"><span class="rc-id">4</span><span class="rc-name">PEC4 — Memoria Final</span></div>
+    <div class="rc-date">11/05</div><div class="rc-date">07/06</div>
+    <div class="rc-tl">
+      <div class="bar bpec b4p" style="left:calc(77/121*100% + 2px);width:calc(28/121*100% - 4px)">28d</div>
+    </div>
+  </div>
+  <!-- 4.1 -->
+  <div class="grow cap-row p4">
+    <div class="rc-info"><span class="rc-id">4.1</span><span class="rc-name">Cap. 10 — Resultados esperados y viab…</span></div>
+    <div class="rc-date">11/05</div><div class="rc-date">18/05</div>
+    <div class="rc-tl">
+      <div class="bar bcap b4c" style="left:calc(77/121*100% + 2px);width:calc(8/121*100% - 4px)">8d</div>
+    </div>
+  </div>
+  <!-- 4.1a -->
+  <div class="grow sub-row p4">
+    <div class="rc-info"><span class="rc-id">4.1a</span><span class="rc-name">10.1–10.3 Resultados por área y viab…</span></div>
+    <div class="rc-date">11/05</div><div class="rc-date">15/05</div>
+    <div class="rc-tl">
+      <div class="bar bsub b4s" style="left:calc(77/121*100% + 2px);width:calc(5/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 4.1b -->
+  <div class="grow sub-row p4">
+    <div class="rc-info"><span class="rc-id">4.1b</span><span class="rc-name">10.4–10.5 Viabilidad económica, KPIs…</span></div>
+    <div class="rc-date">16/05</div><div class="rc-date">18/05</div>
+    <div class="rc-tl">
+      <div class="bar bsub b4s" style="left:calc(82/121*100% + 2px);width:calc(3/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 4.2 -->
+  <div class="grow cap-row p4">
+    <div class="rc-info"><span class="rc-id">4.2</span><span class="rc-name">Cap. 11 — Conclusiones y trabajo fut…</span></div>
+    <div class="rc-date">19/05</div><div class="rc-date">24/05</div>
+    <div class="rc-tl">
+      <div class="bar bcap b4c" style="left:calc(85/121*100% + 2px);width:calc(6/121*100% - 4px)">6d</div>
+    </div>
+  </div>
+  <!-- 4.2a -->
+  <div class="grow sub-row p4">
+    <div class="rc-info"><span class="rc-id">4.2a</span><span class="rc-name">11.1–11.3 Conclusiones, reflexión y l…</span></div>
+    <div class="rc-date">19/05</div><div class="rc-date">22/05</div>
+    <div class="rc-tl">
+      <div class="bar bsub b4s" style="left:calc(85/121*100% + 2px);width:calc(4/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 4.2b -->
+  <div class="grow sub-row p4">
+    <div class="rc-info"><span class="rc-id">4.2b</span><span class="rc-name">11.4–11.5 Trabajo futuro e impactos …</span></div>
+    <div class="rc-date">23/05</div><div class="rc-date">24/05</div>
+    <div class="rc-tl">
+      <div class="bar bsub b4s" style="left:calc(89/121*100% + 2px);width:calc(2/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 4.3 -->
+  <div class="grow cap-row p4">
+    <div class="rc-info"><span class="rc-id">4.3</span><span class="rc-name">Cap. 12-13 — Glosario y Bibliografía</span></div>
+    <div class="rc-date">25/05</div><div class="rc-date">28/05</div>
+    <div class="rc-tl">
+      <div class="bar bcap b4c" style="left:calc(91/121*100% + 2px);width:calc(4/121*100% - 4px)">4d</div>
+    </div>
+  </div>
+  <!-- 4.4 -->
+  <div class="grow cap-row p4">
+    <div class="rc-info"><span class="rc-id">4.4</span><span class="rc-name">Cap. 14 — Anexos completos (grupos A–F)</span></div>
+    <div class="rc-date">29/05</div><div class="rc-date">02/06</div>
+    <div class="rc-tl">
+      <div class="bar bcap b4c" style="left:calc(95/121*100% + 2px);width:calc(5/121*100% - 4px)">5d</div>
+    </div>
+  </div>
+  <!-- 4.5 -->
+  <div class="grow cap-row p4">
+    <div class="rc-info"><span class="rc-id">4.5</span><span class="rc-name">Revisión integral de coherencia de l…</span></div>
+    <div class="rc-date">03/06</div><div class="rc-date">07/06</div>
+    <div class="rc-tl">
+      <div class="bar bcap brev" style="left:calc(100/121*100% + 2px);width:calc(5/121*100% - 4px)">5d</div>
+    </div>
+  </div>
+  <!-- M4 -->
+  <div class="grow hit-row p4">
+    <div class="rc-info"><span class="rc-id">M4</span><span class="rc-name">♦ HITO: Entrega Memoria Final (PEC4)</span></div>
+    <div class="rc-date">07/06</div><div class="rc-date">07/06</div>
+    <div class="rc-tl">
+      <div class="diamond d4" style="left:calc(104.5/121*100%)"></div>
+      <span style="position:absolute;top:50%;left:calc(104.5/121*100% + 12px);transform:translateY(-50%);font-size:8px;font-weight:700;color:var(--c4);font-family:&#39;JetBrains Mono&#39;,monospace;white-space:nowrap">07/06</span>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!--  PEC 5  ·  8 jun – 23 jun 2026  ·  16 días     -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div class="pec-divider div5"></div>
+
+  <!-- 5 PEC5 -->
+  <div class="grow pec-row p5">
+    <div class="rc-info"><span class="rc-id">5</span><span class="rc-name">PEC5 — Defensa del TFG</span></div>
+    <div class="rc-date">08/06</div><div class="rc-date">23/06</div>
+    <div class="rc-tl">
+      <div class="bar bpec b5p" style="left:calc(105/121*100% + 2px);width:calc(16/121*100% - 4px)">16d</div>
+    </div>
+  </div>
+  <!-- 5.1 -->
+  <div class="grow cap-row p5">
+    <div class="rc-info"><span class="rc-id">5.1</span><span class="rc-name">Diseño y producción de la presentación</span></div>
+    <div class="rc-date">08/06</div><div class="rc-date">17/06</div>
+    <div class="rc-tl">
+      <div class="bar bcap b5c" style="left:calc(105/121*100% + 2px);width:calc(10/121*100% - 4px)">10d</div>
+    </div>
+  </div>
+  <!-- 5.1a -->
+  <div class="grow sub-row p5">
+    <div class="rc-info"><span class="rc-id">5.1a</span><span class="rc-name">Estructura narrativa y elaboración d…</span></div>
+    <div class="rc-date">08/06</div><div class="rc-date">13/06</div>
+    <div class="rc-tl">
+      <div class="bar bsub b5s" style="left:calc(105/121*100% + 2px);width:calc(6/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 5.1b -->
+  <div class="grow sub-row p5">
+    <div class="rc-info"><span class="rc-id">5.1b</span><span class="rc-name">Ensayo y preparación de respuestas a…</span></div>
+    <div class="rc-date">14/06</div><div class="rc-date">17/06</div>
+    <div class="rc-tl">
+      <div class="bar bsub b5s" style="left:calc(111/121*100% + 2px);width:calc(4/121*100% - 4px)"></div>
+    </div>
+  </div>
+  <!-- 5.2 -->
+  <div class="grow cap-row p5">
+    <div class="rc-info"><span class="rc-id">5.2</span><span class="rc-name">Período de respuesta a preguntas del t…</span></div>
+    <div class="rc-date">18/06</div><div class="rc-date">22/06</div>
+    <div class="rc-tl">
+      <div class="bar bcap b5c" style="left:calc(115/121*100% + 2px);width:calc(5/121*100% - 4px)">5d</div>
+    </div>
+  </div>
+  <!-- MF HITO FINAL -->
+  <div class="grow hit-row pf">
+    <div class="rc-info"><span class="rc-id" style="color:var(--gold);font-size:11px">MF</span><span class="rc-name" style="color:var(--gold)">⭐ HITO FINAL: Defensa del TFG</span></div>
+    <div class="rc-date" style="color:var(--gold);font-weight:800">23/06</div><div class="rc-date" style="color:var(--gold);font-weight:800">23/06</div>
+    <div class="rc-tl">
+      <!-- Gold star at day 120 = 120.5/121 -->
+      <svg class="star-svg" width="22" height="22" viewBox="0 0 22 22" style="left:calc(120.5/121*100%)">
+        <path d="M11 1.5l2.47 5.01L19 7.64l-4 3.9.94 5.5L11 14.4l-4.94 2.64.94-5.5L3 7.64l5.53-.93z" fill="#F59E0B" stroke="#FBBF24" stroke-width="0.8"></path>
+      </svg>
+      <span style="position:absolute;top:50%;right:4px;transform:translateY(-50%);font-size:8.5px;font-weight:800;color:var(--gold);font-family:&#39;JetBrains Mono&#39;,monospace;white-space:nowrap;text-shadow:0 0 8px rgba(245,158,11,0.5)">23/06/26</span>
+    </div>
+  </div>
+
+  <!-- ── LEGEND ── -->
+  <div class="legend-row">
+    <span style="font-size:8.5px;font-weight:700;color:var(--muted2);margin-right:4px;text-transform:uppercase;letter-spacing:1px">Entrega parcial:</span>
+    <div class="leg"><div class="lb-swatch" style="width:28px;background:linear-gradient(90deg,#0D2B5E,#00A1E0)"></div>PEC1 · Plan de Trabajo</div>
+    <div class="leg"><div class="lb-swatch" style="width:28px;background:linear-gradient(90deg,#0B3D1E,#10B981)"></div>PEC2 · Desarrollo Parte 1</div>
+    <div class="leg"><div class="lb-swatch" style="width:28px;background:linear-gradient(90deg,#431407,#F97316)"></div>PEC3 · Desarrollo Parte 2</div>
+    <div class="leg"><div class="lb-swatch" style="width:28px;background:linear-gradient(90deg,#3B0764,#9333EA)"></div>PEC4 · Memoria Final</div>
+    <div class="leg"><div class="lb-swatch" style="width:28px;background:linear-gradient(90deg,#450A0A,#DC2626)"></div>PEC5 · Defensa del TFG</div>
+    <div style="margin-left:12px" class="leg">
+      <div style="width:12px;height:12px;background:var(--c1);transform:rotate(45deg)"></div>Hito parcial
+    </div>
+    <div class="leg">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1l1.57 3.19L12 4.91l-2.54 2.48.6 3.5L7 9.1l-3.06 1.79.6-3.5L2 4.91l3.43-.53z" fill="#F59E0B"></path></svg>
+      Hito final · Defensa
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span class="footer-note">TFG · Propuesta de implantación de sistemas comerciales en una comercializadora energética B2C · Tutor: Santiago Andrés Bruno Pérez · UOC 2026 · Línea de tiempo completa Feb–Jun 2026</span>
+  <span class="footer-brand">5 PECs · 121 días · 5 hitos · Gantt maestro</span>
+</div>
+
+
+
+</body></html>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retención y gestión de la baja · CRM Comercializadora B2C</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:   #07090F;
+  --bg-base:   #0C1018;
+  --bg-card:   #101520;
+  --bg-hover:  #161D2C;
+  --border-xs: rgba(255,255,255,0.05);
+  --border-sm: rgba(255,255,255,0.09);
+
+  --text:  #EEF2FF;
+  --muted: #8896AC;
+  --dim:   #3D4A5C;
+  --ff-d: 'Syne', sans-serif;
+  --ff-b: 'DM Sans', sans-serif;
+  --ff-m: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg-deep); color: var(--text); font-family: var(--ff-b); min-height: 100vh; }
+
+.grid-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+.glow-orb { position: fixed; pointer-events: none; z-index: 0; border-radius: 50%; filter: blur(140px); opacity: 0.055; }
+.page { position: relative; z-index: 1; padding: 28px 32px 44px; max-width: 1060px; margin: 0 auto; }
+
+/* ── HEADER ── */
+.hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; animation: fadeUp .45s ease both; }
+.hdr-left h1 { font-family: var(--ff-d); font-size: 21px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 7px; }
+.hdr-left h1 em { font-style: normal; background: linear-gradient(120deg, #FB7185 5%, #A78BFA 50%, #3B8BEB 95%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hdr-left p { font-size: 11.5px; color: var(--muted); max-width: 660px; line-height: 1.65; }
+.badges { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+.badge { font-family: var(--ff-m); font-size: 9px; letter-spacing: .5px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; }
+.b-sf  { background: rgba(59,139,235,.1);  border:1px solid rgba(59,139,235,.3);  color:#3B8BEB; }
+.b-blq { background: rgba(251,113,133,.1); border:1px solid rgba(251,113,133,.3); color:#FB7185; }
+
+/* ── DISPARADORES ── */
+.triggers-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  animation: fadeUp .5s .05s ease both;
+}
+.trig-label {
+  font-family: var(--ff-m);
+  font-size: 9px;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--dim);
+  white-space: nowrap;
+}
+.trig-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--ff-m);
+  font-size: 9.5px;
+  padding: 3px 10px;
+  border-radius: 5px;
+  background: rgba(251,113,133,.07);
+  border: 1px solid rgba(251,113,133,.2);
+  color: #FCA5A5;
+  white-space: nowrap;
+}
+
+/* ── LEGEND ── */
+.legend { display: flex; gap: 18px; margin-bottom: 18px; flex-wrap: wrap; animation: fadeUp .5s .07s ease both; }
+.leg-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--muted); }
+.leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── TABLE WRAPPER ── */
+.table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border-sm);
+  border-radius: 14px;
+  overflow: hidden;
+  animation: fadeUp .5s .1s ease both;
+  box-shadow: 0 0 0 1px var(--border-xs), 0 16px 48px rgba(0,0,0,.45);
+}
+table { width: 100%; border-collapse: collapse; }
+
+thead tr {
+  background: linear-gradient(90deg, rgba(251,113,133,.07) 0%, rgba(167,139,250,.06) 50%, rgba(59,139,235,.05) 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+th {
+  font-family: var(--ff-m);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 13px 18px;
+  text-align: left;
+}
+th.th-paso { width: 74px; text-align: center; }
+th.th-resp { width: 195px; }
+
+/* ── ROWS ── */
+tbody tr { border-bottom: 1px solid var(--border-xs); transition: background .15s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg-hover); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,0.012); }
+tbody tr:nth-child(even):hover { background: var(--bg-hover); }
+td { padding: 13px 18px; font-size: 13px; line-height: 1.55; vertical-align: middle; }
+
+/* ── PASO BADGE ── */
+td.paso-col { text-align: center; }
+.paso-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--ff-m); font-size: 11px; font-weight: 700;
+  width: 36px; height: 36px; border-radius: 10px;
+}
+.p-ia    { background: rgba(251,113,133,.12); border:1px solid rgba(251,113,133,.3); color:#FB7185; }
+.p-crm   { background: rgba(59,139,235,.12);  border:1px solid rgba(59,139,235,.3);  color:#3B8BEB; }
+.p-agent { background: rgba(245,158,11,.12);  border:1px solid rgba(245,158,11,.3);  color:#F59E0B; }
+.p-cli   { background: rgba(6,182,212,.12);   border:1px solid rgba(6,182,212,.3);   color:#06B6D4; }
+.p-both  { background: rgba(167,139,250,.12); border:1px solid rgba(167,139,250,.3); color:#A78BFA; }
+.p-mktc  { background: rgba(236,72,153,.12);  border:1px solid rgba(236,72,153,.3);  color:#EC4899; }
+.p-rgpd  { background: rgba(20,184,166,.12);  border:1px solid rgba(20,184,166,.3);  color:#14B8A6; }
+
+/* ── RESPONSABLE PILL ── */
+.resp-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--ff-m); font-size: 10px; font-weight: 600;
+  letter-spacing: .3px; padding: 4px 11px; border-radius: 20px;
+  white-space: nowrap; margin-bottom: 4px;
+}
+.rdot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.r-ia    { background: rgba(251,113,133,.12); border:1px solid rgba(251,113,133,.35); color:#FB7185; }
+.r-crm   { background: rgba(59,139,235,.12);  border:1px solid rgba(59,139,235,.35);  color:#3B8BEB; }
+.r-agent { background: rgba(245,158,11,.12);  border:1px solid rgba(245,158,11,.35);  color:#F59E0B; }
+.r-cli   { background: rgba(6,182,212,.12);   border:1px solid rgba(6,182,212,.35);   color:#06B6D4; }
+.r-both  { background: rgba(167,139,250,.12); border:1px solid rgba(167,139,250,.35); color:#A78BFA; }
+.r-mktc  { background: rgba(236,72,153,.12);  border:1px solid rgba(236,72,153,.35);  color:#EC4899; }
+.r-rgpd  { background: rgba(20,184,166,.12);  border:1px solid rgba(20,184,166,.35);  color:#14B8A6; }
+.resp-stack { display: flex; flex-direction: column; gap: 4px; }
+.resp-sep   { font-family: var(--ff-m); font-size: 8px; color: var(--dim); padding-left: 4px; }
+
+/* ── ACCION col ── */
+td.accion-col { color: var(--text); }
+td.accion-col strong { color: #C7D2FE; font-weight: 500; }
+
+/* ── CHIPS ── */
+.chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 7px; }
+.chip { font-family: var(--ff-m); font-size: 9px; padding: 2px 8px; border-radius: 4px; }
+.ch-blue   { background: rgba(59,139,235,.12); border:1px solid rgba(59,139,235,.28); color:#3B8BEB; }
+.ch-teal   { background: rgba(20,184,166,.12); border:1px solid rgba(20,184,166,.28); color:#14B8A6; }
+.ch-green  { background: rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.28); color:#10B981; }
+.ch-rose   { background: rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.28);color:#FB7185; }
+.ch-amber  { background: rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.28); color:#F59E0B; }
+.ch-red    { background: rgba(225,29,72,.12);  border:1px solid rgba(225,29,72,.28);  color:#E11D48; }
+.ch-violet { background: rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.28);color:#A78BFA; }
+.ch-cyan   { background: rgba(6,182,212,.12);  border:1px solid rgba(6,182,212,.28);  color:#06B6D4; }
+.ch-pink   { background: rgba(236,72,153,.12); border:1px solid rgba(236,72,153,.28); color:#EC4899; }
+.ch-muted  { background: rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:var(--muted); }
+
+/* ── BIFURCACIÓN ── */
+.branch-row { display: flex; flex-direction: column; gap: 6px; }
+.branch-item { display: flex; align-items: flex-start; gap: 8px; }
+.branch-tag {
+  font-family: var(--ff-m); font-size: 8.5px; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px; white-space: nowrap;
+  flex-shrink: 0; margin-top: 2px;
+}
+.bt-ok   { background: rgba(16,185,129,.15); border:1px solid rgba(16,185,129,.35); color:#10B981; }
+.bt-baja { background: rgba(251,113,133,.15);border:1px solid rgba(251,113,133,.35);color:#FB7185; }
+.branch-text { font-size: 12.5px; color: var(--text); line-height: 1.5; }
+.branch-sep { height: 8px; border-left: 1px dashed rgba(255,255,255,0.07); margin-left: 36px; }
+
+/* ── ALERTA RGPD ── */
+.rgpd-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(20,184,166,.06);
+  border: 1px solid rgba(20,184,166,.22);
+  border-radius: 8px;
+  padding: 10px 13px;
+  margin-top: 8px;
+}
+.rgpd-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.rgpd-text { font-size: 12px; color: #99F6E4; line-height: 1.6; }
+.rgpd-text strong { color: #14B8A6; font-weight: 600; }
+
+/* ── CAMPAÑA INFO ── */
+.camp-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(236,72,153,.06);
+  border: 1px solid rgba(236,72,153,.2);
+  border-radius: 8px;
+  padding: 10px 13px;
+  margin-top: 8px;
+}
+.camp-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.camp-text { font-size: 12px; color: #FBCFE8; line-height: 1.6; }
+.camp-text strong { color: #EC4899; font-weight: 600; }
+
+/* ── NOTA col ── */
+td.nota-col { color: var(--muted); font-size: 12px; line-height: 1.6; }
+td.nota-col strong { color: var(--text); font-weight: 500; }
+
+/* ── FOOTER ── */
+.footer-note {
+  margin-top: 14px; font-size: 11px; color: var(--dim); line-height: 1.7;
+  animation: fadeUp .5s .18s ease both; display: flex; gap: 20px; flex-wrap: wrap;
+}
+.fn-item { display: flex; align-items: center; gap: 6px; }
+.fn-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:600px;height:500px;top:-160px;left:-100px;background:#FB7185;"></div>
+<div class="glow-orb" style="width:500px;height:400px;bottom:-80px;right:-60px;background:#A78BFA;"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1><em>Retención y gestión de la baja</em></h1>
+      <p>Detección temprana de churn mediante IA, intervención proactiva de retención, 
+         tramitación de baja, campaña de recuperación y cumplimiento del derecho al olvido RGPD</p>
+    </div>
+    <div class="badges">
+      <span class="badge b-sf">Salesforce CRM</span>
+      <span class="badge b-blq">Bloque D · Postventa</span>
+    </div>
+  </div>
+
+  <!-- DISPARADORES -->
+  <div class="triggers-bar">
+    <span class="trig-label">Disparadores</span>
+    <span class="trig-chip">🚪 Solicitud de baja</span>
+    <span class="trig-chip">🤖 Alerta churn por IA</span>
+    <span class="trig-chip">📡 Notificación ATR de cambio de comercializador</span>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#FB7185"></div><span>CRM + IA</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#3B8BEB"></div><span>CRM (Sistema)</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#F59E0B"></div><span>Agente retención</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#06B6D4"></div><span>Cliente</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#EC4899"></div><span>Marketing Cloud</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#14B8A6"></div><span>RGPD</span></div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="th-paso">Paso</th>
+          <th class="th-resp">Responsable</th>
+          <th>Acción</th>
+          <th>Notas / Condición</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- 1 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-ia">1</div></td>
+          <td>
+            <div class="resp-stack">
+              <span class="resp-pill r-ia"><span class="rdot"></span>CRM + IA</span>
+            </div>
+          </td>
+          <td class="accion-col">Detectar <strong>señales de riesgo de churn</strong>
+            <div class="chips">
+              <span class="chip ch-rose">NPS bajo</span>
+              <span class="chip ch-rose">Reclamaciones recientes</span>
+              <span class="chip ch-amber">Consulta de condiciones de baja</span>
+              <span class="chip ch-violet">Notificación ATR de cambio comercializador</span>
+            </div>
+          </td>
+          <td class="nota-col">Modelo predictivo de churn sobre datos de CRM. La señal ATR es la más determinante: indica que el cliente ya ha iniciado el proceso de cambio.</td>
+        </tr>
+
+        <!-- 2 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-crm">2</div></td>
+          <td><span class="resp-pill r-crm"><span class="rdot"></span>CRM</span></td>
+          <td class="accion-col">Crear <strong>alerta de retención</strong> y clasificar el cliente por valor
+            <div class="chips">
+              <span class="chip ch-amber">Consumo anual</span>
+              <span class="chip ch-amber">Antigüedad</span>
+              <span class="chip ch-amber">Productos contratados</span>
+            </div>
+          </td>
+          <td class="nota-col">La segmentación por valor determina el nivel de oferta de retención autorizado y la prioridad de atención del equipo especializado</td>
+        </tr>
+
+        <!-- 3 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-agent">3</div></td>
+          <td><span class="resp-pill r-agent"><span class="rdot"></span>Agente retención</span></td>
+          <td class="accion-col">Contactar <strong>proactivamente</strong> al cliente antes de que formalice la baja
+            <div class="chips">
+              <span class="chip ch-blue">Oferta personalizada por perfil de consumo</span>
+            </div>
+          </td>
+          <td class="nota-col">El agente accede a la ficha 360° y a las recomendaciones de oferta generadas por el motor de IA / CPQ de Salesforce</td>
+        </tr>
+
+        <!-- 4 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-cli">4</div></td>
+          <td><span class="resp-pill r-cli"><span class="rdot"></span>Cliente</span></td>
+          <td class="accion-col">Responde a la oferta de retención
+            <div class="branch-row" style="margin-top:8px;">
+              <div class="branch-item">
+                <span class="branch-tag bt-ok">Acepta</span>
+                <span class="branch-text">Actualizar contrato · registrar oferta aplicada · cerrar alerta</span>
+              </div>
+              <div class="branch-sep"></div>
+              <div class="branch-item">
+                <span class="branch-tag bt-baja">Mantiene baja</span>
+                <span class="branch-text">Avanzar al paso 5</span>
+              </div>
+            </div>
+          </td>
+          <td class="nota-col">Si acepta: la oferta aplicada queda registrada en el historial del contrato para análisis de efectividad de la retención</td>
+        </tr>
+
+        <!-- 5 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-both">5</div></td>
+          <td>
+            <div class="resp-stack">
+              <span class="resp-pill r-agent"><span class="rdot"></span>Agente</span>
+              <span class="resp-sep">+ CRM</span>
+              <span class="resp-pill r-crm"><span class="rdot"></span>CRM</span>
+            </div>
+          </td>
+          <td class="accion-col">Gestionar la <strong>baja del cliente</strong>
+            <div class="chips">
+              <span class="chip ch-muted">Registrar motivo de baja</span>
+              <span class="chip ch-teal">Tramitar ATR de baja</span>
+              <span class="chip ch-red">Notificar a SAP · cierre contrato facturación</span>
+            </div>
+          </td>
+          <td class="nota-col">El motivo de baja queda categorizado en CRM (precio · producto · mudanza · fallecimiento · otros) para análisis y mejora continua</td>
+        </tr>
+
+        <!-- 6 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-mktc">6</div></td>
+          <td>
+            <div class="resp-stack">
+              <span class="resp-pill r-crm"><span class="rdot"></span>CRM</span>
+              <span class="resp-sep">+ Marketing Cloud</span>
+              <span class="resp-pill r-mktc"><span class="rdot"></span>Marketing Cloud</span>
+            </div>
+          </td>
+          <td class="accion-col">Cerrar contrato en estado <strong>"Baja"</strong> y activar campaña de recuperación
+            <div class="camp-info">
+              <span class="camp-icon">📅</span>
+              <span class="camp-text"><strong>Regla de activación:</strong> campaña a los 90 días si motivo es <strong>precio</strong> o <strong>producto</strong>. No activar si motivo es <strong>mudanza</strong> o <strong>fallecimiento</strong>.</span>
+            </div>
+          </td>
+          <td class="nota-col">Lógica condicional en Salesforce Flow según campo "Motivo de baja". Journey activado desde Marketing Cloud Connect.</td>
+        </tr>
+
+        <!-- 7 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-rgpd">7</div></td>
+          <td><span class="resp-pill r-rgpd"><span class="rdot"></span>CRM · RGPD</span></td>
+          <td class="accion-col">Aplicar <strong>derecho al olvido</strong> si el cliente lo solicita
+            <div class="rgpd-alert">
+              <span class="rgpd-icon">🔒</span>
+              <span class="rgpd-text"><strong>RGPD · Art. 17:</strong> Anonimizar datos personales en CRM · mantener registros contables obligatorios en SAP durante <strong>5 años</strong> (plazo legal)</span>
+            </div>
+          </td>
+          <td class="nota-col">La anonimización se aplica solo en Salesforce. SAP conserva los datos contables conforme al art. 30 del Código de Comercio y la AEAT.</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-note">
+    <div class="fn-item"><div class="fn-dot" style="background:#FB7185"></div><span>CRM + IA</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#3B8BEB"></div><span>CRM (Sistema)</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#F59E0B"></div><span>Agente retención</span></div>
+    <div class="fn-item"><div class="leg-dot" style="background:#06B6D4; width:7px; height:7px; border-radius:50%;"></div><span>Cliente</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#EC4899"></div><span>Marketing Cloud</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#14B8A6"></div><span>RGPD</span></div>
+    <div class="fn-item" style="margin-left:auto;">
+      <span style="color:var(--muted)">Fuente:</span>
+      <span>Elaboración propia · Salesforce CRM · RGPD (UE) 2016/679 · Plataforma ATR REE · Comercializadora B2C</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

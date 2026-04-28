@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solicitud ATR → Contrato activo en SAP · CRM Comercializadora B2C</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep:   #07090F;
+  --bg-base:   #0C1018;
+  --bg-card:   #101520;
+  --bg-hover:  #161D2C;
+  --border-xs: rgba(255,255,255,0.05);
+  --border-sm: rgba(255,255,255,0.09);
+
+  --c-back:   #A78BFA;
+  --c-dist:   #F97316;
+  --c-sap:    #E11D48;
+  --c-crm:    #3B8BEB;
+  --c-mktc:   #EC4899;
+  --c-atr:    #14B8A6;
+  --c-end:    #10B981;
+  --c-rose:   #FB7185;
+
+  --text:  #EEF2FF;
+  --muted: #8896AC;
+  --dim:   #3D4A5C;
+  --ff-d: 'Syne', sans-serif;
+  --ff-b: 'DM Sans', sans-serif;
+  --ff-m: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg-deep); color: var(--text); font-family: var(--ff-b); min-height: 100vh; }
+
+.grid-bg {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+.glow-orb { position: fixed; pointer-events: none; z-index: 0; border-radius: 50%; filter: blur(140px); opacity: 0.055; }
+.page { position: relative; z-index: 1; padding: 28px 32px 44px; max-width: 1060px; margin: 0 auto; }
+
+/* ── HEADER ── */
+.hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; animation: fadeUp .45s ease both; }
+.hdr-left h1 { font-family: var(--ff-d); font-size: 21px; font-weight: 800; letter-spacing: -.3px; margin-bottom: 7px; }
+.hdr-left h1 em { font-style: normal; background: linear-gradient(120deg, #14B8A6 5%, #3B8BEB 50%, #F97316 95%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hdr-left p { font-size: 11.5px; color: var(--muted); max-width: 660px; line-height: 1.65; }
+.badges { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+.badge { font-family: var(--ff-m); font-size: 9px; letter-spacing: .5px; text-transform: uppercase; padding: 3px 10px; border-radius: 4px; }
+.b-sf  { background: rgba(59,139,235,.1);  border:1px solid rgba(59,139,235,.3);  color:#3B8BEB; }
+.b-blq { background: rgba(20,184,166,.1);  border:1px solid rgba(20,184,166,.3);  color:#14B8A6; }
+
+/* ── LEGEND ── */
+.legend { display: flex; gap: 18px; margin-bottom: 18px; flex-wrap: wrap; animation: fadeUp .5s .06s ease both; }
+.leg-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--muted); }
+.leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── TABLE WRAPPER ── */
+.table-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border-sm);
+  border-radius: 14px;
+  overflow: hidden;
+  animation: fadeUp .5s .1s ease both;
+  box-shadow: 0 0 0 1px var(--border-xs), 0 16px 48px rgba(0,0,0,.45);
+}
+
+table { width: 100%; border-collapse: collapse; }
+
+thead tr {
+  background: linear-gradient(90deg, rgba(20,184,166,.07) 0%, rgba(59,139,235,.06) 50%, rgba(249,115,22,.05) 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+th {
+  font-family: var(--ff-m);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 13px 18px;
+  text-align: left;
+}
+th.th-paso { width: 74px; text-align: center; }
+th.th-resp { width: 190px; }
+
+/* ── ROWS ── */
+tbody tr {
+  border-bottom: 1px solid var(--border-xs);
+  transition: background .15s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bg-hover); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,0.012); }
+tbody tr:nth-child(even):hover { background: var(--bg-hover); }
+
+td {
+  padding: 13px 18px;
+  font-size: 13px;
+  line-height: 1.55;
+  vertical-align: middle;
+}
+
+/* ── PASO BADGE ── */
+td.paso-col { text-align: center; }
+.paso-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--ff-m);
+  font-size: 11px;
+  font-weight: 700;
+  width: 36px; height: 36px;
+  border-radius: 10px;
+}
+.p-atr   { background: rgba(20,184,166,.12);  border:1px solid rgba(20,184,166,.3);  color:#14B8A6; }
+.p-crm   { background: rgba(59,139,235,.12);  border:1px solid rgba(59,139,235,.3);  color:#3B8BEB; }
+.p-dist  { background: rgba(249,115,22,.12);  border:1px solid rgba(249,115,22,.3);  color:#F97316; }
+.p-back  { background: rgba(167,139,250,.12); border:1px solid rgba(167,139,250,.3); color:#A78BFA; }
+.p-sap   { background: rgba(225,29,72,.12);   border:1px solid rgba(225,29,72,.3);   color:#E11D48; }
+.p-mktc  { background: rgba(236,72,153,.12);  border:1px solid rgba(236,72,153,.3);  color:#EC4899; }
+.p-warn  { background: rgba(251,113,133,.12); border:1px solid rgba(251,113,133,.3); color:#FB7185; }
+.p-end   { background: rgba(16,185,129,.12);  border:1px solid rgba(16,185,129,.3);  color:#10B981; }
+
+/* ── RESPONSABLE PILL ── */
+.resp-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ff-m);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .3px;
+  padding: 4px 11px;
+  border-radius: 20px;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
+.rdot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.r-atr   { background: rgba(20,184,166,.12);  border:1px solid rgba(20,184,166,.35);  color:#14B8A6; }
+.r-crm   { background: rgba(59,139,235,.12);  border:1px solid rgba(59,139,235,.35);  color:#3B8BEB; }
+.r-dist  { background: rgba(249,115,22,.12);  border:1px solid rgba(249,115,22,.35);  color:#F97316; }
+.r-back  { background: rgba(167,139,250,.12); border:1px solid rgba(167,139,250,.35); color:#A78BFA; }
+.r-sap   { background: rgba(225,29,72,.12);   border:1px solid rgba(225,29,72,.35);   color:#E11D48; }
+.r-mktc  { background: rgba(236,72,153,.12);  border:1px solid rgba(236,72,153,.35);  color:#EC4899; }
+.resp-stack { display: flex; flex-direction: column; gap: 4px; }
+.resp-arrow {
+  font-family: var(--ff-m);
+  font-size: 8px;
+  color: var(--dim);
+  padding-left: 6px;
+}
+
+/* ── ACCION col ── */
+td.accion-col { color: var(--text); }
+td.accion-col strong { color: #C7D2FE; font-weight: 500; }
+
+/* ── CHIPS ── */
+.chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 7px; }
+.chip {
+  font-family: var(--ff-m);
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.ch-blue   { background: rgba(59,139,235,.12); border:1px solid rgba(59,139,235,.28); color:#3B8BEB; }
+.ch-teal   { background: rgba(20,184,166,.12); border:1px solid rgba(20,184,166,.28); color:#14B8A6; }
+.ch-orange { background: rgba(249,115,22,.12); border:1px solid rgba(249,115,22,.28); color:#F97316; }
+.ch-red    { background: rgba(225,29,72,.12);  border:1px solid rgba(225,29,72,.28);  color:#E11D48; }
+.ch-pink   { background: rgba(236,72,153,.12); border:1px solid rgba(236,72,153,.28); color:#EC4899; }
+.ch-violet { background: rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.28);color:#A78BFA; }
+.ch-green  { background: rgba(16,185,129,.12); border:1px solid rgba(16,185,129,.28); color:#10B981; }
+.ch-rose   { background: rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.28);color:#FB7185; }
+.ch-amber  { background: rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.28); color:#F59E0B; }
+.ch-muted  { background: rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:var(--muted); }
+
+/* ── NOTA col ── */
+td.nota-col { color: var(--muted); font-size: 12px; line-height: 1.6; }
+td.nota-col strong { color: var(--text); font-weight: 500; }
+
+/* ── FOOTER ── */
+.footer-note {
+  margin-top: 14px;
+  font-size: 11px;
+  color: var(--dim);
+  line-height: 1.7;
+  animation: fadeUp .5s .18s ease both;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.fn-item { display: flex; align-items: center; gap: 6px; }
+.fn-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow-orb" style="width:600px;height:500px;top:-160px;left:-100px;background:#14B8A6;"></div>
+<div class="glow-orb" style="width:500px;height:400px;bottom:-80px;right:-60px;background:#F97316;"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1><em>Solicitud ATR → Contrato activo en SAP</em></h1>
+      <p>Gestión del proceso de acceso de terceros a la red, sincronización con SAP IS-U/SD 
+         y activación del contrato en el sistema de facturación</p>
+    </div>
+    <div class="badges">
+      <span class="badge b-sf">Salesforce CRM</span>
+      <span class="badge b-blq">Bloque C · ATR</span>
+    </div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#A78BFA"></div><span>Back-office</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#F97316"></div><span>Distribuidora</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#E11D48"></div><span>SAP IS-U / SD</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#3B8BEB"></div><span>CRM (Sistema)</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#14B8A6"></div><span>CRM + ATR</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#EC4899"></div><span>Marketing Cloud</span></div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="th-paso">Paso</th>
+          <th class="th-resp">Responsable</th>
+          <th>Acción</th>
+          <th>Notas / Condición</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- 1 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-atr">1</div></td>
+          <td><span class="resp-pill r-atr"><span class="rdot"></span>CRM + ATR</span></td>
+          <td class="accion-col">Generar y enviar <strong>mensaje ATR</strong> a la distribuidora
+            <div class="chips">
+              <span class="chip ch-teal">C1 · Cambio de comercializador</span>
+              <span class="chip ch-teal">C2 · Cambio de comercializador + potencia</span>
+              <span class="chip ch-teal">A3 · Nueva alta</span>
+            </div>
+          </td>
+          <td class="nota-col">Mensaje XML enviado vía plataforma ATR de REE según tipo de solicitud</td>
+        </tr>
+
+        <!-- 2 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-crm">2</div></td>
+          <td><span class="resp-pill r-crm"><span class="rdot"></span>CRM</span></td>
+          <td class="accion-col">Registrar fecha y <strong>referencia del ATR</strong> enviado en el expediente</td>
+          <td class="nota-col">Plazo regulatorio de respuesta: <strong>5–20 días hábiles</strong> según tipo de solicitud</td>
+        </tr>
+
+        <!-- 3 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-dist">3</div></td>
+          <td><span class="resp-pill r-dist"><span class="rdot"></span>Distribuidora</span></td>
+          <td class="accion-col">Responde a la solicitud ATR
+            <div class="chips">
+              <span class="chip ch-green">✅ Acepta</span>
+              <span class="chip ch-amber">⚠️ Rechaza — motivo subsanable</span>
+              <span class="chip ch-rose">❌ Rechaza — no subsanable</span>
+            </div>
+          </td>
+          <td class="nota-col">Respuesta recibida vía plataforma ATR y registrada automáticamente en CRM</td>
+        </tr>
+
+        <!-- 4a -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-back">4a</div></td>
+          <td><span class="resp-pill r-back"><span class="rdot"></span>Back-office</span></td>
+          <td class="accion-col">Corregir datos del expediente y <strong>re-enviar ATR</strong></td>
+          <td class="nota-col">Si rechazo subsanable → volver a paso 1 con datos corregidos</td>
+        </tr>
+
+        <!-- 4b -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-warn">4b</div></td>
+          <td><span class="resp-pill r-crm"><span class="rdot"></span>CRM</span></td>
+          <td class="accion-col">Notificar al cliente y <strong>cerrar expediente</strong>
+            <div class="chips">
+              <span class="chip ch-rose">🏁 FIN</span>
+            </div>
+          </td>
+          <td class="nota-col">Si rechazo no subsanable → cierre definitivo del expediente con motivo registrado</td>
+        </tr>
+
+        <!-- 5 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-sap">5</div></td>
+          <td>
+            <div class="resp-stack">
+              <span class="resp-pill r-crm"><span class="rdot"></span>CRM</span>
+              <span class="resp-arrow">↓ middleware</span>
+              <span class="resp-pill r-sap"><span class="rdot"></span>SAP IS-U / SD</span>
+            </div>
+          </td>
+          <td class="accion-col">Sincronizar datos vía <strong>middleware</strong> y crear contrato en SAP
+            <div class="chips">
+              <span class="chip ch-red">Crear contrato SAP IS-U / SD</span>
+              <span class="chip ch-red">Asignar número de cliente</span>
+              <span class="chip ch-red">Iniciar ciclo de facturación</span>
+            </div>
+          </td>
+          <td class="nota-col">Integración bidireccional CRM ↔ SAP mediante MuleSoft / ESB. Si acepta la distribuidora.</td>
+        </tr>
+
+        <!-- 6 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-sap">6</div></td>
+          <td>
+            <div class="resp-stack">
+              <span class="resp-pill r-sap"><span class="rdot"></span>SAP IS-U / SD</span>
+              <span class="resp-arrow">↓ middleware</span>
+              <span class="resp-pill r-crm"><span class="rdot"></span>CRM</span>
+            </div>
+          </td>
+          <td class="accion-col">SAP devuelve <strong>ID de contrato</strong> → CRM lo vincula al expediente del cliente</td>
+          <td class="nota-col">El ID de contrato SAP queda almacenado en el objeto <em>Account</em> de Salesforce como campo de referencia</td>
+        </tr>
+
+        <!-- 7 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-mktc">7</div></td>
+          <td><span class="resp-pill r-mktc"><span class="rdot"></span>Marketing Cloud</span></td>
+          <td class="accion-col">Lanzar <strong>email de bienvenida</strong> automático
+            <div class="chips">
+              <span class="chip ch-pink">Detalles del contrato</span>
+              <span class="chip ch-pink">Fecha de inicio de suministro</span>
+              <span class="chip ch-pink">Acceso al área de cliente</span>
+            </div>
+          </td>
+          <td class="nota-col">Journey activado desde Salesforce vía <em>Marketing Cloud Connect</em> al cambiar el estado del contrato</td>
+        </tr>
+
+        <!-- 8 -->
+        <tr>
+          <td class="paso-col"><div class="paso-badge p-end">8</div></td>
+          <td><span class="resp-pill r-crm"><span class="rdot"></span>CRM</span></td>
+          <td class="accion-col">Estado contrato: <strong>"Activo"</strong>
+            <div class="chips">
+              <span class="chip ch-green">→ Inicio flujo de Postventa</span>
+            </div>
+          </td>
+          <td class="nota-col">Transición automática de estado en Salesforce. El cliente pasa a ser gestionado por Service Cloud.</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-note">
+    <div class="fn-item"><div class="fn-dot" style="background:#A78BFA"></div><span>Back-office</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#F97316"></div><span>Distribuidora</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#E11D48"></div><span>SAP IS-U / SD</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#3B8BEB"></div><span>CRM (Sistema)</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#14B8A6"></div><span>CRM + ATR</span></div>
+    <div class="fn-item"><div class="fn-dot" style="background:#EC4899"></div><span>Marketing Cloud</span></div>
+    <div class="fn-item" style="margin-left:auto;">
+      <span style="color:var(--muted)">Fuente:</span>
+      <span>Elaboración propia · Salesforce · SAP IS-U · Plataforma ATR REE · Comercializadora B2C</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
